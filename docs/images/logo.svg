@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FaceForge">
+  <rect width="64" height="64" rx="14" fill="#11151a"/>
+  <g fill="none" stroke="#efa93d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(12 12)">
+    <path d="M20 3 34 11v18L20 37 6 29V11z"/>
+    <path d="M14 14c-3 4-3 10 0 14M26 14c3 4 3 10 0 14M14 20h12M20 10v20"/>
+    <circle cx="15" cy="18" r="1.4" fill="#efa93d" stroke="none"/>
+    <circle cx="25" cy="18" r="1.4" fill="#efa93d" stroke="none"/>
+  </g>
+</svg>
