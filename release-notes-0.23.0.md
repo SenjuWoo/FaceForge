@@ -48,7 +48,7 @@ Double-click. Requires Microsoft Edge WebView2 (usually already on Win10/11). No
 ## Build from source
 
 ```powershell
-git clone https://github.com/ShugokiFable/FaceForge.git
+git clone https://github.com/SenjuWoo/FaceForge.git
 cd FaceForge\FaceForge 0.23.0
 .\build.ps1
 .\package.ps1
@@ -56,5 +56,5 @@ cd FaceForge\FaceForge 0.23.0
 
 ## Related
 
-- [Follower Forge](https://github.com/ShugokiFable/FollowerForge)
-- Full history: [CHANGELOG.txt](https://github.com/ShugokiFable/FaceForge/blob/main/CHANGELOG.txt)
+- [Follower Forge](https://github.com/SenjuWoo/FollowerForge)
+- Full history: [CHANGELOG.txt](https://github.com/SenjuWoo/FaceForge/blob/main/CHANGELOG.txt)

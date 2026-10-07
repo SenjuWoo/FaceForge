@@ -10,4 +10,4 @@ Pair-branding release with **FollowerForge** (one word, matching this tool's com
 `FaceForge-0.23.1-STANDALONE.exe`
 
 ## Pair
-[FollowerForge](https://github.com/ShugokiFable/FollowerForge) builds the NPC after you bake the head in RaceMenu.
+[FollowerForge](https://github.com/SenjuWoo/FollowerForge) builds the NPC after you bake the head in RaceMenu.

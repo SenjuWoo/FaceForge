@@ -51,7 +51,7 @@ FaceForge only **reads** your game/Vortex/CharGen folders. It does not change yo
 
 **Optional**
 - High Poly Head and any head-part mods you already use
-- [FollowerForge](https://github.com/ShugokiFable/FollowerForge) — builds the follower NPC after Export Head
+- [FollowerForge](https://github.com/SenjuWoo/FollowerForge) — builds the follower NPC after Export Head
 
 ---
 
@@ -69,5 +69,5 @@ FaceForge only **reads** your game/Vortex/CharGen folders. It does not change yo
 
 **FaceForge** (face preset) → RaceMenu bake → **FollowerForge** (NPC plugin).
 
-GitHub: https://github.com/ShugokiFable/FaceForge  
-Release: https://github.com/ShugokiFable/FaceForge/releases/tag/v0.23.2
+GitHub: https://github.com/SenjuWoo/FaceForge  
+Release: https://github.com/SenjuWoo/FaceForge/releases/tag/v0.23.2

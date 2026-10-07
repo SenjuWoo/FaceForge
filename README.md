@@ -12,13 +12,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ShugokiFable/FaceForge/actions/workflows/ci.yml"><img src="https://github.com/ShugokiFable/FaceForge/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml"><img src="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-66b6c9?labelColor=11151a" alt="MIT License"></a>
-  <a href="https://github.com/ShugokiFable/FaceForge/releases/tag/v0.24.3"><img src="https://img.shields.io/badge/release-v0.24.3-efa93d?labelColor=11151a" alt="v0.24.3"></a>
+  <a href="https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3"><img src="https://img.shields.io/badge/release-v0.24.3-efa93d?labelColor=11151a" alt="v0.24.3"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/ShugokiFable/FaceForge/releases/latest">Download</a>
+  <a href="https://github.com/SenjuWoo/FaceForge/releases/latest">Download</a>
   ·
   <a href="#quick-start">Quick start</a>
   ·
@@ -35,7 +35,7 @@
 
 ## Quick start
 
-Latest release: **[v0.24.3](https://github.com/ShugokiFable/FaceForge/releases/tag/v0.24.3)** (`FaceForge-0.24.3-STANDALONE.zip`).
+Latest release: **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)** (`FaceForge-0.24.3-STANDALONE.zip`).
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
 2. Double-click **`FaceForge-0.24.3-STANDALONE.exe`**.
@@ -55,7 +55,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 3. Analyze → pick race/sex → pick installed head parts (hair, eyes, and so on).
 4. Export a **RaceMenu preset pack**.
 5. In Skyrim: open RaceMenu → load the preset → sculpt if you want → use **Export Head** (not “slider-only / no sculpt”) if you will build a follower next.
-6. Optional: open **[FollowerForge](https://github.com/ShugokiFable/FollowerForge)** and build the NPC plugin from that baked head.
+6. Optional: open **[FollowerForge](https://github.com/SenjuWoo/FollowerForge)** and build the NPC plugin from that baked head.
 
 **Pair:** FaceForge (face preset) → RaceMenu bake → FollowerForge (NPC plugin).
 
@@ -72,7 +72,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 - High Poly Head and any head-part mods you already use
 - Expressive Facegen Morphs — FaceForge writes only the `EFM_` family. Without EFM active, RaceMenu silently ignores those values and the character loads as the race default, identical whatever photo was used
 - OpenRouter, or a provider CLI, only if you press vision refine (photos stay local unless you do)
-- [FollowerForge](https://github.com/ShugokiFable/FollowerForge) after Export Head
+- [FollowerForge](https://github.com/SenjuWoo/FollowerForge) after Export Head
 
 ## What this is / is not
 
