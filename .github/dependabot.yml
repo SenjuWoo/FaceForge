@@ -7,8 +7,10 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
 
+  # The npm manifest lives in the active snapshot, not the repo root.
+  # Retarget this directory when CURRENT.txt moves.
   - package-ecosystem: npm
-    directory: /
+    directory: "/FaceForge 0.24.3/src/FaceForge.Web"
     schedule:
       interval: monthly
     open-pull-requests-limit: 5

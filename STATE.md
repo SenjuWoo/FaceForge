@@ -6,6 +6,9 @@
 - FileVersion 0.24.3.0; launch verified (still running after 14s, then stopped).
 - Tests: 100 frontend, 96 native assertions. TypeScript clean, .NET Release clean, 0 warnings.
 - Rendered-layout check at 1092x614 and 1280x720 (see below) -- this is what 0.24.2 skipped.
+- Snapshot retention: `FaceForge 0.24.3` (active) and `FaceForge 0.24.2` (last known
+  good) are the only version trees in the default branch; 0.23.0-0.24.1 are tags and
+  release assets only.
 - Product version: `0.24.3`; public distribution remains exactly one self-contained EXE.
 
 ## What changed in 0.24.3

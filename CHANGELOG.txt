@@ -2,6 +2,22 @@
 # One living file.
 
 ================================================================================
+## [maintenance] - 2026-11-01 - one snapshot pair in the default branch
+
+The default branch carried six full version snapshots, 0.23.0 through 0.24.3. Each kept
+its own FaceForge.Web manifest and pnpm lockfile, so every advisory against the dev-only
+build chain (vite, vitest, @vitest/mocker, source-map-js) was counted six times, and the
+old copies could not be fixed without rewriting what those releases shipped.
+
+Removed 0.23.0, 0.23.1, 0.23.2, 0.24.0 and 0.24.1. Every version is still a git tag and a
+release asset. 0.24.3 stays as the active tree, 0.24.2 as the last known good one.
+
+Both remaining snapshots pin vitest 4.1.12 (was 4.1.11) and resolve @vitest/mocker 4.1.12
+and source-map-js 1.2.2 in the lockfile.
+
+UPLOAD-HERE.txt and NEXUS-UPLOAD-CHECKLIST.md still described 0.24.1; both now name the
+0.24.3 archive and its published checksum.
+
 ## [0.24.3] - 2026-08-12 - withdraws 0.24.2, which broke the layout it was fixing
 
 Agent: Claude
