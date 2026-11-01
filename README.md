@@ -14,7 +14,7 @@
 <p align="center">
   <a href="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml"><img src="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-66b6c9?labelColor=11151a" alt="MIT License"></a>
-  <a href="https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3"><img src="https://img.shields.io/badge/release-v0.24.3-efa93d?labelColor=11151a" alt="v0.24.3"></a>
+  <a href="https://github.com/SenjuWoo/FaceForge/releases/latest"><img src="https://img.shields.io/github/v/release/SenjuWoo/FaceForge?label=release&color=efa93d" alt="latest release"></a>
 </p>
 
 <p align="center">
