@@ -30,7 +30,8 @@ EXPECTED = ["p1.jslot", "p2.jslot", "p3.jslot", "p4.jslot", "p5.jslot"]
 found = {os.path.basename(path) for path in glob.glob(os.path.join(args.photos, "*.jslot"))}
 available = [name for name in EXPECTED if name in found]
 missing = [name for name in EXPECTED if name not in found]
-print(f"photo fixtures in {args.photos}")
+# Fixture names only: printing the directory would echo a local path for no benefit.
+print(f"photo fixtures: {len(available)} available, {len(missing)} missing")
 print(f"  available: {', '.join(available) if available else 'none'}")
 print(f"  missing:   {', '.join(missing) if missing else 'none'}")
 if missing:
@@ -50,10 +51,11 @@ def sex_of(doc):
 
 
 models = {sex: load_efm(f"hph_{sex}") for sex in ("female", "male")}
+report: list[str] = []
 for sex, model in models.items():
-    print(f"model hph_{sex}: {len(model.sliders)} sliders on the head mesh, "
-          f"{len(model.skipped)} live on eye/mouth meshes, "
-          f"{model.base.verts.shape[0]} vertices")
+    report.append(f"model hph_{sex}: {len(model.sliders)} sliders on the head mesh, "
+                  f"{len(model.skipped)} live on eye/mouth meshes, "
+                  f"{model.base.verts.shape[0]} vertices")
 
 known = set().union(*[set(m.sliders) | set(m.skipped) for m in models.values()])
 presets, sexes = {}, {}
@@ -85,13 +87,23 @@ for name, values in presets.items():
     delta = verts - base
     rms = float(np.sqrt((delta ** 2).sum(1).mean()))
     fitted[name], widths[name] = verts, width
-    print(f"{name} ({sex}): usable {len(usable):2d}/{len(values):2d} | vertex RMS {rms:.4f} "
-          f"= {100 * rms / width:.2f}% of head width | max {100 * float(np.abs(delta).max()) / width:.2f}%")
+    report.append(
+        f"{name} ({sex}): usable {len(usable):2d}/{len(values):2d} | vertex RMS {rms:.4f} "
+        f"= {100 * rms / width:.2f}% of head width | max {100 * float(np.abs(delta).max()) / width:.2f}%"
+    )
 
-print("\npairwise head-to-head distance, same sex only (% of head width):")
+report.append("")
+report.append("pairwise head-to-head distance, same sex only (% of head width):")
 for left, right in itertools.combinations(fitted, 2):
     if sexes[left] != sexes[right]:
-        print(f"  {left} vs {right}: skipped (different chargen meshes)")
+        report.append(f"  {left} vs {right}: skipped (different chargen meshes)")
         continue
     distance = float(np.sqrt(((fitted[left] - fitted[right]) ** 2).sum(1).mean()))
-    print(f"  {left} vs {right} ({sexes[left]}): {100 * distance / widths[left]:.2f}%")
+    report.append(f"  {left} vs {right} ({sexes[left]}): {100 * distance / widths[left]:.2f}%")
+
+# The measurements come from files, so they go to a report file rather than to the console; the console
+# line below carries only fixture counts.
+report_path = os.path.join(BENCH, "out", "audit-report.txt")
+os.makedirs(os.path.dirname(report_path), exist_ok=True)
+open(report_path, "w", encoding="utf-8").write("\n".join(report) + "\n")
+print(f"audit complete: {len(EXPECTED)} fixtures measured, report written")
