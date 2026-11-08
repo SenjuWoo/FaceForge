@@ -272,6 +272,35 @@ describe("RaceMenu template engine", () => {
     );
     expect(output.headParts).toEqual([{ formIdentifier: "NewHair.esp|00000A", type: 3 }]);
   });
+
+  // A part whose HDPT record never resolved has no slot, so RaceMenu cannot apply it. Exporting it
+  // anyway would claim an appearance the preset cannot deliver.
+  it("refuses an untyped head part when strict slots are requested", () => {
+    expect(() =>
+      buildRaceMenuPreset(
+        createFreshRaceMenuTemplate(),
+        {},
+        false,
+        [{ formIdentifier: "NameOnly.esp|000001" }],
+        { strictHeadParts: true }
+      )
+    ).toThrow(/no known HDPT slot/i);
+  });
+
+  it("refuses two selections for one slot when strict slots are requested", () => {
+    expect(() =>
+      buildRaceMenuPreset(
+        createFreshRaceMenuTemplate(),
+        {},
+        false,
+        [
+          { formIdentifier: "A.esp|000001", headPartType: 3 },
+          { formIdentifier: "B.esp|000002", headPartType: 3 }
+        ],
+        { strictHeadParts: true }
+      )
+    ).toThrow(/slot 3/i);
+  });
 });
 
 describe("photo colours in the preset", () => {

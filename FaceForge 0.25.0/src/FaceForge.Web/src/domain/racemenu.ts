@@ -236,6 +236,12 @@ export function buildRaceMenuPreset(
     appearance?: { skin?: Rgb | null; hair?: Rgb | null };
     /** Resolves a template head part's HDPT type when the file itself does not carry one. */
     headPartTypeOf?: (formIdentifier: string) => number | null;
+    /**
+     * Refuse to export a head-part selection whose HDPT slot is unknown, or two selections for one
+     * slot. RaceMenu would apply one and ignore the other, so a silent export is a lie about what the
+     * preset will do.
+     */
+    strictHeadParts?: boolean;
   } = {}
 ): JsonObject {
   const output = structuredClone(template.document);
@@ -291,6 +297,30 @@ export function buildRaceMenuPreset(
   }
 
   if (selectedHeadParts.length > 0) {
+    const untyped = selectedHeadParts.filter(
+      (part) => typeof part.headPartType !== "number"
+    );
+    if (options.strictHeadParts && untyped.length > 0) {
+      throw new Error(
+        `Cannot export head parts with no known HDPT slot: ${untyped
+          .map((part) => part.formIdentifier)
+          .join(", ")}. Reselect them from the installed list, or the preset would claim a part it cannot place.`
+      );
+    }
+    if (options.strictHeadParts) {
+      const bySlot = new Map<number, string>();
+      for (const part of selectedHeadParts) {
+        const type = part.headPartType as number;
+        const previous = bySlot.get(type);
+        if (previous !== undefined && previous !== part.formIdentifier) {
+          throw new Error(
+            `Two head parts target HDPT slot ${type} (${previous} and ${part.formIdentifier}). Keep one.`
+          );
+        }
+        bySlot.set(type, part.formIdentifier);
+      }
+    }
+
     const existing = Array.isArray(output.headParts) ? output.headParts.filter(isObject) : [];
     // A template written by RaceMenu carries `type` on every part; one written by FaceForge did not, so
     // fall back to the indexed HDPT records the caller can resolve.
