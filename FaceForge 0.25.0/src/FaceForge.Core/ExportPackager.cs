@@ -74,7 +74,7 @@ public static class ExportPackager
                             preset = $"SKSE/Plugins/CharGen/Presets/{name}.jslot",
                             targetRaceEditorId = request.TargetRaceEditorId,
                             targetSex = request.TargetSex,
-                            materializeWith = "RaceMenu Sculpt tab -> Save preset, in game",
+                            materializeWith = "RaceMenu Sculpt > Export Head, in game",
                             expectedOutput = new
                             {
                                 jslot = $"Data/SKSE/Plugins/CharGen/Presets/{name}.jslot",

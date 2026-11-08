@@ -23,7 +23,7 @@ vi.mock("./nativeBridge", () => ({
   }
 }));
 
-import { computeSculpt } from "./headRender";
+import { computeSculpt, reshapeExportBlock } from "./headRender";
 
 // vitest runs in a node environment; computeSculpt uses window.setTimeout for its timeout guard.
 beforeEach(() => {
@@ -48,6 +48,20 @@ describe("computeSculpt", () => {
     answer({ requestId: posted[0].requestId, sculpt: [], divisor: 10000 });
     const result = await pending;
     expect(result.entries).toEqual([]);
+  });
+
+  // A browser has no renderer, so a reshape the preview shows would vanish on export. The export
+  // path asks this before it writes anything.
+  it("blocks an export that carries a reshape but has no renderer to bake it", () => {
+    expect(reshapeExportBlock(true, false)).toMatch(/needs the desktop app/i);
+  });
+
+  it("allows a plain preset without a reshape in the browser", () => {
+    expect(reshapeExportBlock(false, false)).toBeNull();
+  });
+
+  it("allows a reshape when the desktop renderer is present", () => {
+    expect(reshapeExportBlock(true, true)).toBeNull();
   });
 
   it("rejects when the native side never answers", async () => {

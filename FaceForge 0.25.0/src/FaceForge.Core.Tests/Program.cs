@@ -571,6 +571,17 @@ try
             jobText.Contains("\"targetRaceEditorId\": \"NordRace\"", StringComparison.Ordinal),
             "target race recorded");
 
+        // The job manifest carries the same instruction in machine-readable form; both used to name
+        // Save Preset, which writes only the .jslot.
+        // The serializer escapes '>' as \u003E, so match the words rather than the escaped literal.
+        Assert(
+            jobText.Contains("materializeWith", StringComparison.Ordinal) &&
+            jobText.Contains("Export Head", StringComparison.Ordinal),
+            "manifest names the Export Head command");
+        Assert(
+            !jobText.Contains("Save preset", StringComparison.Ordinal),
+            "manifest does not tell users to save the preset to get the mesh");
+
         // The generated README is the only place a user is told how to get the NIF/DDS, and an earlier
         // version told them to nudge a sculpt slider and save the preset again - which does not produce
         // a head mesh. Export Head is a separate RaceMenu command.

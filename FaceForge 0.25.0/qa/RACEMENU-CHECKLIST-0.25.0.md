@@ -67,12 +67,16 @@ its source photo is worth more than any number in this file.
 
 ## FollowerForge handoff (only if you will build an NPC)
 
-1. In RaceMenu, after the look is right, use **Export Head** — not "slider-only / no sculpt".
-2. Confirm these files appear somewhere under the profile's overwrite or the CharGen folder:
-   `femalehead.nif` (or `malehead.nif`), the matching `.dds` tints, and the `.nif`/`.tri` trio RaceMenu
-   writes for the sculpt.
-3. Point FollowerForge at that exported head and build the plugin. If FollowerForge cannot find the
-   head, the export step — not FaceForge — is what failed.
+1. In RaceMenu, after the look is right, choose **Sculpt > Export Head** and give it the preset's name.
+   That command writes the mesh; **Save Preset** writes only the `.jslot`.
+2. Confirm the three files that share the preset name are present in the deployed location — the game's
+   `Data` folder, or the mod manager's overwrite folder when the game runs under one:
+   `Data\SKSE\Plugins\CharGen\Presets\<name>.jslot`
+   `Data\SKSE\Plugins\CharGen\<name>.nif`
+   `Data\SKSE\Plugins\CharGen\<name>.dds`
+   There is no `femalehead.nif` in this flow; the export is named after the preset.
+3. Point FollowerForge at that `<name>.nif` / `<name>.dds` pair and build the plugin. If FollowerForge
+   cannot find the head, the Export Head step — not FaceForge — is what failed.
 
 ## What to send back
 

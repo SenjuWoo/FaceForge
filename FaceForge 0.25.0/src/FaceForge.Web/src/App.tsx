@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AboutModal, { type VisionSettings, type Mo2State } from "./components/AboutModal";
 import MatchPanel, { type ReferenceSource } from "./components/MatchPanel";
-import { computeSculpt, renderHeads, reshapedRenderRequest, RESHAPE_KEYS, type RenderTargetMeta } from "./domain/headRender";
+import {
+  computeSculpt,
+  renderHeads,
+  reshapeExportBlock,
+  reshapedRenderRequest,
+  RESHAPE_KEYS,
+  type RenderTargetMeta
+} from "./domain/headRender";
 import { readPhotoColors } from "./domain/appearance";
 import { classifyIris, type PhotoColors } from "./domain/photoColors";
 import { efmSliderNames } from "./domain/fit";
@@ -1402,6 +1409,12 @@ export default function App() {
       // A reshape the user can see in the preview has to reach the preset. A failed or empty sculpt
       // conversion used to be swallowed, so the export shipped an empty host shell and looked fine.
       let sculpt: Awaited<ReturnType<typeof computeSculpt>> | null = null;
+      const reshapeBlock = reshapeExportBlock(hasReshape, nativeAvailable);
+      if (reshapeBlock) {
+        setError(reshapeBlock);
+        setNotice("Export stopped: the preview reshape cannot be written into the preset here.");
+        return;
+      }
       if (nativeAvailable && hasReshape) {
         try {
           const result = await computeSculpt(matchMeta, scaled);

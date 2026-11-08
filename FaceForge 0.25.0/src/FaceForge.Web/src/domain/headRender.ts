@@ -190,7 +190,20 @@ export interface SculptResult {
 }
 
 /**
- * Asks the native side to convert the sculpt reshape carried in the slider record (face width/height,
+ * A reshape only becomes real geometry when the native renderer converts it to vertex deltas. In a
+ * plain browser there is no renderer, so an export would silently drop the reshape the preview shows.
+ * Returns the reason to refuse, or null when the export may proceed.
+ */
+export function reshapeExportBlock(hasReshape: boolean, nativeAvailable: boolean): string | null {
+  if (!hasReshape || nativeAvailable) return null;
+  return (
+    "This reshape needs the desktop app: a browser cannot turn it into RaceMenu sculpt data, " +
+    "so the export would lose it. Open FaceForge on Windows, or reset the reshape to zero."
+  );
+}
+
+/**
+ * Asks the native side to convert the sculpt reshape carried in the slider record
  * nose-forward, jaw-lift sentinels) into per-vertex RaceMenu sculpt deltas for the head, eyes and brows.
  * The export writes these into the preset's morphs.sculpt so the elongation / nose / jaw the preview
  * shows actually appear in-game. Resolves to empty in the browser (no native renderer).
