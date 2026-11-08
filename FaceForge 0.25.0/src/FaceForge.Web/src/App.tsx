@@ -1399,9 +1399,24 @@ export default function App() {
       // capped EFM sliders cannot reach) into per-vertex sculpt deltas, so the exported head matches
       // the preview in-game. Only when a reshape is actually present and the native renderer is here.
       const hasReshape = (RESHAPE_KEYS as readonly string[]).some((key) => Math.abs(scaled[key] ?? 0) > 1e-6);
-      const sculpt = nativeAvailable && hasReshape
-        ? await computeSculpt(matchMeta, scaled).catch(() => null)
-        : null;
+      // A reshape the user can see in the preview has to reach the preset. A failed or empty sculpt
+      // conversion used to be swallowed, so the export shipped an empty host shell and looked fine.
+      let sculpt: Awaited<ReturnType<typeof computeSculpt>> | null = null;
+      if (nativeAvailable && hasReshape) {
+        try {
+          const result = await computeSculpt(matchMeta, scaled);
+          if (result.entries.length === 0 ||
+              result.entries.every((entry) => entry.data.length === 0)) {
+            throw new Error("the reshape produced no sculpt vertices");
+          }
+          sculpt = result;
+        } catch (reason) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          setError(`Sculpt conversion failed: ${message}`);
+          setNotice("Export stopped: the preview reshape could not be written into the preset.");
+          return;
+        }
+      }
       // Photo colours (estimates): skin picks a point on Skyrim's skin-tone gradient, hair becomes actor.hairColor.
       const appearance = applyColors && photoColors
         ? {
@@ -1427,7 +1442,8 @@ export default function App() {
           targetSex,
           sculpt,
           appearance,
-          headPartTypeOf: (identifier) => headPartTypes.get(identifier) ?? null
+          headPartTypeOf: (identifier) => headPartTypes.get(identifier) ?? null,
+          strictHeadParts: true
         }
       );
       const contents = serializeRaceMenuPreset(output);

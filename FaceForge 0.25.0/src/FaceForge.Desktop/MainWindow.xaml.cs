@@ -607,12 +607,16 @@ public partial class MainWindow : Window
         var view = _catalog.View;
         var morphInfo = _catalog.Summary.MorphRegistry;
         var bsaMorphs = _catalog.BsaMorphs;
-        var sculpt = await Task.Run(() => HeadRenderer.ComputeSculpt(view, morphInfo, request, bsaMorphs));
+        var (sculpt, error) = await Task.Run(() =>
+            HeadRenderer.TryComputeSculpt(view, morphInfo, request, bsaMorphs));
 
+        // An empty list with no error would read as "the reshape needs no sculpt", which is how a real
+        // failure used to reach the export as an HPH host shell with no vertex data.
         Post("sculpt-computed", new
         {
             requestId,
             divisor = 10000,
+            error,
             sculpt = (sculpt ?? new List<HeadRenderer.SculptPart>())
                 .Select(part => new { host = part.Host, vertices = part.Vertices, data = part.Data })
         });

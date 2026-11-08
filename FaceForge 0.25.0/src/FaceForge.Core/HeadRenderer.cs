@@ -168,6 +168,48 @@ public static class HeadRenderer
     /// renderer does (via <see cref="BuildMorphedParts"/> + <see cref="ApplyReshape"/>), the exported
     /// head matches the preview. Non-destructive: it only writes preset sculpt data, never game files.
     /// </summary>
+    /// <summary>
+    /// ComputeSculpt with a reason attached. The null case used to be indistinguishable from "the
+    /// reshape is a no-op", which let an export claim success while writing an empty sculpt host.
+    /// </summary>
+    public static (IReadOnlyList<SculptPart>? Parts, string? Error) TryComputeSculpt(
+        ResolvedDataView view,
+        MorphRegistrySnapshot morphInfo,
+        RenderRequest request,
+        BsaMorphIndex? bsaMorphs,
+        int divisor = 10000)
+    {
+        var config = MorphRegistry.HeadConfigurations().FirstOrDefault(item =>
+            item.Sex.Equals(request.Sex, StringComparison.OrdinalIgnoreCase) &&
+            item.HighPoly == request.HighPoly);
+        if (config is null)
+        {
+            return (null,
+                $"No {request.Sex} chargen head is indexed for HighPoly={request.HighPoly}, so the reshape cannot be converted.");
+        }
+
+        try
+        {
+            var parts = ComputeSculpt(view, morphInfo, request, bsaMorphs, divisor);
+            if (parts is null)
+            {
+                return (null,
+                    $"The {config.HeadTri} chargen mesh could not be loaded (missing, unreadable, or its topology "
+                    + "does not match the installed morphs). The reshape preview cannot be written to sculpt.");
+            }
+            if (parts.Count == 0 || parts.All(part => part.Data.Count == 0))
+            {
+                return (parts,
+                    "The reshape produced no vertex deltas, so the sculpt would be empty.");
+            }
+            return (parts, null);
+        }
+        catch (Exception error)
+        {
+            return (null, $"Sculpt conversion failed: {error.Message}");
+        }
+    }
+
     public static IReadOnlyList<SculptPart>? ComputeSculpt(
         ResolvedDataView view,
         MorphRegistrySnapshot morphInfo,
