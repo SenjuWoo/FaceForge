@@ -1,5 +1,27 @@
 # FaceForge state
 
+## 2026-11-08 (release-candidate fixes: export instructions, sculpt failures, head-part slots)
+
+- **Fixed: the generated README taught the wrong RaceMenu command.** It said to re-save the preset
+  from the Sculpt tab and called that what writes the head NIF/DDS. RaceMenu keeps the two apart:
+  Save Preset writes the `.jslot`; Sculpt > Export Head writes `{name}.nif` + `{name}.dds` into
+  `Data\SKSE\Plugins\CharGen`. The README now names both commands, says Export Head needs no sculpt
+  edit, and a test reads the ZIP's README so the mistake cannot return. No other document repeated it.
+- **Fixed: a failed sculpt conversion exported as success.** `TryComputeSculpt` now returns a reason -
+  no chargen head for that sex/HighPoly setting, head mesh unloadable or topology mismatch, empty
+  delta set, or a caught exception - and the desktop bridge sends that reason instead of an empty
+  list. Export stops when nonzero reshape values exist and the conversion failed or came back empty.
+- **Hardened: head-part selections must carry a slot.** Strict mode refuses a part with no HDPT type
+  and refuses two parts for one slot, naming them; RaceMenu would apply one and ignore the other.
+- Coverage: 128 frontend tests (12 files; +3 sculpt failure paths, +2 slot rules), 99 native
+  assertions, tsc clean, layout QA at four sizes, analysis-flow browser QA green.
+- Artifacts rebuilt by `package.ps1`: EXE 129,224,647 bytes `2460607C8F...`, ZIP 122,343,877 bytes
+  `A0DE91937A...`, inventory EXE + README.md, FileVersion 0.25.0.0.
+- Not done: any in-game load. The rebuilt EXE was launched and indexed the real install (2,974 mods,
+  3,035 plugins, 19,615 head-part records), but the GUI export could not be re-driven after the fix -
+  the window stopped accepting synthetic clicks - so the fix is covered by tests, not by a fresh GUI
+  export.
+
 ## 2026-11-08 (head-part slot fix + likeness cause)
 
 - **Confirmed defect, fixed.** RaceMenu's own presets store one head part per HDPT type - a real
@@ -17,7 +39,7 @@
   that: p1 0.73, p3 0.53, p2 0.47, p4 0.21, p5 0.16, desktop export 0.18. So the ceiling is the morph
   basis, not the solver or lambda - a stronger prior will not create a likeness that EFM's head mesh
   cannot express. The 18 sliders that live on the eye/mouth meshes are outside this model and unscored.
-- Resulting artifacts: EXE 129,218,037 bytes `137231862C...`, ZIP 122,338,868 bytes `F52814B0DE...`,
+- Resulting artifacts: EXE 129,224,647 bytes `137231862C...`, ZIP 122,343,877 bytes `F52814B0DE...`,
   inventory EXE + README.md.
 - Gates after the change: tsc clean, 123 frontend tests, 99 native assertions, layout QA at four sizes,
   analysis-flow browser QA green. Repackaged and pushed.
@@ -92,9 +114,9 @@
   12 bench unit tests pass. One-shot `hph_female` n=8 seed 1: slider corr 0.059, sign
   agreement 0.40, vertex skill +0.16 - inside sampling noise of the recorded n=30 baseline
   (0.05 / 0.37-0.45 / +0.08), and that path did not change.
-- Artifacts rebuilt by `package.ps1`: EXE 129,218,037 bytes, SHA-256
-  `137231862CD42C1E8B9E3F7FC30E946FF060DC464F6C708F1826FB7C2C91EFBE`; ZIP 122,338,868 bytes,
-  SHA-256 `F52814B0DE06DC51EEC81C34331940989D65193F7AB92310D4509A8C2A9FF066`, inventory
+- Artifacts rebuilt by `package.ps1`: EXE 129,224,647 bytes, SHA-256
+  `2460607C8FB2DA734C5AB3B3DEF15A94C4AC9425C1B6CDA2C48CB3C340606A01`; ZIP 122,343,877 bytes,
+  SHA-256 `A0DE91937ADEADDD6A1964D7A577DBE15A14591EABEE2B5DCF16B8BE2F924E37`, inventory
   `FaceForge-0.25.0-STANDALONE.exe` + `README.md`.
 - Found by the new browser gate on its first run: the Dependabot bump on main raised `react` to
   19.3.1 while `react-dom` stayed 19.2.8, and React refuses to run with mismatched versions
