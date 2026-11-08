@@ -1,5 +1,30 @@
 # FaceForge state
 
+## 2026-11-08 (pipeline audit, no code change)
+
+- Ask: why presets can still read as generic with EFM active. Answered by measuring the five real-photo
+  presets through the installed High Poly Head EFM model (`qa/bench/audit_presets.py`, read-only).
+- Every EFM name in the five presets exists in the installed EFM slider set: **no unknown morph names**.
+  49/53, 46/55, 36/43, 52/58 and 47/52 of them move the head mesh; the rest live on the eye/mouth meshes,
+  which the head model does not cover.
+- Magnitude is the finding: each preset moves the head **0.58-1.96% of head width in RMS**, largest single
+  vertex 1.6-5.4%. Two different photos land **0.43-2.47% of head width apart**. At head width ~12.4 model
+  units and ~150 mm real width, that is roughly 1-2 mm RMS. Subtle by construction.
+- Sculpt data in all five is an empty HPH host shell (`data: []`), and no head parts are carried - both
+  because the headless generator selected neither. The interactive export does write selected head parts
+  (`racemenu.ts` line 289) and a reshape sculpt when one exists.
+- The 0.059 slider correlation and 0.396 sign agreement quoted from `bench.py` describe the **legacy
+  one-shot ratio path** (its docstring says so), not the shipped dense fit. The dense fit's own recorded
+  numbers are skill +0.385 at the default lambda 1000 (+0.411 at 100, +0.339 cross-renderer); lambda 30
+  measured -0.386 cross-renderer, which is why the default is conservative. No implementation defect was
+  demonstrated, so no code was changed.
+- Provider check: `claude.exe` on this machine is 2.1.309 and accepts the exact flag set the app sends
+  (`-p --output-format json --max-turns --allowedTools --disallowedTools`); `--max-turns` is accepted but
+  no longer listed in `--help`. Detection was verified; a live refinement request was **not** made, so
+  found-binary is not claimed as a working request.
+- `qa/RACEMENU-CHECKLIST-0.25.0.md` holds the manual pass, including what the measured magnitudes predict
+  the tester should see.
+
 ## 2026-11-08 (release cleanup)
 
 - Docs corrected: the in-snapshot `README.md` still described 0.24.3 and `START HERE.txt` still said
