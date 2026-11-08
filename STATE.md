@@ -27,7 +27,9 @@
 - Version strings unified to 0.25.0 everywhere (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
 - Built `FaceForge-0.25.0-STANDALONE.exe` (126,867,574 bytes, SHA-256 `0D0483D7…`, FileVersion
   0.25.0.0; launch check 10 s alive then stopped, and again with a stripped PATH).
-- 0.25.0 was pushed to GitHub main (22d7275) with CI green on that SHA. Two alerts the push
+- 0.25.0 is on GitHub main at `22f8513` (first commit `1a5189a`, then `22d7275`, then the
+  dense-fit cache fix); CI green on the last two SHAs, and Dependabot / CodeQL / secret scanning all
+  read 0 open alerts afterwards. Two alerts the push
   opened were fixed at source rather than dismissed: 27 Dependabot alerts from a
   `qa/bench/requirements.txt` that pinned Pillow for a developer-only venv (the manifest is now
   a README instruction, `.venv/` is ignored), and a CodeQL "clear text storage" finding on the
