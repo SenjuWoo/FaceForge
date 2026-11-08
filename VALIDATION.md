@@ -98,7 +98,7 @@ build with every gate green, which is exactly how 0.24.2 shipped.
 - `build.ps1` end to end: PASS (pnpm install --frozen-lockfile, vitest 120, vite build, native
   Core.Tests 99 assertions, Desktop Release build).
 - `package.ps1`: PASS, single-file gate one EXE. `FaceForge-0.25.0-STANDALONE.exe`, 126,867,573 bytes,
-  SHA-256 `F29BE2BBE345E61E243A86F50B52DF4B6058826427C5C2610A11EF936976BBFF`, FileVersion 0.25.0.0.
+  SHA-256 `0D0483D7FDDA0F04C8D74FF8B7A12CB2D15EFCB264100C7C4CB7060EE273DD6F`, FileVersion 0.25.0.0.
   Launch check: ran 10 s and was stopped. Not released, not pushed.
 - Vision provider detection exercised on this machine with a GUI-like PATH (`~/.local/bin` and the npm
   folders removed): `claude` resolves to `C:\Users\karlo\.local\bin\claude.exe`; `codex` and
@@ -112,4 +112,11 @@ build with every gate green, which is exactly how 0.24.2 shipped.
   changed).
 - Settings dialog rendered at 1536x960: provider card with Install / Locate… / Official help, the path
   row and the hint. The double-encoded apostrophes ("providerâ€™s") are fixed.
+- Layout measured at 1366x768 (100% and 125% scaling) and 1536x960: shell equals the viewport, no
+  page scroll, status rail at the bottom and visible, three panels 650/820 px, footer visible, no
+  page errors.
+- `browser-qa.mjs` re-run after the Jacobian cache moved out of localStorage: all checks green,
+  64 of 64 declared EFM sliders written, no console/page/HTTP errors.
+- Packaged EXE launched with PATH cut to `C:\Windows\system32;C:\Windows` and stayed up for 8 s.
+- CI on GitHub (`Build + run core tests (latest snapshot)`) passed on the pushed SHA.
 

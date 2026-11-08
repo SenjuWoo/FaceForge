@@ -425,39 +425,22 @@ export function deserializeJacobian(text: string): DenseJacobian | null {
 
 const memory = new Map<string, DenseJacobian>();
 
-/** In-memory first, then localStorage (best effort; blocked storage just means re-measuring). */
+/**
+ * In-memory only, per app run. The measurement costs about ten seconds once, and this is a desktop
+ * app: browser storage for a cache of parity data is more risk than the reload is worth, and a static
+ * analyser is right to flag a browser-storage write of a serialised blob. Re-measuring is the fallback
+ * path that already exists.
+ */
 export function cachedJacobian(key: string): DenseJacobian | null {
-  const hit = memory.get(key);
-  if (hit) return hit;
-  try {
-    const text = window.localStorage.getItem(key);
-    const parsed = text ? deserializeJacobian(text) : null;
-    if (parsed && parsed.key === key) {
-      memory.set(key, parsed);
-      return parsed;
-    }
-  } catch {
-    /* storage unavailable */
-  }
-  return null;
+  return memory.get(key) ?? null;
 }
 
 export function storeJacobian(jac: DenseJacobian): void {
   memory.set(jac.key, jac);
-  try {
-    window.localStorage.setItem(jac.key, serializeJacobian(jac));
-  } catch {
-    /* quota or blocked storage: memory cache still serves this session */
-  }
 }
 
 export function forgetJacobian(key: string): void {
   memory.delete(key);
-  try {
-    window.localStorage.removeItem(key);
-  } catch {
-    /* ignore */
-  }
 }
 
 export interface DenseFitOptions {

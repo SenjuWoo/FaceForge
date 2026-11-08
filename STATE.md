@@ -25,8 +25,15 @@
   pose readout reports `null` (fails the tilt check) instead of throwing. It completes and writes its
   report; four stale UI expectations remain, listed in VALIDATION.md.
 - Version strings unified to 0.25.0 everywhere (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
-- Built `FaceForge-0.25.0-STANDALONE.exe` (126,867,573 bytes, SHA-256 `F29BE2BB…`, FileVersion
-  0.25.0.0; launch check 10 s alive then stopped). NOT released and NOT pushed to GitHub.
+- Built `FaceForge-0.25.0-STANDALONE.exe` (126,867,574 bytes, SHA-256 `0D0483D7…`, FileVersion
+  0.25.0.0; launch check 10 s alive then stopped, and again with a stripped PATH).
+- 0.25.0 was pushed to GitHub main (22d7275) with CI green on that SHA. Two alerts the push
+  opened were fixed at source rather than dismissed: 27 Dependabot alerts from a
+  `qa/bench/requirements.txt` that pinned Pillow for a developer-only venv (the manifest is now
+  a README instruction, `.venv/` is ignored), and a CodeQL "clear text storage" finding on the
+  dense-fit Jacobian cache in localStorage (the cache is memory-only per run now; the head is
+  measured once per launch, about ten seconds).
+- Not released: no tag, no GitHub release, no Nexus file version. That waits on an in-game check.
 - Still open: the four stale browser-QA checks; no in-game RaceMenu load of any preset (p1..p5 from
   the colour layer are untested); eye parts still rank by name only.
 
