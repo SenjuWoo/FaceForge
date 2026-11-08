@@ -106,8 +106,8 @@ build with every gate green, which is exactly how 0.24.2 shipped.
 
 - `build.ps1` end to end: PASS (pnpm install --frozen-lockfile, vitest 120, vite build, native
   Core.Tests 99 assertions, Desktop Release build).
-- `package.ps1`: PASS, single-file gate one EXE. `FaceForge-0.25.0-STANDALONE.exe`, 126,867,573 bytes,
-  SHA-256 `E1561E2E9F798FC3B099C9BD883AD415D110504955441C06C43956D754129E86`, FileVersion 0.25.0.0.
+- `package.ps1`: PASS, single-file gate one EXE. `FaceForge-0.25.0-STANDALONE.exe`, 129,218,679 bytes,
+  SHA-256 `0D19CB8C1A56ABB5CBBF9B4366A1ABCD047F6E5DA18F54F230448E4FDB0DCF00`, FileVersion 0.25.0.0.
   Launch check: ran 10 s and was stopped. Not released, not pushed.
 - Vision provider detection exercised on this machine with a GUI-like PATH (`~/.local/bin` and the npm
   folders removed): `claude` resolves to `C:\Users\karlo\.local\bin\claude.exe`; `codex` and

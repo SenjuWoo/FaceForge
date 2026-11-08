@@ -19,10 +19,15 @@
   12 bench unit tests pass. One-shot `hph_female` n=8 seed 1: slider corr 0.059, sign
   agreement 0.40, vertex skill +0.16 - inside sampling noise of the recorded n=30 baseline
   (0.05 / 0.37-0.45 / +0.08), and that path did not change.
-- Artifacts rebuilt by `package.ps1`: EXE 126,867,573 bytes, SHA-256
-  `E1561E2E9F798FC3B099C9BD883AD415D110504955441C06C43956D754129E86`; ZIP 119,995,860 bytes,
-  SHA-256 `B9C6EFDE16825167417796ED323446577DC6B2CE62E271B8350187718CDF7FD3`, inventory
+- Artifacts rebuilt by `package.ps1`: EXE 129,218,679 bytes, SHA-256
+  `0D19CB8C1A56ABB5CBBF9B4366A1ABCD047F6E5DA18F54F230448E4FDB0DCF00`; ZIP 122,336,580 bytes,
+  SHA-256 `893EDF429DA50F9BF533D13EF520F7AA13BD6F4643AFD8FEF2B52E3DBA929A3D`, inventory
   `FaceForge-0.25.0-STANDALONE.exe` + `README.md`.
+- Found by the new browser gate on its first run: the Dependabot bump on main raised `react` to
+  19.3.1 while `react-dom` stayed 19.2.8, and React refuses to run with mismatched versions
+  (minified error #527, blank window). 0.25.0 pins both at 19.2.8, which is react-dom's newest
+  stable. The published 0.24.3 snapshot is left untouched, so its source tree still carries the
+  mismatch; its released EXE predates the bump and is unaffected.
 
 ## 2026-11-07 (continued after a Claude Code usage stop)
 

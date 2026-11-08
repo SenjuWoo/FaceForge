@@ -33,6 +33,9 @@ New in this snapshot:
 - Source diagnostics restored to the three-step layout: the Source panel shows tilt/turn/nod/mirrored,
   the crop-and-re-detect and un-foreshortening notes, and the symmetry-is-only-a-quality-signal note.
 - Version strings unified at 0.25.0 (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
+- react and react-dom are pinned together at 19.2.8: a dependency bump had raised react alone to
+  19.3.1 and React refuses to run with mismatched versions, which left the window blank.
+- The browser QA (analysis flow plus a layout gate at four window sizes) is now a CI job.
 - `build.ps1` works on machines where `pnpm` resolves to the PowerShell shim, and `package.ps1`
   produces `FaceForge-0.25.0-STANDALONE.exe`.
 - `qa/browser-qa.mjs` runs again: its snapshot path is derived, its waits and selectors match the
