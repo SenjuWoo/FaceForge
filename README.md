@@ -90,7 +90,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 Verified in this tree:
 
 - `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
-- 121 frontend tests and 99 native assertions
+- 131 frontend tests and 99 native assertions
 - TypeScript clean, .NET Release clean, 0 warnings
 - `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame)
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
@@ -140,5 +140,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 129,224,647 bytes. SHA-256: `2460607C8FB2DA734C5AB3B3DEF15A94C4AC9425C1B6CDA2C48CB3C340606A01`.
-Zip: 122,343,877 bytes. SHA-256: `A0DE91937ADEADDD6A1964D7A577DBE15A14591EABEE2B5DCF16B8BE2F924E37`.
+EXE: 129,222,097 bytes. SHA-256: `34BB816B356718F26C334CA89DA10312B785F27E489A234A3F5720746E0A6800`.
+Zip: 122,348,044 bytes. SHA-256: `BCB20B9E0E5C02244434502F40D25FAC123483FD9F7F5D81F6720031936C829D`.

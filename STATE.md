@@ -1,5 +1,23 @@
 # FaceForge state
 
+## 2026-11-08 (release-candidate cleanup)
+
+- Export manifest instruction corrected to `RaceMenu Sculpt > Export Head, in game`; the Core test now
+  reads `FaceForge/racemenu-export-job.json` out of a built ZIP and asserts the wording, alongside the
+  existing README assertion. Verified by reverting the string and watching the test fail.
+- `qa/RACEMENU-CHECKLIST-0.25.0.md` no longer mentions `femalehead.nif` or an exported `.tri` trio: it
+  names `<name>.jslot` in `Presets`, `<name>.nif` and `<name>.dds` in `CharGen`, and the deployed
+  location, matching the generated README and manifest.
+- A reshape with no native renderer can no longer export silently: `reshapeExportBlock` refuses the
+  export in the browser and says why, and App surfaces it. Three tests cover blocked, allowed-plain and
+  allowed-desktop.
+- Root README test count corrected to 131; nothing else in the release copy was stale.
+- Coverage: 131 frontend tests (12 files), 99 native assertions, tsc clean, browser + layout QA green
+  in CI. Artifacts: EXE 129,222,097 bytes `34BB816B35...`, ZIP 122,348,044 bytes `BCB20B9E0E...`.
+- Still not done: no in-game load. The post-fix GUI export could not be driven in this environment -
+  the photo picker is an HTML file input inside WebView2, background clicks are dropped by the WPF
+  host, and foreground delivery is refused because the WebView child owns focus.
+
 ## 2026-11-08 (release-candidate fixes: export instructions, sculpt failures, head-part slots)
 
 - **Fixed: the generated README taught the wrong RaceMenu command.** It said to re-save the preset
@@ -13,9 +31,9 @@
   list. Export stops when nonzero reshape values exist and the conversion failed or came back empty.
 - **Hardened: head-part selections must carry a slot.** Strict mode refuses a part with no HDPT type
   and refuses two parts for one slot, naming them; RaceMenu would apply one and ignore the other.
-- Coverage: 128 frontend tests (12 files; +3 sculpt failure paths, +2 slot rules), 99 native
+- Coverage: 131 frontend tests (12 files; +3 sculpt failure paths, +2 slot rules), 99 native
   assertions, tsc clean, layout QA at four sizes, analysis-flow browser QA green.
-- Artifacts rebuilt by `package.ps1`: EXE 129,224,647 bytes `2460607C8F...`, ZIP 122,343,877 bytes
+- Artifacts rebuilt by `package.ps1`: EXE 129,222,097 bytes `2460607C8F...`, ZIP 122,348,044 bytes
   `A0DE91937A...`, inventory EXE + README.md, FileVersion 0.25.0.0.
 - Not done: any in-game load. The rebuilt EXE was launched and indexed the real install (2,974 mods,
   3,035 plugins, 19,615 head-part records), but the GUI export could not be re-driven after the fix -
@@ -39,7 +57,7 @@
   that: p1 0.73, p3 0.53, p2 0.47, p4 0.21, p5 0.16, desktop export 0.18. So the ceiling is the morph
   basis, not the solver or lambda - a stronger prior will not create a likeness that EFM's head mesh
   cannot express. The 18 sliders that live on the eye/mouth meshes are outside this model and unscored.
-- Resulting artifacts: EXE 129,224,647 bytes `137231862C...`, ZIP 122,343,877 bytes `F52814B0DE...`,
+- Resulting artifacts: EXE 129,222,097 bytes `137231862C...`, ZIP 122,348,044 bytes `F52814B0DE...`,
   inventory EXE + README.md.
 - Gates after the change: tsc clean, 123 frontend tests, 99 native assertions, layout QA at four sizes,
   analysis-flow browser QA green. Repackaged and pushed.
@@ -114,9 +132,9 @@
   12 bench unit tests pass. One-shot `hph_female` n=8 seed 1: slider corr 0.059, sign
   agreement 0.40, vertex skill +0.16 - inside sampling noise of the recorded n=30 baseline
   (0.05 / 0.37-0.45 / +0.08), and that path did not change.
-- Artifacts rebuilt by `package.ps1`: EXE 129,224,647 bytes, SHA-256
-  `2460607C8FB2DA734C5AB3B3DEF15A94C4AC9425C1B6CDA2C48CB3C340606A01`; ZIP 122,343,877 bytes,
-  SHA-256 `A0DE91937ADEADDD6A1964D7A577DBE15A14591EABEE2B5DCF16B8BE2F924E37`, inventory
+- Artifacts rebuilt by `package.ps1`: EXE 129,222,097 bytes, SHA-256
+  `34BB816B356718F26C334CA89DA10312B785F27E489A234A3F5720746E0A6800`; ZIP 122,348,044 bytes,
+  SHA-256 `BCB20B9E0E5C02244434502F40D25FAC123483FD9F7F5D81F6720031936C829D`, inventory
   `FaceForge-0.25.0-STANDALONE.exe` + `README.md`.
 - Found by the new browser gate on its first run: the Dependabot bump on main raised `react` to
   19.3.1 while `react-dom` stayed 19.2.8, and React refuses to run with mismatched versions
