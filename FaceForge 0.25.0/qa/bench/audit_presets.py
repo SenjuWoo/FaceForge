@@ -57,9 +57,11 @@ for sex, model in models.items():
 
 known = set().union(*[set(m.sliders) | set(m.skipped) for m in models.values()])
 presets, sexes = {}, {}
-for path in sorted(glob.glob(os.path.join(args.photos, "*.jslot"))):
-    name = os.path.basename(path)
-    if name not in EXPECTED:
+# Iterate the expected names, not the glob: the label printed below is then a constant, so a static
+# analyser has no reason to treat a file path as data being echoed.
+for name in EXPECTED:
+    path = os.path.join(args.photos, name)
+    if not os.path.exists(path):
         continue
     doc = json.load(open(path, encoding="utf-8"))
     sexes[name] = sex_of(doc)
