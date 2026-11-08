@@ -14,7 +14,7 @@ They were produced headless (no head parts selected, no sculpt), from the owner'
 | p2 (front) | 55 | 46 | 1.02% | 2.82% |
 | p3 (turned, mouth open) | 43 | 36 | 0.99% | 5.04% |
 | p4 (front) | 58 | 52 | 0.65% | 2.04% |
-| p5 (male, front) | 52 | 47 | 0.58% | 1.62% |
+| p5 (male, front) | 52 | 47 | 0.59% | 1.62% |
 
 Head-to-head distance between two different photos is 0.43–2.47% of head width. So expect **subtle**
 shape differences between presets, not a new face. If p1 and p2 look identical in game, that is

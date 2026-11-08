@@ -1,14 +1,32 @@
 // Builds a .jslot per photo with the real TS export path: dense-fit sliders + skin-tone tint + hair colour.
-// node make_presets.mjs   (needs vite 5173 and BenchHost 5199; reads out/photos.* produced earlier)
+//
+//   node make_presets.mjs [--out <dir>] [--url http://127.0.0.1:5173/]
+//
+// Needs the Vite dev server (default 5173) and the BenchHost results already on disk
+// (out/photos.manifest.json, out/photos.dense.json, out/photos.colors.json). Paths resolve from this
+// file so the snapshot can move, and Playwright comes from the web project's dev dependency.
 import { readFile, writeFile } from "node:fs/promises";
-import { chromium } from "file:///C:/Users/karlo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs";
-const O = "Z:/Backup/!Skyrim/!Ai modding workspace/FaceForge/FaceForge-main/FaceForge 0.25.0/qa/bench/out/";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const requireFromWeb = createRequire(new URL("../../src/FaceForge.Web/package.json", import.meta.url));
+const { chromium } = requireFromWeb("playwright");
+
+const argv = process.argv.slice(2);
+const argOf = (flag, fallback) => {
+  const at = argv.indexOf(flag);
+  return at >= 0 && argv[at + 1] ? argv[at + 1] : fallback;
+};
+const O = path.resolve(argOf("--out", path.join(HERE, "out"))) + path.sep;
+const URL_BASE = argOf("--url", "http://127.0.0.1:5173/");
 const manifest = JSON.parse(await readFile(O + "photos.manifest.json", "utf8"));
 const fits = Object.fromEntries(JSON.parse(await readFile(O + "photos.dense.json", "utf8")).map((r) => [r.id, r.sliders]));
 const colors = JSON.parse(await readFile(O + "photos.colors.json", "utf8"));
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage();
-await page.goto("http://127.0.0.1:5173/", { waitUntil: "networkidle" });
+await page.goto(URL_BASE, { waitUntil: "networkidle" });
 const summary = {};
 for (const m of manifest) {
   const c = colors[m.id];

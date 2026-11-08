@@ -1,5 +1,30 @@
 # FaceForge state
 
+## 2026-11-08 (release-candidate validation)
+
+- Audit methodology corrected: the presets are now measured on the chargen mesh of their own sex, and
+  only same-sex pairs are compared. p1-p4 on hph_female (3832 verts), p5 on hph_male (3598 verts):
+  1.96% / 1.02% / 0.99% / 0.65% / 0.59% of head width RMS. Same-sex pairs 0.35-1.82%; cross-sex pairs are
+  refused as mesh mismatches. `audit_presets.py` now fails with an available/missing list when a fixture
+  is absent. `make_presets.mjs` resolves its paths from the file and takes Playwright from the web
+  project's dev dependency, so both tools run on another machine.
+- Packaged-application smoke test (not a process check): the release ZIP was extracted, its EXE hash
+  matched the published value, and the EXE was driven through the real UI. It indexed 2,974 source mods /
+  3,035 plugins / 19,615 head-part records and detected High Poly Head; a photograph was imported and
+  analyzed (tilt -7.3 degrees straightened, turn 13.3, nod 12.2, 224 paired points); the dense fit
+  produced a rendered preset; and "Export Preset Pack" wrote a real archive with the jslot, a
+  dependencies.json and an appearance-selections.json.
+- That exported pack is the evidence the interactive path differs from the headless generator: 64 EFM
+  sliders (mean |v| 0.241, max 1.07) and TWO head-part references (`High Poly Head.esm|000A07` face,
+  `SGEyebrows.esp|00080B` brows) with matching `modNames`. Tint 0xFF99867F = (153,134,127), on the
+  installed skin-tone gradient; hair 0x002D2017 = (45,32,23). Structural head movement of that export is
+  0.61% of head width - the same order as the generated presets, so the packaged app is not producing
+  different output.
+- Sculpt in both paths is still an empty HPH host shell. No algorithm change: the audit found no
+  implementation defect, only low authority from the conservative prior.
+- Not done: any in-game RaceMenu load (no game run), and no live vision request (would spend the owner's
+  quota and upload a photo). Provider status remains: detected, flags parse on 2.1.309, request untested.
+
 ## 2026-11-08 (pipeline audit, no code change)
 
 - Ask: why presets can still read as generic with EFM active. Answered by measuring the five real-photo
