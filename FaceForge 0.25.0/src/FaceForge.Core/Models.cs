@@ -64,7 +64,10 @@ public sealed record AppearanceChoice(
     bool Playable = true,
     string? ValidRacesEditorId = null,
     IReadOnlyList<string>? ValidRaces = null,
-    bool TypeFromRecord = false)
+    bool TypeFromRecord = false,
+    // The raw HDPT Type value. RaceMenu presets carry it per head part and slot the part by it, so an
+    // export that omits it cannot say which slot a selected part belongs to.
+    int? HeadPartType = null)
 {
     public IReadOnlyList<string> ValidRaces { get; init; } = ValidRaces ?? [];
 }

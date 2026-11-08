@@ -1,5 +1,28 @@
 # FaceForge state
 
+## 2026-11-08 (head-part slot fix + likeness cause)
+
+- **Confirmed defect, fixed.** RaceMenu's own presets store one head part per HDPT type - a real
+  preset on this machine carries types 0,1,2,3,4,7, never a repeat - and each entry carries
+  `formId`, `formIdentifier` and `type`. FaceForge wrote `{"formIdentifier": ...}` only and appended
+  selections beside the template's parts, so a preset could hold two parts for one slot and the game
+  would apply whichever it reached. `AppearanceChoice` now carries the record's raw `HeadPartType`,
+  `buildRaceMenuPreset` emits `type`, and a selected part replaces the template part of the same
+  slot; a template part with no `type` is resolved through the indexed HDPT records
+  (`headPartTypeOf`). Two regression tests cover both paths (123 frontend tests now).
+- **Why real photographs come out conservative - measured, not guessed.** Per-unit authority of every
+  installed EFM head slider: **52 of 65 move the head mesh by 0.01% of head width or less**, 9 exceed
+  0.02%, and the strongest (`EFM_Eyes_Height`) reaches 0.45%. Pushing the same sliders the fit picked
+  to unit amplitude would move the head only **1.9-3.6%** of head width. The fit already uses 16-73% of
+  that: p1 0.73, p3 0.53, p2 0.47, p4 0.21, p5 0.16, desktop export 0.18. So the ceiling is the morph
+  basis, not the solver or lambda - a stronger prior will not create a likeness that EFM's head mesh
+  cannot express. The 18 sliders that live on the eye/mouth meshes are outside this model and unscored.
+- Resulting artifacts: EXE 129,218,037 bytes `137231862C...`, ZIP 122,338,868 bytes `F52814B0DE...`,
+  inventory EXE + README.md.
+- Gates after the change: tsc clean, 123 frontend tests, 99 native assertions, layout QA at four sizes,
+  analysis-flow browser QA green. Repackaged and pushed.
+- Not done: any in-game load, and no live vision request.
+
 ## 2026-11-08 (release-candidate validation)
 
 - Audit methodology corrected: the presets are now measured on the chargen mesh of their own sex, and
@@ -69,9 +92,9 @@
   12 bench unit tests pass. One-shot `hph_female` n=8 seed 1: slider corr 0.059, sign
   agreement 0.40, vertex skill +0.16 - inside sampling noise of the recorded n=30 baseline
   (0.05 / 0.37-0.45 / +0.08), and that path did not change.
-- Artifacts rebuilt by `package.ps1`: EXE 129,218,679 bytes, SHA-256
-  `0D19CB8C1A56ABB5CBBF9B4366A1ABCD047F6E5DA18F54F230448E4FDB0DCF00`; ZIP 122,336,580 bytes,
-  SHA-256 `893EDF429DA50F9BF533D13EF520F7AA13BD6F4643AFD8FEF2B52E3DBA929A3D`, inventory
+- Artifacts rebuilt by `package.ps1`: EXE 129,218,037 bytes, SHA-256
+  `137231862CD42C1E8B9E3F7FC30E946FF060DC464F6C708F1826FB7C2C91EFBE`; ZIP 122,338,868 bytes,
+  SHA-256 `F52814B0DE06DC51EEC81C34331940989D65193F7AB92310D4509A8C2A9FF066`, inventory
   `FaceForge-0.25.0-STANDALONE.exe` + `README.md`.
 - Found by the new browser gate on its first run: the Dependabot bump on main raised `react` to
   19.3.1 while `react-dom` stayed 19.2.8, and React refuses to run with mismatched versions

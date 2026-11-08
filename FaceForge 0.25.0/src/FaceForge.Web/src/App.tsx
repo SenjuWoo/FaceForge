@@ -1409,12 +1409,26 @@ export default function App() {
             hair: photoColors.hair && photoColors.hair.confidence >= 0.3 ? photoColors.hair.color : null
           }
         : undefined;
+      // A template written before 0.25.0 has head parts without a `type`, so the slot a selected part
+      // replaces can only be found through the indexed HDPT records.
+      const headPartTypes = new Map<string, number>();
+      for (const choice of environment?.appearanceChoices ?? []) {
+        if (typeof choice.headPartType === "number") {
+          headPartTypes.set(choice.formIdentifier, choice.headPartType);
+        }
+      }
       const output = buildRaceMenuPreset(
         template,
         scaled,
         preserveSculpt,
         selectedAppearance,
-        { highPolyHead: highPolyHeadActive, targetSex, sculpt, appearance }
+        {
+          highPolyHead: highPolyHeadActive,
+          targetSex,
+          sculpt,
+          appearance,
+          headPartTypeOf: (identifier) => headPartTypes.get(identifier) ?? null
+        }
       );
       const contents = serializeRaceMenuPreset(output);
       if (nativeAvailable) {
@@ -1442,6 +1456,7 @@ export default function App() {
     }
   }, [
     applyColors,
+    environment,
     groups.length,
     likeness,
     matchMeta,

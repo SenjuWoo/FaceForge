@@ -215,6 +215,63 @@ describe("RaceMenu template engine", () => {
       "TRE_Brows.esp"
     ]);
   });
+
+  // A RaceMenu preset holds one head part per HDPT type (a real one on this machine carries types
+  // 0,1,2,3,4,7 - never the same type twice). Appending beside the template's part would give the game
+  // two candidates for one slot.
+  it("replaces the template part in the same HDPT slot instead of adding a second one", () => {
+    const template = parseRaceMenuTemplate(
+      JSON.stringify({
+        actor: { weight: 50 },
+        modNames: ["Skyrim.esm", "Hair.esp", "Brow.esp"],
+        headParts: [
+          { formId: 111, formIdentifier: "Hair.esp|000001", type: 3 },
+          { formId: 222, formIdentifier: "Brow.esp|000002", type: 6 }
+        ],
+        morphs: { custom: [], sculpt: null, sculptDivisor: 10000 },
+        version: {
+          formatVersion: 3,
+          runtimeVersion: 17039392,
+          signature: 1163086675,
+          skseVersion: 33685600
+        }
+      }),
+      "Base.jslot"
+    );
+    const output = buildRaceMenuPreset(template, {}, false, [
+      { formIdentifier: "NewBrow.esp|000003", headPartType: 6 }
+    ]);
+    expect(output.headParts).toEqual([
+      { formId: 111, formIdentifier: "Hair.esp|000001", type: 3 },
+      { formIdentifier: "NewBrow.esp|000003", type: 6 }
+    ]);
+  });
+
+  it("finds the slot of a template part that carries no type", () => {
+    const template = parseRaceMenuTemplate(
+      JSON.stringify({
+        actor: { weight: 50 },
+        modNames: ["Skyrim.esm", "Hair.esp"],
+        headParts: [{ formIdentifier: "Hair.esp|000001" }],
+        morphs: { custom: [], sculpt: null, sculptDivisor: 10000 },
+        version: {
+          formatVersion: 3,
+          runtimeVersion: 17039392,
+          signature: 1163086675,
+          skseVersion: 33685600
+        }
+      }),
+      "Old.jslot"
+    );
+    const output = buildRaceMenuPreset(
+      template,
+      {},
+      false,
+      [{ formIdentifier: "NewHair.esp|00000A", headPartType: 3 }],
+      { headPartTypeOf: (identifier) => (identifier === "Hair.esp|000001" ? 3 : null) }
+    );
+    expect(output.headParts).toEqual([{ formIdentifier: "NewHair.esp|00000A", type: 3 }]);
+  });
 });
 
 describe("photo colours in the preset", () => {

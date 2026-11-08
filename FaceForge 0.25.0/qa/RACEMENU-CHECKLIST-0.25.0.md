@@ -55,3 +55,29 @@ parts are carried, because the generator ran without a selection.
 For each preset: loaded (yes/no), shape change vs default (none / subtle / clear), skin tone (right /
 too dark / too grey), hair colour (right / wrong), any visual defect. One screenshot per preset next to
 its source photo is worth more than any number in this file.
+
+## Two more checks added after the head-part export fix
+
+10. **Male preset on a male character.** p5 was measured on the male chargen mesh (3598 verts) and must
+    be loaded on a male character of the race the preset targets; loading it on a female character is a
+    mesh mismatch and will look broken.
+11. **Head parts actually apply.** After loading a preset, check the part name shown in RaceMenu's Head
+    tab for each slot (hair, brows, eyes, face). If a slot shows the race default instead of the part
+    named in the pack's `appearance-selections.json`, that is the defect this fix targets — report it.
+
+## FollowerForge handoff (only if you will build an NPC)
+
+1. In RaceMenu, after the look is right, use **Export Head** — not "slider-only / no sculpt".
+2. Confirm these files appear somewhere under the profile's overwrite or the CharGen folder:
+   `femalehead.nif` (or `malehead.nif`), the matching `.dds` tints, and the `.nif`/`.tri` trio RaceMenu
+   writes for the sculpt.
+3. Point FollowerForge at that exported head and build the plugin. If FollowerForge cannot find the
+   head, the export step — not FaceForge — is what failed.
+
+## What to send back
+
+- One screenshot per preset: character face in RaceMenu, same race, same lighting, same camera angle.
+- For the "does it look like the photo" question, a second screenshot of the preset beside its source
+  photo, cropped to the face.
+- The RaceMenu Head tab for one preset, showing the part names per slot.
+- For the FollowerForge check, the file list from step 2.

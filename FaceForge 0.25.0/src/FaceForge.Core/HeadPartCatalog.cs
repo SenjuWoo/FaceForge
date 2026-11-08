@@ -48,7 +48,8 @@ internal static class HeadPartCatalog
                         part.Flags.HasFlag(HeadPart.Flag.Playable),
                         listEditorId,
                         races,
-                        typed is not null);
+                        typed is not null,
+                        part.Type is null ? null : (int)part.Type);
                 })
                 .Where(item => item is not null)
                 .Cast<AppearanceChoice>()

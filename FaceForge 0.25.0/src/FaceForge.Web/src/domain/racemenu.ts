@@ -43,6 +43,8 @@ export interface SliderValue {
 
 export interface RaceMenuHeadPart {
   formIdentifier: string;
+  /** HDPT Type. RaceMenu slots a part by this, and its own presets write it on every entry. */
+  headPartType?: number | null;
 }
 
 const isObject = (value: unknown): value is JsonObject =>
@@ -232,6 +234,8 @@ export function buildRaceMenuPreset(
      * becomes the skin-tone tint; `hair` becomes actor.hairColor. Other tint layers in the template are kept.
      */
     appearance?: { skin?: Rgb | null; hair?: Rgb | null };
+    /** Resolves a template head part's HDPT type when the file itself does not carry one. */
+    headPartTypeOf?: (formIdentifier: string) => number | null;
   } = {}
 ): JsonObject {
   const output = structuredClone(template.document);
@@ -287,18 +291,42 @@ export function buildRaceMenuPreset(
   }
 
   if (selectedHeadParts.length > 0) {
-    const existing = Array.isArray(output.headParts) ? output.headParts : [];
+    const existing = Array.isArray(output.headParts) ? output.headParts.filter(isObject) : [];
+    // A template written by RaceMenu carries `type` on every part; one written by FaceForge did not, so
+    // fall back to the indexed HDPT records the caller can resolve.
+    const typeOfExisting = (part: JsonObject): number | null => {
+      if (typeof part.type === "number") return part.type;
+      const identifier = typeof part.formIdentifier === "string" ? part.formIdentifier : null;
+      if (!identifier) return null;
+      const resolved = options.headPartTypeOf?.(identifier);
+      return typeof resolved === "number" ? resolved : null;
+    };
+    const selectedTypes = new Set(
+      selectedHeadParts
+        .map((part) => part.headPartType)
+        .filter((value): value is number => typeof value === "number")
+    );
+    // One part per HDPT slot, which is what RaceMenu's own presets contain (types 0,1,2,3,4,7 - never
+    // twice). A part the user chose replaces the template's part for that slot instead of sitting beside
+    // it, where the game would apply one and silently ignore the other.
+    const kept = existing.filter((part) => {
+      const type = typeOfExisting(part);
+      return type === null || !selectedTypes.has(type);
+    });
     const seen = new Set(
-      existing
-        .filter(isObject)
+      kept
         .map((part) => part.formIdentifier)
         .filter((value): value is string => typeof value === "string")
     );
     output.headParts = [
-      ...existing,
+      ...kept,
       ...selectedHeadParts
         .filter((part) => !seen.has(part.formIdentifier))
-        .map((part) => ({ formIdentifier: part.formIdentifier }))
+        .map((part) =>
+          typeof part.headPartType === "number"
+            ? { formIdentifier: part.formIdentifier, type: part.headPartType }
+            : { formIdentifier: part.formIdentifier }
+        )
     ];
     const mods = new Set(
       Array.isArray(output.modNames)

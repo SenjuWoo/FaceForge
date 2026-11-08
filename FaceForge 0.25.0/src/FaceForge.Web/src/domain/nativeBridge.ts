@@ -132,6 +132,8 @@ export interface AppearanceChoice {
   validRaces: string[];
   /** False when the record had no Type subrecord and the category was guessed from its name. */
   typeFromRecord: boolean;
+  /** Raw HDPT Type value, which is what RaceMenu slots a head part by. Null when the record has none. */
+  headPartType?: number | null;
 }
 
 export interface MorphFamilyCount {
