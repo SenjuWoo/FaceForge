@@ -264,7 +264,7 @@ public static class ExportPackager
         Exact plugin dependencies and installed-source provenance are in dependencies.json.
         """;
 
-    private static string BuildRaceMenuExportReadme(string name, ExportRequest request) => $"""
+    internal static string BuildRaceMenuExportReadme(string name, ExportRequest request) => $"""
         FaceForge RaceMenu Head Export Stage: {name}
 
         Target race: {request.TargetRaceEditorId ?? "not chosen"}
@@ -279,25 +279,29 @@ public static class ExportPackager
         running game knows the active race, sex, head parts, TRI topology, tint layers, and
         installed assets.
 
-        1. Install this ZIP with Vortex.
+        1. Install this ZIP with Vortex, or copy its folders into the game's Data folder.
         2. In Skyrim, open RaceMenu and set the race and sex above BEFORE loading the preset.
            RaceMenu silently ignores head parts that are not valid for the active race/sex.
-        3. Load {name}.jslot from the Presets tab.
-        4. Still in RaceMenu, open the Sculpt tab and save the preset back out under the SAME
-           name: {name}. Saving with sculpt data present is what makes RaceMenu write the
-           companion head mesh and tint texture next to the preset.
-        5. Confirm all three files now exist:
-           Data\SKSE\Plugins\CharGen\Presets\{name}.jslot
-           Data\SKSE\Plugins\CharGen\{name}.nif
-           Data\SKSE\Plugins\CharGen\{name}.dds
-           If the NIF and DDS are missing, the character had no sculpt data. Nudge any sculpt
-           control once in RaceMenu and save again.
-        6. Open FollowerForge. It scans Data\SKSE\Plugins\CharGen for exactly that NIF/DDS pair
+        3. Load {name}.jslot from the Presets tab. Then check the Head tab and the colours: the
+           parts listed in FaceForge/appearance-selections.json must be the parts now worn.
+        4. RaceMenu has two separate commands, and this stage needs the second one:
+             Save Preset          writes Data\SKSE\Plugins\CharGen\Presets\{name}.jslot
+             Sculpt > Export Head writes Data\SKSE\Plugins\CharGen\{name}.nif and {name}.dds
+           Open the Sculpt tab and choose Export Head, using {name} as the target name. Nothing has
+           to be sculpted first: Export Head is a separate operation from Save Preset and writes the
+           current head out as a mesh whether or not it carries sculpt data.
+        5. Confirm the pair exists in the deployed location - the game's Data folder, or the mod
+           manager's overwrite folder when the game runs under one:
+             Data\SKSE\Plugins\CharGen\{name}.nif
+             Data\SKSE\Plugins\CharGen\{name}.dds
+        6. Confirm the three files agree before importing them anywhere: the .jslot you loaded, the
+           .nif and the .dds are the same character.
+        7. Open FollowerForge. It scans Data\SKSE\Plugins\CharGen for exactly that NIF/DDS pair
            and matches it to the preset by name, then builds the NPC plugin with race, voice,
            class, placement, equipment, spells, perks, and behavior.
 
-        Step 5 is the whole point of this stage. A JSlot on its own is not a head;
-        FollowerForge lists nothing until the matching NIF exists in that folder.
+        Step 4 is the whole point of this stage. A JSlot on its own is not a head; FollowerForge
+        lists nothing until the matching NIF exists next to the presets.
         """;
 
     private static string SanitizeName(string value)

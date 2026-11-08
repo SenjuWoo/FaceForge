@@ -570,6 +570,24 @@ try
         Assert(
             jobText.Contains("\"targetRaceEditorId\": \"NordRace\"", StringComparison.Ordinal),
             "target race recorded");
+
+        // The generated README is the only place a user is told how to get the NIF/DDS, and an earlier
+        // version told them to nudge a sculpt slider and save the preset again - which does not produce
+        // a head mesh. Export Head is a separate RaceMenu command.
+        var readme = zip.GetEntry("README.txt");
+        Assert(readme is not null, "generated README exists");
+        using var readmeReader = new StreamReader(readme!.Open());
+        var readmeText = readmeReader.ReadToEnd();
+        Assert(
+            readmeText.Contains("Export Head", StringComparison.Ordinal),
+            "README names the Export Head command");
+        Assert(
+            readmeText.Contains("separate operation from Save Preset", StringComparison.Ordinal),
+            "README separates Export Head from Save Preset");
+        Assert(
+            !readmeText.Contains("Nudge any sculpt control", StringComparison.OrdinalIgnoreCase) &&
+            !readmeText.Contains("save the preset back", StringComparison.OrdinalIgnoreCase),
+            "README does not ask for a fake sculpt edit to produce the mesh");
     }
     // Re-reading a finished preset must recompute its needs from the file's own head-part
     // records, because the export-time dependency report goes stale the moment the user picks
