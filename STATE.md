@@ -1,14 +1,135 @@
 # FaceForge state
 
+## 2026-11-07 (continued after a Claude Code usage stop)
+
+- The interrupted session (`~/.claude/projects/Z--Backup--Skyrim--Ai-modding-workspace-FaceForge/
+  323ab87b-….jsonl`, 2,154 records) was recovered: it stopped right after the colour layer, having
+  handed the owner five presets to test in RaceMenu. Nothing was in flight; the next planned item
+  was eye-texture colour ranking for head parts.
+- Fixed the reported "it keeps telling me to install the latest versions" (Nexus, 2026-08-14).
+  Provider detection was PATH-only, and a double-clicked EXE inherits Explorer's PATH, so an
+  installed CLI read as missing with no way to point at it. Now: known install folders are searched
+  (`%APPDATA%\npm`, `~/.local/bin`, `.bun/bin`, `.volta/bin`, `%LOCALAPPDATA%\npm|pnpm|Programs\codex`,
+  WindowsApps), a manual path per provider is stored in `%LOCALAPPDATA%\FaceForge\vision-paths.json`,
+  and Settings has a **Locate…** button (file or folder; a `.ps1` pick resolves to its sibling
+  `.cmd`/`.exe`). Verified here: with PATH stripped to a GUI-like set, `claude.exe` is found in
+  `~/.local/bin`; `codex`/`gemini` are genuinely absent; a stored override turns "not installed" into
+  "installed" at the stored path. `dotnet run --project src/FaceForge.Core.Tests -- --vision` prints
+  the stored overrides and the resolved statuses.
+- `build.ps1` could not complete on this machine: `Get-Command pnpm` resolves the `pnpm.ps1` shim,
+  which re-parses arguments, so `install --frozen-lockfile` reached pnpm as one token and failed.
+  It now prefers the `.cmd`/`.exe` shim and the flag is quoted. The full gate runs green.
+- `qa/browser-qa.mjs` could not run at all: it hardcoded the pre-reset 0.12.0 path, waited for a
+  "63 values" label that no longer exists, and crashed on a missing `.pose-grid` readout. Root is now
+  derived from the script location, the wait is the real "Analysis complete" status, and a missing
+  pose readout reports `null` (fails the tilt check) instead of throwing. It completes and writes its
+  report; four stale UI expectations remain, listed in VALIDATION.md.
+- Version strings unified to 0.25.0 everywhere (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
+- Built `FaceForge-0.25.0-STANDALONE.exe` (126,867,573 bytes, SHA-256 `F29BE2BB…`, FileVersion
+  0.25.0.0; launch check 10 s alive then stopped). NOT released and NOT pushed to GitHub.
+- Still open: the four stale browser-QA checks; no in-game RaceMenu load of any preset (p1..p5 from
+  the colour layer are untested); eye parts still rank by name only.
+
+## 2026-10-30 (later): lost work found on GitHub, overlaid into 0.25.0
+
+- Owner pointed at GitHub. `SenjuWoo/FaceForge` PR #1 (closed, unmerged, commit `70939cd`,
+  2026-08-15, "0.24.26-0.24.28") holds a native head renderer, a measured-Jacobian fit ("Analyze &
+  improve"), Match pane, sculpt reshape, BSA/MO2/DDS support. `main` never had it. Details and
+  limits: PLAN.md "Recovered prior work".
+- Active snapshot is now `FaceForge 0.25.0` = 0.24.3 + those 33 files (path-conflict check against
+  later `main` changes: none). CURRENT.txt points at it. Product version strings still read 0.24.3.
+- Verified there: `tsc -b` clean; vitest 100 passed; native `Core.Tests` 96 assertions PASS. New
+  NuGet dependency BCnEncoder.Net (declared 2.1.4, restore resolved 2.2.0, warning NU1603).
+- Not verified: desktop app launch, fit quality, in-game result. Versions 0.24.4-0.24.25 and their
+  notes are unrecoverable from GitHub.
+- Phase 0 benchmark DONE (`FaceForge 0.25.0/qa/bench/`, numbers in `BASELINE-2026-10-30.json`):
+  synthetic round trip on a [U] linear EFM head model, seed 1, 30 cases, determinism self-check
+  passes, 9 unit tests pass. Detector found the face in 30/30 renders on every head.
+  * One-shot path (== 0.24.3 code): slider correlation 0.05 (hph_female), sign agreement 0.37-0.45
+    (below a coin flip), vertex skill +0.08 hph_female / -0.09 vanilla_female / -0.19 hph_male /
+    -0.92 vanilla_male (0 = no better than leaving the head neutral). Only EFM_Nose_Height,
+    Lip_Height, Lip_Width recover well (corr 0.8-0.98) and at 10-30% of the true magnitude.
+  * Recovered PR #1 fit, hph_female, 30 cases, ~8 s and ~400 renders per case: vertex skill -4.65
+    with python-rendered photos, -1.77 in the best case (photo rendered by the same C# renderer).
+    Pixel-space skill incl. reshape: -2.4 front, -3.0 at yaw 35 (one-shot -0.37 / -0.34).
+  * Why (12 cases, same renderer): the fit's own loss for the TRUE sliders has median 0.42 vs 0.81
+    for the neutral head, and the fit reaches 0.15, lower than truth in 12/12. The optimiser works;
+    the 39-ratio objective does not single out the true face (it is under-determined and noisy).
+    Not isolated: how much of the 0.42 floor is photo-path vs render-path processing.
+  * Caveats: synthetic sparse sliders, not photos; model [U] until an F5 export is compared; vertex
+    score ignores the fit's reshape moves (pixel score includes them); only hph_female was run for the
+    fit. A real-photo result may differ. No in-game result exists.
+- Phase 2 PROTOTYPE done in python (not in the product): dense landmark fit with a measured detector
+  Jacobian, `qa/bench/phase2.py`, results `PHASE2-PROTOTYPE-2026-10-30.json`. Vertex skill on the same
+  cases: hph_female +0.59 (one-shot +0.08, PR #1 fit -1.77), hph_male +0.57 (-0.19), vanilla_female
+  +0.40 (-0.09), vanilla_male +0.23 (-0.92); stable on a held-out seed (+0.62) and a dense generator
+  (+0.57). Same synthetic-only caveats; 12 bench unit tests pass. Next: port to TypeScript, then a
+  real-photo check (needs the owner's test photos).
+- Phase 2 PORTED (2026-10-30): `FaceForge 0.25.0/src/FaceForge.Web/src/domain/denseFit.ts` + Match pane
+  wiring (default method "Dense landmarks", fallback to the ratio fit on failure or by choice, "Re-measure
+  head" button). Verified: `tsc -b` clean, vitest 106 passed (6 new, incl. parity with the Python
+  solver on a seeded fixture), native 96 assertions PASS. Benchmarked headless via the real C# renderer
+  (hph_female, 30 cases, `PHASE2-PORT-2026-10-30.json`): +0.41 best case, +0.34 with a photo from a
+  different renderer at the default lambda 1000 (it was -0.39 at lambda 30). NOT verified: the desktop
+  app was not launched, the Match pane UI was not clicked through, no real photograph, nothing in game.
+  Other heads were not re-run through the port. No EXE built; version strings still 0.24.3.
+- First real photos (owner sent 5, 2026-10-30; copies in gitignored `qa/bench/out/photos/`, not committed):
+  dense fit run through the real renderer, side-by-side sheets `out/photos/p*.sheet*.png`. Frontal photos
+  (4 female, 1 male): residual 2.2-5.1% of eye distance, shape changes from the neutral head are SUBTLE
+  at the default lambda 1000 and not recognisably the person; the head is still bald, untinted, default
+  brows. One turned, mouth-open photo (residual 8-9%) went wrong: at lambda 100 four sliders hit the +-3
+  rail and the chin narrowed unnaturally, i.e. yaw and expression were read as face shape. No pose or
+  expression compensation exists in the dense method. Conclusion: the shape fit is not the main gap any
+  more; colour/head parts, pose and expression handling, and a larger-authority sculpt are.
+- COLOUR LAYER built (2026-10-30, `domain/photoColors.ts`, `appearance.ts`, export in `racemenu.ts`, UI in the
+  output panel): reads skin, lip, iris and hair colour from the front photo at landmark-defined regions; the
+  export writes a skin-tone tint (`tintInfo`, index 0, SkinTone.dds, or recolours the template's own SkinTone
+  layer) and `actor.hairColor`; "Apply photo colours" toggle with swatches and confidences. Iris colour only
+  feeds the existing eye-part ranking by name. Verified: tsc clean, vitest 120 passed (14 new), native 96
+  assertions, `vite build` OK, UI rendered with a real photo and no console errors, and five real `.jslot`
+  files built through the real export path (`qa/bench/out/photos/p1..p5.jslot`, gitignored).
+  * Wrong idea found and dropped: tint = photo / installed skin albedo. The installed head texture averages
+    only (128,110,102) so every channel ratio exceeded 1 and clamped to white. The tint is now the point on
+    Skyrim's own skin-tone preset gradient (Skyrim.esm COLO HumanFemaleSkinWhite01-10, HumanSkinDarkSkin05-10)
+    with the matching lightness; lightness only, hue not matched. The albedo code was removed again.
+  * Limits: one photo each, so lighting, white balance and makeup move every colour; the photo-lightness to
+    preset mapping is a calibration choice [U]; tint multiply semantics are inferred from the preset values,
+    not confirmed in game; lip colour is shown but not written (its tint index is race-specific and Core does
+    not read race tint lists; a template with a Lips layer could be recoloured later); light eyes in a small
+    photo read wrong (the 300x400 photo's blue eyes came out grey-brown at confidence 0.43, so it is not used).
+  * Head parts: eye parts are suggested by NAME only. Of 1866 installed eye parts only about 21% carry
+    brown/blue/green in their EditorID (78/179/143) and many are follower-specific, so a real fix needs eye
+    textures read from NIF/TXST. Hair and brow STYLE matching is not done.
+  * Version strings in this tree are inconsistent (an earlier note here said they all read 0.24.3, which was
+    wrong): build.ps1, package.ps1, EmbeddedWebBundle.cs, OpenRouterVision.cs say 0.24.28; the Desktop csproj
+    says 0.24.15; package.json, ExportPackager.cs, racemenu.ts say 0.24.3. Make them one 0.25.0 at release.
+
+## 2026-10-30 rework kickoff (Claude Code) -- plan proposed, no code changed
+
+- Active version still `0.24.3`. Rework plan: `PLAN.md` (status PROPOSED, awaiting approval).
+- Recovery check after PC reset: local tree equals GitHub `SenjuWoo/FaceForge` main (last feature
+  release 0.24.3, 2026-08-12; later commits are only Dependabot and doc/link edits). No other
+  FaceForge folder in `Z:\Backup` or the user profile; no earlier Claude session for this project.
+  Any unpublished work after 2026-08-12 is not on this machine.
+- CORRECTION (verified 2026-10-30): the "51 EFM sliders are inert on High Poly Head" finding
+  below (2026-08-05) is WRONG. `--morphs` reads loose files only (`Complete: false`; four BSAs pack
+  facegenmorphs inis). `High Poly Head.bsa` ships `morphs\kl\femalehead_efm.tri` (3832 vertices, 134
+  EFM_* morphs, FRTRI003 parsed to end of file) and registers it in its packed
+  `high poly head.esm\morphs.ini`. EFM is live on HPH. Same for the old idea "transfer EFM morphs to
+  HPH topology" -- unnecessary. The registry should read BSAs (houseCARL `housecarl_bsa_extract`
+  works; BSArch did not).
+- Python 3.14 shared runtime has no numpy/scipy/PIL/onnx/mediapipe; QA scripts need a venv.
+  GPU: RTX 4080 SUPER 16 GB. dotnet 10.0.403, node v26.13.0.
+- `qa/*.mjs` and `render-head.py` were not run; only the native `--morphs` report was.
+
+---
+
 - Active version: `FaceForge 0.24.3` (parent 0.24.2, withdrawn), tool-validated release.
 - Final EXE: `FaceForge-0.24.3-STANDALONE.exe`, 125,978,736 bytes.
 - SHA-256: `73BF90EA0A2A5B4D52E19BB7DABF592AB13BA192F5F4C7A8F42F2DFFE2D200E0`.
 - FileVersion 0.24.3.0; launch verified (still running after 14s, then stopped).
 - Tests: 100 frontend, 96 native assertions. TypeScript clean, .NET Release clean, 0 warnings.
 - Rendered-layout check at 1092x614 and 1280x720 (see below) -- this is what 0.24.2 skipped.
-- Snapshot retention: `FaceForge 0.24.3` (active) and `FaceForge 0.24.2` (last known
-  good) are the only version trees in the default branch; 0.23.0-0.24.1 are tags and
-  release assets only.
 - Product version: `0.24.3`; public distribution remains exactly one self-contained EXE.
 
 ## What changed in 0.24.3

@@ -71,3 +71,45 @@ asserted from the stylesheet.
 
 `qa/browser-qa.mjs` is not part of `build.ps1`. A CSS change can therefore reach a published
 build with every gate green, which is exactly how 0.24.2 shipped.
+
+
+## FaceForge 0.25.0 (in progress) -- 2026-10-30
+
+- Overlay of GitHub PR #1 onto 0.24.3: `tsc -b` clean; vitest 100 passed; native `Core.Tests` 96
+  assertions PASS; bench unit tests 9 passed; bench determinism self-check PASS.
+- Phase 0 benchmark numbers: `FaceForge 0.25.0/qa/bench/BASELINE-2026-10-30.json` (see STATE.md).
+- NOT verified: the desktop app was never launched; no real photograph was run; no in-game RaceMenu
+  load; the linear head model is unconfirmed against an F5 export; no EXE built from 0.25.0.
+- Game Data, Vortex staging and installed tools were read-only; High Poly Head.bsa morph files were
+  extracted to `qa/bench/cache/` (gitignored), not into Data.
+- Phase 2 prototype: 12 bench unit tests pass (umeyama, bounded ridge, scorer, head model). Results
+  are synthetic only; no real photograph, no desktop app run, no in-game load. The dev servers started
+  for the runs (Vite 5173, BenchHost 5199) were stopped afterwards.
+- Phase 2 port: tsc clean; vitest 106 passed; native Core.Tests 96 assertions PASS. Dense fit run headless
+  through the real C# renderer (BenchHost) on 30 synthetic cases; UI not clicked through; no EXE built;
+  no real photograph; no in-game load. Vite (5173) and BenchHost (5199) stopped afterwards.
+- Colour layer: tsc clean; vitest 120 passed; native 96 assertions PASS; `vite build` OK; UI rendered in a
+  browser with a real photo (swatches shown, no console errors). Five presets built through the real export
+  path from real photos. NOT verified: loading any of them in RaceMenu, whether the tint looks right in game,
+  the desktop EXE (not built from this tree), lip tints, eye-texture colour.
+
+## FaceForge 0.25.0 (in progress) -- 2026-11-07 build gate
+
+- `build.ps1` end to end: PASS (pnpm install --frozen-lockfile, vitest 120, vite build, native
+  Core.Tests 99 assertions, Desktop Release build).
+- `package.ps1`: PASS, single-file gate one EXE. `FaceForge-0.25.0-STANDALONE.exe`, 126,867,573 bytes,
+  SHA-256 `F29BE2BBE345E61E243A86F50B52DF4B6058826427C5C2610A11EF936976BBFF`, FileVersion 0.25.0.0.
+  Launch check: ran 10 s and was stopped. Not released, not pushed.
+- Vision provider detection exercised on this machine with a GUI-like PATH (`~/.local/bin` and the npm
+  folders removed): `claude` resolves to `C:\Users\karlo\.local\bin\claude.exe`; `codex` and
+  `gemini` are not installed here. A stored override is honoured at the stored path.
+- Three new native assertions: a folder pick resolves the command inside it; a `.ps1` pick resolves to
+  its sibling `.cmd`; a missing path resolves to nothing.
+- `qa/browser-qa.mjs` runs to completion again (root derived from the script path, real
+  "Analysis complete" wait). Report: no console, page or HTTP errors, generated families `EFM` only.
+  STALE AND FAILING, so the browser gate is NOT green: `symmetryIsQualityOnly`, `poseCorrectionVisible`,
+  `rotatedTiltDetected` (this UI has no `.pose-grid` readout) and `smallFaceReframed` (warning-list text
+  changed).
+- Settings dialog rendered at 1536x960: provider card with Install / Locate… / Official help, the path
+  row and the hint. The double-encoded apostrophes ("providerâ€™s") are fixed.
+

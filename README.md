@@ -31,14 +31,14 @@
   <img src="docs/images/app-hero.png" alt="FaceForge after analyzing a synthetic front portrait: source face, measured proportions, and RaceMenu output panel" width="100%">
 </p>
 
-<p align="center"><sub>QA render from the 0.24.3 tree, using the bundled synthetic portrait. Not a claim about every photograph.</sub></p>
+<p align="center"><sub>QA render from the 0.25.0 tree, using the bundled synthetic portrait. Not a claim about every photograph.</sub></p>
 
 ## Quick start
 
-Latest release: **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)** (`FaceForge-0.24.3-STANDALONE.zip`).
+Latest release: **[v0.25.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0)** (`FaceForge-0.25.0-STANDALONE.zip`).
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
-2. Double-click **`FaceForge-0.24.3-STANDALONE.exe`**.
+2. Double-click **`FaceForge-0.25.0-STANDALONE.exe`**.
 3. **Do not** drop the EXE into `Skyrim Special Edition\Data`.
 4. **Do not** add this zip as a Vortex or MO2 mod for Skyrim.
 
@@ -86,34 +86,34 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 
 Verified in this tree:
 
-- `FaceForge 0.24.3/` is the ship snapshot (`CURRENT.txt`)
-- 100 frontend tests and 96 native assertions
+- `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
+- 120 frontend tests and 99 native assertions
 - TypeScript clean, .NET Release clean, 0 warnings
-- Packaged `FaceForge-0.24.3-STANDALONE.exe` (FileVersion 0.24.3.0)
-- Rendered-layout check at 1092×614 and 1280×720
+- `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame) at 1536x960 and 1100x760
+- Packaged `FaceForge-0.25.0-STANDALONE.exe` (FileVersion 0.25.0.0)
 
 Not claimed:
 
 - In-game likeness on an arbitrary photograph
-- That the OpenRouter routing fix was re-confirmed against a live key in this environment
+- That a generated preset has been loaded in RaceMenu and looked at by a person
 - Photograph guidance (still unwritten)
 - A closed explanation for one report of a generic in-game result **with EFM present**
 
-`v0.24.2` is withdrawn. Its small-screen CSS change broke panel layout at every window size. 0.24.3 keeps 0.24.2’s other fixes and restores the 0.24.1 shell height. The measurement pipeline is untouched: a 0.24.3 preset is the same as 0.24.1.
+0.24.3 stays downloadable. 0.25.0 changes how a face is measured - the defaults are different, so a 0.25.0 preset is not the same as a 0.24.3 preset for the same photo.
 
 ## Build from source
 
-Ship tree: `FaceForge 0.24.3\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
+Ship tree: `FaceForge 0.25.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
 
 ```powershell
-cd "FaceForge 0.24.3"
+cd "FaceForge 0.25.0"
 .\build.ps1
 .\package.ps1
 ```
 
 ## Credits
 
-Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.24.3/THIRD_PARTY_NOTICES.md`](FaceForge%200.24.3/THIRD_PARTY_NOTICES.md).
+Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.25.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.25.0/THIRD_PARTY_NOTICES.md).
 
 Skyrim, RaceMenu, and related names belong to their owners. This project is unofficial.
 
@@ -121,13 +121,19 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 
 [MIT](LICENSE)
 
-## Notes in 0.24.3
+## Notes in 0.25.0
 
-Carried from withdrawn 0.24.2:
+- **The default fit changed.** "Dense landmarks" measures how the installed head actually responds to
+  each slider and fits the photo's 468 landmarks to it. "Legacy ratios" keeps the 0.24.3 method.
+- **Photo colours are written** as a skin-tone tint on Skyrim's own preset gradient plus the hair
+  colour. Lightness is matched, hue is not; lip and iris colours are shown but not written.
+- **Vision providers no longer dead-end.** If a Codex / Claude Code / Gemini CLI is installed but not
+  found, Settings > Locate... points at its program once and the path is remembered. The resolved path
+  is shown in the card.
+- **BSA-packed morphs count.** `facegenmorphs` inside High Poly Head / RaceMenu / ECE archives is read,
+  which corrects the earlier claim that EFM sliders are inert on High Poly Head.
+- Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
+  it instead of failing with a WebView2 error.
 
-- OpenRouter 404 on every model — three provider-routing clauses intersected to an empty pool. Only `data_collection: "deny"` is kept
-- MO2 / USVFS detection instead of a bare WebView2 crash
-- “loaded 4/4” and “missing” at once now reads “present, source mod not identified”
-- Warning when Expressive Facegen Morphs is absent
-
-Zip: 119,141,039 bytes. SHA-256: `4B3B01A0D4868D92897E22EABB0057958F1F30D071ADD03A92CFF57D84596F05`.
+EXE: 126,871,669 bytes. SHA-256: `038E20C285583D4DA31A1CD074230BD54EB4019D535BAC17553E8DBC57FC15DD`.
+Zip: 119,996,026 bytes. SHA-256: `13F8CAA236B8A8AF617F9001B92D678EF954CBCF4C07535532341651C6A2AC94`.

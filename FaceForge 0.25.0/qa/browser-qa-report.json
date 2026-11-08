@@ -1,0 +1,82 @@
+{
+  "title": "FaceForge",
+  "headingVisible": true,
+  "presetPackVisible": true,
+  "photoFirstVisible": true,
+  "animeModeVisible": true,
+  "raceGuidanceVisible": true,
+  "raceChoiceCount": 3,
+  "raceChoiceLabels": [
+    "Nord",
+    "Imperial",
+    "Breton"
+  ],
+  "appearanceGuidanceVisible": true,
+  "symmetryIsQualityOnly": true,
+  "raceMenuHeadExportVisible": true,
+  "followerHeadKitVisible": true,
+  "dependencyIndexVisible": true,
+  "targetActorVisible": true,
+  "targetSexButtons": 2,
+  "targetRaceSelectVisible": true,
+  "appearanceCategoryTabs": 6,
+  "appearanceCategoryLabels": [
+    "Head Mesh",
+    "Hair",
+    "Brows",
+    "Eyes",
+    "Facial Hair",
+    "Scars"
+  ],
+  "appearanceGateVisible": true,
+  "sliderInventoryVisible": true,
+  "presetReportVisible": true,
+  "inventoryStage": {
+    "available": false,
+    "skipped": "Error: ENOENT: no such file or directory, stat 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\Data\\SKSE\\Plugins\\CharGen\\Presets\\READ_ALL_SLIDERS_TEST.jslot'"
+  },
+  "generatedFamilies": [
+    "EFM"
+  ],
+  "bakedHeadStepVisible": true,
+  "poseCorrectionVisible": true,
+  "poseReadouts": 4,
+  "poseValues": [
+    "−0.2°",
+    "1.5°",
+    "3.6°"
+  ],
+  "heldMeasurementsShown": 0,
+  "heldSliderFlags": 0,
+  "rotatedTiltDetected": 15.7,
+  "rotatedTiltReadout": "Tilt 15.7° straightened, then rotated out",
+  "rotatedStraightened": true,
+  "rotatedMaxSliderDelta": 0.10000000000000003,
+  "rotatedMeanSliderDelta": 0.030625000000000013,
+  "smallFaceReframed": true,
+  "smallFaceMaxSliderDelta": 0.11999999999999988,
+  "smallFaceMeanSliderDelta": 0.02875000000000001,
+  "outputFormatVersion": 3,
+  "generatedEfmCount": 64,
+  "declaredEfmCount": 64,
+  "expectedGeneratedPresent": true,
+  "finiteGenerated": true,
+  "maxGenerated": 1.41,
+  "meanGenerated": 0.29312499999999997,
+  "pinnedGenerated": 0,
+  "sculptCleared": true,
+  "freshDependencies": true,
+  "freshHeadPartsEmpty": true,
+  "modelRequests": [
+    "http://localhost:4173/mediapipe/wasm//vision_wasm_internal.js",
+    "http://localhost:4173/mediapipe/wasm//vision_wasm_internal.wasm",
+    "http://localhost:4173/mediapipe/models/face_landmarker.task"
+  ],
+  "consoleErrors": [],
+  "consoleNotes": [
+    "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+  ],
+  "pageErrors": [],
+  "requestFailures": [],
+  "httpErrors": []
+}

@@ -1,0 +1,73 @@
+FaceForge 0.25.0 - a photograph to an editable RaceMenu starting preset
+
+FaceForge is an out-of-game Windows app. It measures a face in a photograph, locally, and writes a
+RaceMenu preset pack you finish in game. It is not a Skyrim plugin, not an SKSE plugin, and it does not
+belong in your load order, your Data folder, or your mod manager.
+
+WHAT CHANGED IN 0.25.0
+
+- Shape fitting is measured against the head you actually have. FaceForge renders your installed
+  chargen head, measures how each slider moves it, then fits the photo's 468 landmarks to that measured
+  response. The older ratio method is still there as "Legacy ratios".
+- Colour is written, not just suggested. Skin tone (matched on Skyrim's own skin-tone gradient) and
+  hair colour go into the preset; the swatches show what was read from the photo first.
+- Vision accounts stop dead-ending. ChatGPT/Codex, Claude Code and Gemini CLIs are found even when the
+  app is launched in a way that hides them, and Settings > Locate... lets you point at the program
+  yourself. The path is remembered and shown.
+- Morph data packed inside BSA archives is read, so High Poly Head and RaceMenu morph packages count.
+- Mod Organizer 2 profiles and BCn-compressed skin textures are read directly.
+
+INSTALL THE TOOL, NOT A GAME MOD
+
+1. Unzip anywhere on the PC.
+2. Run FaceForge-0.25.0-STANDALONE.exe.
+3. Do not put it in Skyrim Special Edition\Data.
+4. Do not install this archive with Vortex or Mod Organizer 2.
+
+Windows 10/11 with WebView2. No .NET install needed, one single-file EXE.
+
+Use it outside Mod Organizer 2 / USVFS. FaceForge detects that injection and says so rather than
+failing on startup; run it normally and it still reads the same installed mods.
+
+HOW TO USE IT
+
+1. Choose a clear front photo. A slight turn is handled; a heavy turn or an open mouth is not reliable.
+2. Analyze. Pick race and sex, then the installed head parts you want.
+3. Optionally press "Refine with vision model" - that is the only step that sends anything off the PC,
+   and it only happens if you configure an account and press the button.
+4. Export the RaceMenu preset pack.
+5. In Skyrim: open RaceMenu, load the preset, adjust if you like, and use Export Head if you plan to
+   build a follower from it.
+6. Optional: FollowerForge turns that exported head into an NPC plugin.
+
+Compression of the face shape is conservative on purpose. Expect a starting point that is measurably
+closer to the photo than the race default, not a finished likeness.
+
+REQUIREMENTS
+
+Hard: Windows 10/11, WebView2, Skyrim SE or AE, RaceMenu to load and export the preset.
+Optional: High Poly Head, Expressive Facegen Morphs, and whatever head-part mods you already use.
+Expressive Facegen Morphs matters: without it, RaceMenu silently ignores the EFM_ values and every
+preset looks like the race default.
+
+KNOWN LIMITATIONS, AS OF THIS UPLOAD
+
+- No in-game likeness claim. The preset has not been loaded in RaceMenu by a person for this release;
+  the numbers and the rendered preview are verified, the final look is not.
+- Skin tone is matched by lightness only. Hue and makeup in the photo are not reproduced, and a
+  strongly lit photo will read too light.
+- Lip and iris colours are shown but not written. Eye parts are ranked by name, not by texture colour.
+- One photo, single view. Depth is guessed; a turned or open-mouth photo leans on that guess.
+- The sculpt output is four parametric moves, not a per-vertex fitted displacement.
+- A face can come out uncanny. The fit has a conservative prior for that reason; adjust in RaceMenu.
+
+FILES
+
+FaceForge-0.25.0-STANDALONE.exe - the whole tool.
+README.md - the same instructions as above.
+
+Size 126,871,669 bytes. SHA-256 038E20C285583D4DA31A1CD074230BD54EB4019D535BAC17553E8DBC57FC15DD
+Archive 119,996,026 bytes. SHA-256 13F8CAA236B8A8AF617F9001B92D678EF954CBCF4C07535532341651C6A2AC94
+
+Changelog: https://github.com/SenjuWoo/FaceForge/blob/main/CHANGELOG.txt
+Source: https://github.com/SenjuWoo/FaceForge

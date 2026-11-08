@@ -1,0 +1,17 @@
+﻿src/FaceForge.Web/node_modules/
+src/FaceForge.Web/dist/
+src/FaceForge.Web/public/mediapipe/wasm/
+src/**/bin/
+src/**/obj/
+artifacts/
+TestResults/
+*.user
+*.suo
+**/FaceForge.WebBundle.zip
+
+qa/bench/.venv/
+qa/bench/cache/
+qa/bench/out/
+__pycache__/
+qa/bench/host/bin/
+qa/bench/host/obj/

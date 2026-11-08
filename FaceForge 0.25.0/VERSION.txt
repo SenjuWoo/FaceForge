@@ -1,0 +1,14 @@
+FaceForge 0.25.0
+
+Parent: FaceForge 0.24.3 (GitHub main) + GitHub PR #1 commit 70939cd (closed, never merged)
+Status: IN PROGRESS. EXE built, not released.
+- src/ = 0.24.3 with the 33 files of PR #1 overlaid (native head renderer, measured-Jacobian fit,
+  Match pane, sculpt reshape, BSA/MO2/DDS support).
+- Adds src/domain/denseFit.ts and a "Dense landmarks" method in the Match pane (default); the ratio fit stays selectable.
+- Adds photo colour extraction and export (skin-tone tint, hair colour) with swatches in the output panel.
+- Adds qa/bench/: synthetic round-trip benchmark (head model, render, pipeline runner, scorer).
+Agents: Claude Code (Sonnet 5.5) started 0.25.0; continued by Hermes on 2026-11-07.
+Verified: build.ps1 end to end, tsc clean, 120 frontend tests, 99 native assertions, vite build,
+12 bench unit tests, package.ps1 single-file gate, EXE launch check.
+- Adds manual vision-provider paths (Settings > Locate...) and known install folders to CLI detection.
+Version strings are unified at 0.25.0.

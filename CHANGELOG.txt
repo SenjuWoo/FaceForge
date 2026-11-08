@@ -2,6 +2,48 @@
 # One living file.
 
 ================================================================================
+## [0.25.0] - 2026-11-08 - accuracy rework, photo colours, provider connection
+
+Agent: Claude Code (Sonnet 5.5) started this snapshot; continued by Hermes on 2026-11-07/08.
+Parent: FaceForge 0.24.3.
+
+Recovered work: GitHub PR #1 (commit 70939cd, closed unmerged, 2026-08-15, "0.24.26-0.24.28") held a
+native head renderer, a measured-Jacobian fit, the Match pane, sculpt reshape and BSA/MO2/DDS support;
+`main` never had it. It is overlaid here. History for 0.24.4-0.24.25 was never pushed and is not
+recoverable.
+
+New in this snapshot:
+
+- Dense-landmark fit (`src/domain/denseFit.ts`) is the default method in the Match pane: the head's
+  slider response is measured once by the native renderer, then a photo's 468 landmarks are fitted in
+  about a second. The earlier 39-ratio fit stays selectable as "Legacy ratios".
+- Photo colour layer: skin, lip, iris and hair colour are read from the photo; the export writes a
+  skin-tone tint on Skyrim's own preset gradient plus the hair colour, with swatches and an
+  "Apply photo colours" toggle. Iris colour only feeds eye-part ranking by name.
+- Native head renderer (`HeadRenderer.cs`) renders the player's real chargen head, so a preset can be
+  previewed and measured before it is loaded in game.
+- BSA-aware morph registry (`BsaArchive.cs`, `BsaMorphIndex.cs`): `facegenmorphs` packed inside
+  High Poly Head.bsa / RaceMenu.bsa / ECE.bsa now counts. This corrects the 2026-08-05 claim that 51
+  EFM sliders are inert on High Poly Head - they are live.
+- Mod Organizer 2 profile indexing and DDS skin texture reading.
+- Vision providers: detection now searches the usual install folders as well as PATH (a GUI-launched
+  EXE inherits a stale PATH, which is why an installed CLI read as missing), each provider can be
+  pointed at its program from Settings > Locate..., and the chosen path is remembered in
+  `%LOCALAPPDATA%\FaceForge\vision-paths.json`. The resolved path is shown in the card.
+- Source diagnostics restored to the three-step layout: the Source panel shows tilt/turn/nod/mirrored,
+  the crop-and-re-detect and un-foreshortening notes, and the symmetry-is-only-a-quality-signal note.
+- Version strings unified at 0.25.0 (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
+- `build.ps1` works on machines where `pnpm` resolves to the PowerShell shim, and `package.ps1`
+  produces `FaceForge-0.25.0-STANDALONE.exe`.
+- `qa/browser-qa.mjs` runs again: its snapshot path is derived, its waits and selectors match the
+  current UI, the EFM slider count is read from the catalog instead of a pinned number, and the race and
+  appearance counts are asserted as minimums with unique labels.
+
+Verified: `build.ps1` end to end (120 frontend tests, 99 native assertions, tsc clean, vite build,
+Desktop Release), `qa/browser-qa.mjs` all checks green, `package.ps1` single-file gate, EXE launch check.
+Not verified: any in-game RaceMenu load, including the five colour-layer presets.
+
+================================================================================
 ## [maintenance] - 2026-11-01 - one snapshot pair in the default branch
 
 The default branch carried six full version snapshots, 0.23.0 through 0.24.3. Each kept

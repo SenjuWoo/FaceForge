@@ -1,0 +1,83 @@
+{
+ "date": "2026-10-30",
+ "what": "Phase 2 PROTOTYPE (python, qa/bench/phase2.py): dense 468-landmark ridge fit with a measured detector Jacobian, similarity-aligned, TTA16 landmarks",
+ "same_caveats": "[U] linear EFM head-mesh model (headmodel.py), renders not photographs, EFM family only, seed 1, 30 cases of 6-12 sliders in [-2,2] drawn from the 56 sliders the one-shot path writes",
+ "lambda_note": "lambda=30 sits on a plateau (10-300 all within ~0.06 skill); validation seed 2 alone picks 10",
+ "prior_art_same_cases_hph_female": {
+  "oneshot_skill": 0.08,
+  "PR1_fit_skill_python_photos": -4.651,
+  "PR1_fit_skill_same_renderer": -1.766
+ },
+ "results": {
+  "hph_female (test seed 1, sparse)": {
+   "oneshot_skill": 0.08,
+   "oneshot_corr": 0.054,
+   "dense_measured_J_lambda30": {
+    "skill": 0.595,
+    "corr": 0.301,
+    "rmse_rel_height_pct": 0.5,
+    "null_rmse_pct": 0.79
+   },
+   "landmark_model_explained_variance": 0.7
+  },
+  "hph_female (validation seed 2, sparse)": {
+   "oneshot_skill": 0.035,
+   "oneshot_corr": 0.04,
+   "dense_measured_J_lambda30": {
+    "skill": 0.618,
+    "corr": 0.344,
+    "rmse_rel_height_pct": 0.45,
+    "null_rmse_pct": 0.73
+   },
+   "landmark_model_explained_variance": 0.754
+  },
+  "hph_female (dense generator)": {
+   "oneshot_skill": 0.097,
+   "oneshot_corr": 0.062,
+   "dense_measured_J_lambda30": {
+    "skill": 0.568,
+    "corr": 0.282,
+    "rmse_rel_height_pct": 0.81,
+    "null_rmse_pct": 1.24
+   },
+   "landmark_model_explained_variance": 0.681
+  },
+  "vanilla_female": {
+   "oneshot_skill": -0.086,
+   "oneshot_corr": 0.012,
+   "dense_measured_J_lambda30": {
+    "skill": 0.401,
+    "corr": 0.285,
+    "rmse_rel_height_pct": 0.63,
+    "null_rmse_pct": 0.81
+   },
+   "landmark_model_explained_variance": 0.241
+  },
+  "hph_male": {
+   "oneshot_skill": -0.192,
+   "oneshot_corr": 0.028,
+   "dense_measured_J_lambda30": {
+    "skill": 0.574,
+    "corr": 0.319,
+    "rmse_rel_height_pct": 0.38,
+    "null_rmse_pct": 0.58
+   },
+   "landmark_model_explained_variance": 0.663
+  },
+  "vanilla_male": {
+   "oneshot_skill": -0.919,
+   "oneshot_corr": -0.017,
+   "dense_measured_J_lambda30": {
+    "skill": 0.231,
+    "corr": 0.23,
+    "rmse_rel_height_pct": 0.51,
+    "null_rmse_pct": 0.58
+   },
+   "landmark_model_explained_variance": 0.147
+  }
+ },
+ "ablations_hph_female_seed1": {
+  "barycentric_geometric_J_skill_lam1000": 0.382,
+  "tta1_vs_tta16_difference": "~0.01 skill; per-detection noise 0.85px, model error 3-4px => not a noise problem"
+ }
+}

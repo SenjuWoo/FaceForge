@@ -76,6 +76,7 @@ FaceForge 0.22.0/
 # Python cache
 **/__pycache__/
 *.pyc
+**/.venv/
 
 FaceForge-*-STANDALONE.exe
 FaceForge 0.23.0/
