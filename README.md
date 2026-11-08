@@ -35,7 +35,10 @@
 
 ## Quick start
 
-Latest release: **[v0.25.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0)** (`FaceForge-0.25.0-STANDALONE.zip`).
+**0.25.0 is in this tree and builds, but it is not a published release yet.** The latest public
+download is still **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
+The 0.25.0 candidate is `FaceForge 0.25.0/`, packaged by `package.ps1`; its numbers are under
+"Honest status" below.
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
 2. Double-click **`FaceForge-0.25.0-STANDALONE.exe`**.
@@ -87,9 +90,11 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 Verified in this tree:
 
 - `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
-- 120 frontend tests and 99 native assertions
+- 121 frontend tests and 99 native assertions
 - TypeScript clean, .NET Release clean, 0 warnings
-- `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame) at 1536x960 and 1100x760
+- `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame)
+- `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
+  a CI job, not a manual step
 - Packaged `FaceForge-0.25.0-STANDALONE.exe` (FileVersion 0.25.0.0)
 
 Not claimed:
@@ -135,5 +140,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 126,867,574 bytes. SHA-256: `0D0483D7FDDA0F04C8D74FF8B7A12CB2D15EFCB264100C7C4CB7060EE273DD6F`.
-Zip: 119,994,857 bytes. SHA-256: `5997292D2A371B87E81E3EBD4BEB9C327D7404E40CDE5D8D55CD61BA1C883EE9`.
+EXE: 126,867,573 bytes. SHA-256: `E1561E2E9F798FC3B099C9BD883AD415D110504955441C06C43956D754129E86`.
+Zip: 119,995,860 bytes. SHA-256: `B9C6EFDE16825167417796ED323446577DC6B2CE62E271B8350187718CDF7FD3`.

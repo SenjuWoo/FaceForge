@@ -1,7 +1,15 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { chromium } from "file:///C:/Users/karlo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs";
+
+// Playwright is a dev dependency of the web project, so this resolves through that package.json
+// instead of a machine-specific absolute path. `pnpm exec playwright install chromium` supplies the
+// browser; no system Edge install is assumed.
+const requireFromWeb = createRequire(
+  new URL("../src/FaceForge.Web/package.json", import.meta.url)
+);
+const { chromium } = requireFromWeb("playwright");
 
 // Derived from this file's own location (it sits in <snapshot>/qa/): a hardcoded snapshot path
 // breaks the harness every time the workspace moves, which is what happened after the PC reset.
@@ -16,7 +24,7 @@ const declaredEfmCount = new Set(
 const output = `${root}/qa/FaceForge-QA-Export.jslot`;
 const reportPath = `${root}/qa/browser-qa-report.json`;
 
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1536, height: 960 } });
 const consoleErrors = [];
 const consoleNotes = [];

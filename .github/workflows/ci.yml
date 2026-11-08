@@ -48,3 +48,71 @@ jobs:
         run: |
           # Desktop csproj requires Resources/FaceForge.WebBundle.zip from the snapshot's build.ps1.
           pwsh -File "${{ steps.snap.outputs.path }}/build.ps1" -Configuration Release
+
+  browser:
+    name: Browser QA (layout + analysis flow)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Locate newest FaceForge snapshot directory
+        id: snap
+        shell: pwsh
+        run: |
+          $dir = Get-ChildItem -Directory -Filter "FaceForge *" |
+            Sort-Object { [version](($_.Name -replace '[^0-9.]', '').Trim('.')) } |
+            Select-Object -Last 1
+          if (-not $dir) { throw "No 'FaceForge <version>' directory found at repo root." }
+          Write-Host "Using snapshot: $($dir.Name)"
+          "path=$($dir.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "web=$($dir.Name)/src/FaceForge.Web" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Install web dependencies and Chromium
+        shell: pwsh
+        working-directory: ${{ steps.snap.outputs.web }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install chromium
+
+      - name: Build the web bundle
+        shell: pwsh
+        working-directory: ${{ steps.snap.outputs.web }}
+        run: pnpm build
+
+      - name: Serve the built bundle
+        shell: pwsh
+        working-directory: ${{ steps.snap.outputs.web }}
+        run: |
+          Start-Process -FilePath "pnpm.cmd" -ArgumentList @("exec","vite","preview","--port","4173","--strictPort") -WindowStyle Hidden
+          for ($i = 0; $i -lt 60; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:4173/" -UseBasicParsing -TimeoutSec 2
+              if ($response.StatusCode -eq 200) { Write-Host "Preview is up"; exit 0 }
+            } catch { Start-Sleep -Seconds 1 }
+          }
+          throw "vite preview did not answer on 4173."
+
+      # 0.24.2 shipped a broken layout with every other gate green; this is the gate that would have caught it.
+      - name: Layout QA (1366x768 at 100% and 125%, 1280x720, 1536x960)
+        shell: pwsh
+        run: node "${{ steps.snap.outputs.path }}/qa/layout-qa.mjs"
+
+      - name: Analysis flow QA (photo -> preset)
+        shell: pwsh
+        run: node "${{ steps.snap.outputs.path }}/qa/browser-qa.mjs"
+
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: faceforge-qa
+          path: |
+            ${{ steps.snap.outputs.path }}/qa/layout-*.png
+            ${{ steps.snap.outputs.path }}/qa/layout-qa-report.json
+            ${{ steps.snap.outputs.path }}/qa/render-*.png
+            ${{ steps.snap.outputs.path }}/qa/browser-qa-report.json
+          if-no-files-found: warn

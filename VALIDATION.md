@@ -1,4 +1,13 @@
-# FaceForge 0.24.3 validation
+# FaceForge validation
+
+Active candidate: **0.25.0** — built, packaged and pushed to main, **not published**. Its gates are in
+"FaceForge 0.25.0 (in progress)" below; the runtime check that is still missing is an in-game RaceMenu
+load.
+
+Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 one.
+
+## FaceForge 0.24.3 (published)
+
 
 Status: tool-validated standalone release. In-game likeness is untested, and the OpenRouter
 fix is not runtime-confirmed — see "Not verified" below.
@@ -98,7 +107,7 @@ build with every gate green, which is exactly how 0.24.2 shipped.
 - `build.ps1` end to end: PASS (pnpm install --frozen-lockfile, vitest 120, vite build, native
   Core.Tests 99 assertions, Desktop Release build).
 - `package.ps1`: PASS, single-file gate one EXE. `FaceForge-0.25.0-STANDALONE.exe`, 126,867,573 bytes,
-  SHA-256 `0D0483D7FDDA0F04C8D74FF8B7A12CB2D15EFCB264100C7C4CB7060EE273DD6F`, FileVersion 0.25.0.0.
+  SHA-256 `E1561E2E9F798FC3B099C9BD883AD415D110504955441C06C43956D754129E86`, FileVersion 0.25.0.0.
   Launch check: ran 10 s and was stopped. Not released, not pushed.
 - Vision provider detection exercised on this machine with a GUI-like PATH (`~/.local/bin` and the npm
   folders removed): `claude` resolves to `C:\Users\karlo\.local\bin\claude.exe`; `codex` and

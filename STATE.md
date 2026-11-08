@@ -1,5 +1,29 @@
 # FaceForge state
 
+## 2026-11-08 (release cleanup)
+
+- Docs corrected: the in-snapshot `README.md` still described 0.24.3 and `START HERE.txt` still said
+  0.23.1 (both now 0.25.0, and both name the 0.25.0 EXE). The root README no longer advertises an
+  unpublished 0.25.0 release; 0.24.3 is stated as the latest public download. `VALIDATION.md` leads
+  with 0.25.0 and keeps 0.24.3 as history. The two stale "browser-QA still failing" bullets are gone.
+- `package.ps1` is now the only packaging step: it reads the version from `VERSION.txt`, refuses to
+  build when the EXE FileVersion disagrees with it, stages exactly the EXE and `README.md`, fails on
+  any other file in the inventory, and writes `NEXUS-UPLOAD\FaceForge-<version>-STANDALONE.zip`
+  itself. One command produces both shippable files and prints both hashes.
+- Browser QA is portable and enforced: Playwright is a dev dependency resolved through the web
+  project's `package.json` (no absolute path into a user cache), the browser comes from
+  `pnpm exec playwright install chromium`, and a new `qa/layout-qa.mjs` asserts shell height, page
+  scroll, status rail, footer and three panels at 1366x768 (100% and 125% scaling), 1280x720 and
+  1536x960. Both scripts run as a `browser` job in CI.
+- Bench re-check after the dense-fit cache change: `bench.py --selfcheck` reports identical;
+  12 bench unit tests pass. One-shot `hph_female` n=8 seed 1: slider corr 0.059, sign
+  agreement 0.40, vertex skill +0.16 - inside sampling noise of the recorded n=30 baseline
+  (0.05 / 0.37-0.45 / +0.08), and that path did not change.
+- Artifacts rebuilt by `package.ps1`: EXE 126,867,573 bytes, SHA-256
+  `E1561E2E9F798FC3B099C9BD883AD415D110504955441C06C43956D754129E86`; ZIP 119,995,860 bytes,
+  SHA-256 `B9C6EFDE16825167417796ED323446577DC6B2CE62E271B8350187718CDF7FD3`, inventory
+  `FaceForge-0.25.0-STANDALONE.exe` + `README.md`.
+
 ## 2026-11-07 (continued after a Claude Code usage stop)
 
 - The interrupted session (`~/.claude/projects/Z--Backup--Skyrim--Ai-modding-workspace-FaceForge/
@@ -23,7 +47,7 @@
   "63 values" label that no longer exists, and crashed on a missing `.pose-grid` readout. Root is now
   derived from the script location, the wait is the real "Analysis complete" status, and a missing
   pose readout reports `null` (fails the tilt check) instead of throwing. It completes and writes its
-  report; four stale UI expectations remain, listed in VALIDATION.md.
+  report. The four stale UI expectations were then fixed; see the 2026-11-08 entry above.
 - Version strings unified to 0.25.0 everywhere (were 0.24.3 / 0.24.15 / 0.24.28 / 0.23.2).
 - Built `FaceForge-0.25.0-STANDALONE.exe` (126,867,574 bytes, SHA-256 `0D0483D7…`, FileVersion
   0.25.0.0; launch check 10 s alive then stopped, and again with a stripped PATH).
@@ -36,8 +60,8 @@
   dense-fit Jacobian cache in localStorage (the cache is memory-only per run now; the head is
   measured once per launch, about ten seconds).
 - Not released: no tag, no GitHub release, no Nexus file version. That waits on an in-game check.
-- Still open: the four stale browser-QA checks; no in-game RaceMenu load of any preset (p1..p5 from
-  the colour layer are untested); eye parts still rank by name only.
+- Still open: no in-game RaceMenu load of any preset (p1..p5 from the colour layer are untested);
+  eye parts still rank by name only.
 
 ## 2026-10-30 (later): lost work found on GitHub, overlaid into 0.25.0
 

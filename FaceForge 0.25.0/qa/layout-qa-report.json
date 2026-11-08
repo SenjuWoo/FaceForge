@@ -1,0 +1,174 @@
+[
+  {
+    "case": "1366x768-100",
+    "viewport": [
+      1366,
+      768
+    ],
+    "rootScrollHeight": 768,
+    "rootClientHeight": 768,
+    "shell": {
+      "top": 0,
+      "bottom": 768,
+      "height": 768
+    },
+    "rail": {
+      "top": 702,
+      "bottom": 768,
+      "height": 66
+    },
+    "footer": {
+      "top": 702,
+      "bottom": 768,
+      "height": 66
+    },
+    "panels": [
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      },
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      },
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      }
+    ],
+    "pageErrors": [],
+    "failures": []
+  },
+  {
+    "case": "1366x768-125",
+    "viewport": [
+      1366,
+      768
+    ],
+    "rootScrollHeight": 768,
+    "rootClientHeight": 768,
+    "shell": {
+      "top": 0,
+      "bottom": 768,
+      "height": 768
+    },
+    "rail": {
+      "top": 702,
+      "bottom": 768,
+      "height": 66
+    },
+    "footer": {
+      "top": 702,
+      "bottom": 768,
+      "height": 66
+    },
+    "panels": [
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      },
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      },
+      {
+        "top": 52,
+        "bottom": 702,
+        "height": 650
+      }
+    ],
+    "pageErrors": [],
+    "failures": []
+  },
+  {
+    "case": "1280x720-100",
+    "viewport": [
+      1280,
+      720
+    ],
+    "rootScrollHeight": 720,
+    "rootClientHeight": 720,
+    "shell": {
+      "top": 0,
+      "bottom": 720,
+      "height": 720
+    },
+    "rail": {
+      "top": 654,
+      "bottom": 720,
+      "height": 66
+    },
+    "footer": {
+      "top": 654,
+      "bottom": 720,
+      "height": 66
+    },
+    "panels": [
+      {
+        "top": 52,
+        "bottom": 654,
+        "height": 602
+      },
+      {
+        "top": 52,
+        "bottom": 654,
+        "height": 602
+      },
+      {
+        "top": 52,
+        "bottom": 654,
+        "height": 602
+      }
+    ],
+    "pageErrors": [],
+    "failures": []
+  },
+  {
+    "case": "1536x960-100",
+    "viewport": [
+      1536,
+      960
+    ],
+    "rootScrollHeight": 960,
+    "rootClientHeight": 960,
+    "shell": {
+      "top": 0,
+      "bottom": 960,
+      "height": 960
+    },
+    "rail": {
+      "top": 878,
+      "bottom": 960,
+      "height": 82
+    },
+    "footer": {
+      "top": 878,
+      "bottom": 960,
+      "height": 82
+    },
+    "panels": [
+      {
+        "top": 58,
+        "bottom": 878,
+        "height": 820
+      },
+      {
+        "top": 58,
+        "bottom": 878,
+        "height": 820
+      },
+      {
+        "top": 58,
+        "bottom": 878,
+        "height": 820
+      }
+    ],
+    "pageErrors": [],
+    "failures": []
+  }
+]

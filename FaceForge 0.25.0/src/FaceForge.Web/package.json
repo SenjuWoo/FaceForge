@@ -13,17 +13,18 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "1.2.0",
-    "react": "19.3.1",
+    "@mediapipe/tasks-vision": "0.10.35",
+    "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@types/react": "19.3.0",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.1.2",
+    "@vitejs/plugin-react": "6.0.4",
+    "playwright": "^1.65.0",
     "typescript": "5.9.3",
-    "vite": "8.3.5",
-    "vitest": "5.0.5"
+    "vite": "8.1.6",
+    "vitest": "4.1.11"
   },
   "packageManager": "pnpm@11.9.0"
 }

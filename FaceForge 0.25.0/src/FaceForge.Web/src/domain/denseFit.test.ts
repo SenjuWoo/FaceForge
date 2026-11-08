@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   applySimilarity,
   boundedRidge,
+  cachedJacobian,
   deserializeJacobian,
   DENSE_LANDMARKS,
   fitSimilarity,
+  forgetJacobian,
   invertSimilarity,
   serializeJacobian,
+  storeJacobian,
   solveDense,
   type DenseJacobian
 } from "./denseFit";
@@ -93,5 +96,16 @@ describe("dense fit solver", () => {
     broken.data = broken.data.slice(0, 40);
     expect(deserializeJacobian(JSON.stringify(broken))).toBeNull();
     expect(deserializeJacobian("not json")).toBeNull();
+  });
+
+  // The cache lives in memory for one run: nothing is written to browser storage, and a
+  // forgotten key has to look exactly like a key that was never measured.
+  it("keeps the measured Jacobian in memory and forgets it on demand", () => {
+    const jac = syntheticJacobian(["EFM_A", "EFM_B"]);
+    expect(cachedJacobian(jac.key)).toBeNull();
+    storeJacobian(jac);
+    expect(cachedJacobian(jac.key)?.names).toEqual(jac.names);
+    forgetJacobian(jac.key);
+    expect(cachedJacobian(jac.key)).toBeNull();
   });
 });
