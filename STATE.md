@@ -1,5 +1,14 @@
 # FaceForge state
 
+## 2026-11-09 (0.25.0-beta.1 published as a pre-release)
+
+Beta because nothing here has been seen in Skyrim. Everything else is closed out: the packaged EXE was
+driven end to end over the WebView2 debugging port, the exported preset carries four typed head parts
+(1/3/2/6) and 1,793 sculpt deltas when the reshape is moved, the head-stage README and manifest name
+Sculpt > Export Head, and the record identifiers resolve against the deployed plugins. Tag
+`v0.25.0-beta.1`; binaries unchanged from the 2026-11-09 build (EXE 34BB816B..., ZIP BCB20B9E...) since
+no product code changed after it.
+
 ## 2026-11-09 (packaged-app export verified)
 
 The post-fix GUI export that earlier sessions could not drive now has real evidence. The release EXE

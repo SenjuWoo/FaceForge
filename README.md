@@ -35,10 +35,11 @@
 
 ## Quick start
 
-**0.25.0 is in this tree and builds, but it is not a published release yet.** The latest public
-download is still **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
-The 0.25.0 candidate is `FaceForge 0.25.0/`, packaged by `package.ps1`; its numbers are under
-"Honest status" below.
+**0.25.0 is a public beta.** Download it from
+**[v0.25.0-beta.1](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.1)** — it is marked
+pre-release because no generated preset has been loaded in Skyrim yet, so treat the in-game look as
+unproven. The last full release is still
+**[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
 2. Double-click **`FaceForge-0.25.0-STANDALONE.exe`**.
@@ -86,6 +87,10 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 | Safe to keep outside the game folder | A replacement for RaceMenu or Creation Kit |
 
 ## Honest status
+
+**Beta.** Everything below was produced out of game. No FaceForge preset has been loaded in RaceMenu
+and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified —
+that is why 0.25.0 ships as a pre-release.
 
 Verified in this tree:
 

@@ -1,8 +1,8 @@
 # FaceForge validation
 
-Active candidate: **0.25.0** — built, packaged and pushed to main, **not published**. Its gates are in
-"FaceForge 0.25.0 (in progress)" below; the runtime check that is still missing is an in-game RaceMenu
-load.
+Active candidate: **0.25.0-beta.1** — built, packaged and published as a **pre-release**. Every gate
+below is out of game; the one still missing is a RaceMenu load, which is why this is a beta and not a
+full release.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 one.
 
