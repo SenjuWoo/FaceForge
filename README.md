@@ -96,6 +96,10 @@ Verified in this tree:
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
   a CI job, not a manual step
 - Packaged `FaceForge-0.25.0-STANDALONE.exe` (FileVersion 0.25.0.0)
+- The packaged EXE was driven end to end over the WebView2 debugging port: photo, analysis, installed
+  hair/eyes/brows/face picked from the real catalogue, then a preset pack whose four head parts carry
+  unique HDPT types and whose reshaped export carries 1,793 sculpt deltas. Recipe in
+  `FaceForge 0.25.0/qa/PACKAGED-APP-EXPORT.md`
 
 Not claimed:
 

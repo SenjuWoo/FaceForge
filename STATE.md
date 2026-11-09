@@ -1,5 +1,32 @@
 # FaceForge state
 
+## 2026-11-09 (packaged-app export verified)
+
+The post-fix GUI export that earlier sessions could not drive now has real evidence. The release EXE
+was launched with `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222`, so the page
+could be driven over CDP while the binary stayed the shipped one — no build hooks, nothing to remove
+later. The native save dialog was driven with UI Automation and SendKeys.
+
+Run: photo `qa/bench/out/photos/p2.png` -> Analyse (84% confidence, tilt -7.3, turn 13.3, nod 12.2) ->
+hair `Vanilla hair remake_Unlocked.esp|000890`, eyes `CompleteVanillaEyeOverhaul_CVEObyLDD.esp|000ABC`,
+brows `SGEyebrows.esp|00080B`, face `High Poly Head.esm|000A07` -> export.
+
+- `FaceForge_Preset-RaceMenu-Head-Export.zip` (4,669 bytes): README carries the corrected
+  `Save Preset` / `Sculpt > Export Head` split, `racemenu-export-job.json` says
+  `materializeWith: "RaceMenu Sculpt > Export Head, in game"`, 4 head parts with unique HDPT types
+  (1, 3, 2, 6), 64 EFM sliders, skin tint present.
+- `FaceForge_Preset-RaceMenu-Preset-Pack.zip` (3,269 bytes, no reshape): sculpt hosts present with
+  empty data - correct for a neutral reshape.
+- Same pack after moving face width 1.0 -> 0.9 (13,721 bytes): 1,793 sculpt deltas across head, eyes
+  and brows, divisor 10,000. The reshape path the earlier fix guards is real and exercised.
+- FormIDs checked in the live order: three resolve directly through houseCARL. `SGEyebrows.esp|00080B`
+  is defined by the *deployed* copy (sha a4249151...), while houseCARL's precedence names the
+  `SE SG Brows` copy (sha 091a34ba...) whose same EditorID sits at 000D6D. The Data folder file is
+  byte-identical to the High Poly Head copy, so the game loads 00080B and the preset is correct;
+  houseCARL's winner differs from the deployed file in this Vortex setup.
+
+Still unverified: anything in-game. No preset has been loaded in RaceMenu.
+
 ## 2026-11-08 (release-candidate cleanup)
 
 - Export manifest instruction corrected to `RaceMenu Sculpt > Export Head, in game`; the Core test now

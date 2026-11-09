@@ -6,6 +6,24 @@ load.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 one.
 
+## 2026-11-09 — packaged-app export (0.25.0 candidate)
+
+PASS. The shipped EXE was driven end to end without build hooks: launched with
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222`, the page was controlled over CDP
+and the native save dialog through UI Automation. Recipe: `qa/PACKAGED-APP-EXPORT.md`.
+
+| Step | Result |
+|---|---|
+| Analyse bundled photo p2 | 84% confidence, tilt -7.3, turn 13.3, nod 12.2, 16 sliders |
+| Select installed parts | face `High Poly Head.esm\|000A07`, hair `Vanilla hair remake_Unlocked.esp\|000890`, eyes `CompleteVanillaEyeOverhaul_CVEObyLDD.esp\|000ABC`, brows `SGEyebrows.esp\|00080B` |
+| Head-export pack | 4 entries: jslot, `racemenu-export-job.json`, README, dependencies, selections. `materializeWith` reads `RaceMenu Sculpt > Export Head, in game`; head parts carry HDPT types 1, 3, 2, 6 — no duplicate slot; 64 EFM sliders; skin tint present |
+| Preset pack, neutral reshape | sculpt hosts present with empty deltas, correct when nothing is reshaped |
+| Preset pack, face width 1.0 -> 0.9 | 1,793 sculpt deltas (head 1,284, eyes 176, brows 333), divisor 10,000 |
+| FormIDs | three resolve in the live order through houseCARL; `SGEyebrows.esp\|00080B` is defined by the deployed copy (sha `a4249151...`), whose Data file matches the High Poly Head mod, while houseCARL's precedence names the `SE SG Brows` copy (sha `091a34ba...`, same EditorID at `000D6D`) |
+
+Not covered: loading any preset inside Skyrim. The in-game appearance, colours, head parts and sculpt
+remain unverified until someone runs the checklist.
+
 ## FaceForge 0.24.3 (published)
 
 
