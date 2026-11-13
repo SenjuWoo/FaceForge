@@ -1,1 +1,1 @@
-﻿FaceForge 0.25.0
+﻿FaceForge 0.26.0

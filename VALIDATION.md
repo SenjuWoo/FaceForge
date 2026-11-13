@@ -1,10 +1,32 @@
 # FaceForge validation
 
-Active candidate: **0.25.0-beta.4** - built, packaged and published as a **pre-release**. Every gate
-below is out of game; the one still missing is a RaceMenu load, which is why this is a beta and not a
-full release.
+Active candidate: **0.26.0** - built, packaged and published as a GitHub release marked
+**pre-release**. Every gate below is out of game; the one still missing is a RaceMenu load.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+
+## 2026-11-13 - 0.26.0
+
+PASS, with the limits listed at the end.
+
+| Gate | Result |
+|---|---|
+| `package.ps1` | exit 0, 0 warnings, 0 errors; new version gate (VERSION.txt = csproj = package.json) passed |
+| Frontend tests | 148 passed, 13 files (+12: feature labels x2, style direction, style cues, fit stages x3, appearance ranking x3, child parts x2) |
+| Native validation | PASS, 139 assertions (+8: render cache x5, loose-over-archive x3) |
+| Browser QA | green, including the new `windowDoesNotScroll` check (failed on the pre-fix bundle) |
+| Layout QA | 4 of 4 sizes |
+| Install test | ZIP extracted to an empty folder; EXE hash equals the built one |
+| Packaged EXE `qa/packaged-app-check.mjs` | loads at `https://app.faceforge/`, indexes the real install, analyses, network probe refused, foreign image refused, navigation refused |
+| Packaged EXE, dense fit | "Analyze & improve" ran to completion (remaining landmark error 2.1% of eye distance on the synthetic portrait); no child head parts listed; window scroll height equals the window |
+| Render cache benchmark | 64-render batches on a High Poly Head install, 0.25.0 vs 0.26.0 Core, same requests: warm 143-172 ms vs 40-61 ms; first 398-428 ms vs 204-250 ms; SHA-256 over all PNGs identical in each batch |
+
+Failing first: every new frontend test failed before its fix (10 at once, then style-test and child-part
+pairs); the render-cache assertion failed on the old renderer; the loose-over-archive assertion failed
+with 0.25.0's `BsaMorphIndex.cs` swapped back in; `windowDoesNotScroll` was false on the pre-fix bundle.
+
+Not covered: nothing was loaded in Skyrim; no live vision request; the bench Python tests were not re-run
+(no bench code changed).
 
 ## 2026-11-13 - dependency updates and beta.4
 
@@ -197,7 +219,7 @@ build with every gate green, which is exactly how 0.24.2 shipped.
   SHA-256 `34BB816B356718F26C334CA89DA10312B785F27E489A234A3F5720746E0A6800`, FileVersion 0.25.0.0.
   Launch check: ran 10 s and was stopped. Not released, not pushed.
 - Vision provider detection exercised on this machine with a GUI-like PATH (`~/.local/bin` and the npm
-  folders removed): `claude` resolves to `C:\Users\karlo\.local\bin\claude.exe`; `codex` and
+  folders removed): `claude` resolves to `%USERPROFILE%\.local\bin\claude.exe`; `codex` and
   `gemini` are not installed here. A stored override is honoured at the stored path.
 - Three new native assertions: a folder pick resolves the command inside it; a `.ps1` pick resolves to
   its sibling `.cmd`; a missing path resolves to nothing.

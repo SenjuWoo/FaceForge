@@ -1,0 +1,21 @@
+﻿src/FaceForge.Web/node_modules/
+src/FaceForge.Web/dist/
+src/FaceForge.Web/public/mediapipe/wasm/
+src/**/bin/
+src/**/obj/
+artifacts/
+TestResults/
+*.user
+*.suo
+**/FaceForge.WebBundle.zip
+
+qa/bench/.venv/
+qa/bench/cache/
+qa/bench/out/
+__pycache__/
+qa/bench/host/bin/
+qa/bench/host/obj/
+
+# Kept local on purpose (commit d9b09b0): CodeQL reads its report writer as clear-text storage of
+# sensitive data. It measures local presets only; re-adding it reopens that alert.
+qa/bench/audit_presets.py

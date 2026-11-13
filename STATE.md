@@ -1,5 +1,41 @@
 # FaceForge state
 
+## 2026-11-13 (audit, 0.26.0)
+
+Goal: finish the audit (the files beta.3 listed as not read line by line), fix, optimise, release
+0.26.0 and prepare the Nexus upload. Done; GitHub release `v0.26.0` marked pre-release.
+
+Snapshot `FaceForge 0.26.0/` copied from the tracked files of 0.25.0 (which stays as beta.4, last
+known good). CURRENT.txt and Dependabot point at 0.26.0; CI picks the newest snapshot by itself.
+
+Read line by line: faceAnalysis.ts, sourceCorrection.ts, multiView.ts, occlusion.ts, imageStyle.ts,
+headPartPreferences.ts, hphCalibration.ts, sliderCatalog.ts, fit.ts 380-776, OutputPanel, MatchPanel
+(sources), App slider handling. AboutModal/SourcePanel by search only (text and file inputs).
+
+Fixed (CHANGELOG 0.26.0 has the detail): style factor direction and cue scale; feature-label cut-offs;
+child head parts offered; appearance list cut before preference sort; window scroll from an unpositioned
+hidden checkbox; ratio-fit stage prefixes (EFM_Oral case, EFM_EYE, cheek shape, duplicate brow angle);
+loose morph precedence over archives; angle photo URL leak; stale no-SIMD WASM in the bundle; BSA
+decompress cap; real names in comments. Optimised: per-index mesh cache (`HeadRenderer.MeshCache`,
+ConditionalWeakTable on ResolvedDataView). Version single-sourced (`AppVersion`, `__APP_VERSION__`,
+build.ps1 gate).
+
+Verified by running: VALIDATION.md 0.26.0 entry. Artifacts: EXE 125,436,817 bytes `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC`;
+ZIP 118,563,185 bytes `1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62`.
+
+Nexus kit: NEXUS-RELEASE.md (index), NEXUS-UPLOAD/ (paste, BBCode description, changelog lines, media
+plan, media-0.26.0/ screenshots from the packaged EXE; screenshots are local only, not in git).
+
+Open:
+- RaceMenu load of a 0.26.0 preset (qa/RACEMENU-CHECKLIST-0.26.0.md), then `gh release edit v0.26.0
+  --prerelease=false --latest` if it holds.
+- Nexus upload itself (the user's account). Nexus currently has 0.24.3; 0.25.0 was never uploaded there.
+- Provenance of qa/synthetic-neutral-portrait.png is not recorded in the repo; confirm before using
+  the screenshots publicly.
+- Vortex/direct plugins.txt filtering (unchanged reason).
+- Commit `9741171` (beta.3) carries an AI co-author trailer against the operator rule; not rewritten
+  because main is protected and the tag points at it.
+
 ## 2026-11-13 (dependency updates, 0.25.0-beta.4)
 
 The six open Dependabot PRs (18, 20-24) were reviewed, applied in one commit and closed by Dependabot

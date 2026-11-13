@@ -1,0 +1,51 @@
+FILE DESCRIPTION (paste into the file's description field)
+
+FaceForge 0.26.0 - the Windows app (one EXE and a README). Unzip anywhere outside the game and run the
+EXE. Not a game mod: do not install it with Vortex or Mod Organizer 2. Needs Windows 10/11 with WebView2.
+Archive SHA-256 1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62
+
+--------------------------------------------------------------------------------
+
+WHAT CHANGED SINCE 0.24.3 (the previous file on this page)
+
+0.26.0
+- The "Compact soft midface" style now narrows the cheeks, bridge and jaw as described; it used to widen them.
+- Child head parts are no longer offered for an adult character, and High Poly Head parts no longer drop
+  off the appearance list.
+- Head previews and the measured fit are about three times faster once warm, with identical output.
+- Loose morph files override the copies inside archives, as the game does.
+- The window no longer slides up when you scroll past the end of a panel.
+- The "Legacy ratios" fit now works the mouth-opening, eyelid, eyeball, eye-socket, iris and cheek-shape
+  sliders in their own stages.
+- Smaller download.
+
+0.25.0
+- Shape fitting is measured against the head you actually have: FaceForge renders your installed chargen
+  head, measures how each slider moves it, and fits the photo's 468 landmarks to that response. The older
+  ratio method stays as "Legacy ratios".
+- Skin tone and hair colour are written into the preset; swatches show what was read from the photo.
+- Morph data packed in .bsa archives counts, so High Poly Head's slider morphs are seen.
+- Mod Organizer 2 profiles and compressed skin textures are read directly.
+- Vision refinement through the ChatGPT/Codex, Claude Code or Gemini command-line tools works, and
+  Settings > Locate... points FaceForge at a tool it did not find.
+- The interface cannot open network connections; the only thing that leaves the PC is a vision request
+  you configure and start yourself.
+
+INSTALL THE TOOL, NOT A GAME MOD
+
+1. Unzip anywhere on the PC.
+2. Run FaceForge-0.26.0-STANDALONE.exe.
+3. Do not put it in Skyrim Special Edition\Data.
+4. Do not install this archive with Vortex or Mod Organizer 2.
+
+Run it directly, not through Mod Organizer 2 / USVFS. FaceForge detects that and says so; run normally and
+it still reads the same installed mods.
+
+FILES
+
+FaceForge-0.26.0-STANDALONE.exe - 125,436,817 bytes, SHA-256 55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC
+README.md - the instructions.
+Archive - 118,563,185 bytes, SHA-256 1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62
+
+Changelog: https://github.com/SenjuWoo/FaceForge/blob/main/CHANGELOG.txt
+Source: https://github.com/SenjuWoo/FaceForge

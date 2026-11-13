@@ -31,18 +31,16 @@
   <img src="docs/images/app-hero.png" alt="FaceForge after analyzing a synthetic front portrait: source face, measured proportions, and RaceMenu output panel" width="100%">
 </p>
 
-<p align="center"><sub>QA render from the 0.25.0 tree, using the bundled synthetic portrait. Not a claim about every photograph.</sub></p>
+<p align="center"><sub>The packaged app after a dense fit on the synthetic test portrait, with the installed head rendered beside it. Not a claim about every photograph.</sub></p>
 
 ## Quick start
 
-**0.25.0 is a public beta.** Download it from
-**[v0.25.0-beta.4](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.4)** — it is marked
-pre-release because no generated preset has been loaded in Skyrim yet, so treat the in-game look as
-unproven. The last full release is still
+Download **[v0.26.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0)**. It is marked pre-release because no generated preset has been loaded
+in Skyrim yet, so treat the in-game look as unproven. The last full release is
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
-2. Double-click **`FaceForge-0.25.0-STANDALONE.exe`**.
+2. Double-click **`FaceForge-0.26.0-STANDALONE.exe`**.
 3. **Do not** drop the EXE into `Skyrim Special Edition\Data`.
 4. **Do not** add this zip as a Vortex or MO2 mod for Skyrim.
 
@@ -74,7 +72,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 **Optional**
 
 - High Poly Head and any head-part mods you already use
-- Expressive Facegen Morphs — FaceForge writes only the `EFM_` family. Without EFM active, RaceMenu silently ignores those values and the character loads as the race default, identical whatever photo was used
+- Expressive Facegen Morphs — FaceForge writes the `EFM_` family unless you load a slider inventory. Without EFM active, RaceMenu silently ignores those values and the character loads as the race default, identical whatever photo was used
 - OpenRouter, or a provider CLI, only if you press vision refine (photos stay local unless you do)
 - [FollowerForge](https://github.com/SenjuWoo/FollowerForge) after Export Head
 
@@ -90,24 +88,25 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 
 **Beta.** Everything below was produced out of game. No FaceForge preset has been loaded in RaceMenu
 and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified —
-that is why 0.25.0 ships as a pre-release.
+that is why 0.26.0 ships as a pre-release.
 
 Verified in this tree:
 
-- `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
-- 136 frontend tests and 131 native assertions (the native count is tallied at run time)
+- `FaceForge 0.26.0/` is the ship snapshot (`CURRENT.txt`)
+- 148 frontend tests and 139 native assertions (the native count is tallied at run time)
 - TypeScript clean, .NET Release clean, 0 warnings
-- `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame)
+- `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame),
+  with no outbound request and a window that does not scroll
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
   a CI job, not a manual step
-- Packaged `FaceForge-0.25.0-STANDALONE.exe` (FileVersion 0.25.0.0)
+- Packaged `FaceForge-0.26.0-STANDALONE.exe` (FileVersion 0.26.0.0)
 - The download ZIP was extracted and its EXE driven: a photo analyses, the interface cannot open a
   network connection (page policy plus a host filter, probed against the landmark library's logging
   endpoint), and the window refuses to navigate elsewhere. `qa/packaged-app-check.mjs` repeats it
 - The packaged EXE was driven end to end over the WebView2 debugging port: photo, analysis, installed
   hair/eyes/brows/face picked from the real catalogue, then a preset pack whose four head parts carry
   unique HDPT types and whose reshaped export carries 1,793 sculpt deltas. Recipe in
-  `FaceForge 0.25.0/qa/PACKAGED-APP-EXPORT.md`
+  `FaceForge 0.26.0/qa/PACKAGED-APP-EXPORT.md`
 
 Not claimed:
 
@@ -118,27 +117,35 @@ Not claimed:
 - A live vision request. The provider CLI launch path is tested with real processes, but no photo was
   sent to a model for this build
 
-0.24.3 stays downloadable. 0.25.0 changes how a face is measured - the defaults are different, so a 0.25.0 preset is not the same as a 0.24.3 preset for the same photo.
+0.24.3 stays downloadable. 0.25.0 and later change how a face is measured - the defaults are different, so a 0.26.0 preset is not the same as a 0.24.3 preset for the same photo.
 
 ## Build from source
 
-Ship tree: `FaceForge 0.25.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
+Ship tree: `FaceForge 0.26.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
 
 ```powershell
-cd "FaceForge 0.25.0"
+cd "FaceForge 0.26.0"
 .\build.ps1
 .\package.ps1
 ```
 
 ## Credits
 
-Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.25.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.25.0/THIRD_PARTY_NOTICES.md).
+Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.26.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.26.0/THIRD_PARTY_NOTICES.md).
 
 Skyrim, RaceMenu, and related names belong to their owners. This project is unofficial.
 
 ## License
 
 [MIT](LICENSE)
+
+## Notes in 0.26.0
+
+- **"Compact soft midface" now narrows the midface** as described; before, it widened it.
+- **Child head parts are not offered** for an adult character, and High Poly Head parts stay on the list.
+- **Head previews and the measured fit are faster**: meshes are read once per index, same pixels.
+- **Loose morph files override archived ones**, as in the game.
+- **The window no longer slides up** when you scroll past the end of a panel.
 
 ## Notes in 0.25.0
 
@@ -158,5 +165,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 129,379,846 bytes. SHA-256: `821A5106DDA562987D653D1428CDB1980D2CC77739399260DBB80BBB1C09CF13`.
-Zip: 122,498,437 bytes. SHA-256: `E7F67A2E454552E22A5BBC87721CD958D6CC7D4CC0F9278B01C34C73DD66221E`.
+0.26.0 EXE: 125,436,817 bytes. SHA-256: `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC`.
+0.26.0 Zip: 118,563,185 bytes. SHA-256: `1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62`.

@@ -1,0 +1,61 @@
+[center][size=6][b]FaceForge[/b][/size]
+[size=4]A photo in, an editable RaceMenu preset out.[/size][/center]
+
+[b]FaceForge is a Windows app, not a game mod.[/b] It measures a face in a photograph on your own PC and writes a RaceMenu preset you load and finish in game. It does not go in your Data folder, your load order or your mod manager.
+
+[size=5][b]What it does[/b][/size]
+[list]
+[*][b]Measures against your head, not a generic one.[/b] FaceForge renders the chargen head your install actually uses (vanilla or High Poly Head), measures how each slider moves it, and fits the photo's 468 face landmarks to that measured response.
+[*][b]Corrects the photo before measuring.[/b] Head tilt is rotated out, a slight turn or nod is un-foreshortened, left and right are averaged, and a smile, a blink or a fringe over the brows fades the affected measurements instead of baking them into the face.
+[*][b]Writes colour.[/b] Skin tone and hair colour read from the photo go into the preset; the swatches show what was read before you export.
+[*][b]Uses what you have installed.[/b] Head meshes, hair, brows and eyes are listed from your own plugins, filtered by the race and sex you pick, with High Poly Head preferred when present.
+[*][b]Shows the result before you export.[/b] A front and profile render of your installed head with the fitted sliders sits beside the photo.
+[*][b]Stays on your PC.[/b] The interface is blocked from opening network connections. The only thing that ever leaves the PC is an optional vision-model refinement you configure and start yourself.
+[/list]
+
+[size=5][b]Quick start[/b][/size]
+[list=1]
+[*]Unzip anywhere outside the game and run the EXE. It finds Skyrim and indexes your setup, read-only.
+[*]Choose a clear front photo and press [i]Analyze face[/i], then [i]Analyze & improve[/i].
+[*]Pick race and sex, then the installed head parts you want.
+[*]Export the preset pack.
+[*]In Skyrim, open RaceMenu, load the preset at that race and sex, and adjust. Use Sculpt > Export Head if you want to build a follower from it later.
+[/list]
+
+[size=5][b]Requirements[/b][/size]
+[b]Hard:[/b] Windows 10 or 11 with Microsoft Edge WebView2 (normally already installed), Skyrim Special Edition or Anniversary Edition, RaceMenu.
+[b]Strongly recommended:[/b] Expressive Facegen Morphs. Without it RaceMenu ignores the EFM slider values and every preset loads as the race default.
+[b]Optional:[/b] High Poly Head and any head-part mods you already use. A ChatGPT/Codex, Claude Code or Gemini command-line tool, or an OpenRouter key, only if you want vision refinement.
+No .NET install is needed; the app is one self-contained EXE.
+
+[size=5][b]Install, update, uninstall[/b][/size]
+[b]Install:[/b] unzip anywhere and run the EXE. Do not install the archive with Vortex or Mod Organizer 2, and run the EXE directly rather than through Mod Organizer 2 (it still reads your MO2 profile).
+[b]Update:[/b] replace the EXE with the new one.
+[b]Uninstall:[/b] delete the EXE, and the folder [i]%LOCALAPPDATA%\FaceForge[/i] if you want every trace gone. FaceForge writes nothing to the game folder, the mod manager or the registry.
+
+[size=5][b]Limits, said plainly[/b][/size]
+[list]
+[*]Expect a starting point that is measurably closer to the photo than the race default, not a finished likeness. Finish it in RaceMenu.
+[*]One front photo cannot see depth; nose and chin projection are estimated. Add left and right angle photos for a better read.
+[*]Skin tone is matched on lightness; strong lighting or makeup in the photo is not reproduced. Lip and eye colour are shown, not written.
+[*]The sculpt part of the export is a few broad shape moves, not a per-vertex copy of the photo.
+[*]Everything FaceForge checks is done outside the game. How a given preset looks in game depends on your skin, lighting and head-part mods.
+[/list]
+
+[size=5][b]Troubleshooting[/b][/size]
+[list]
+[*][b]Every preset looks like the race default:[/b] Expressive Facegen Morphs is not active in the game.
+[*][b]The app says it is running under Mod Organizer 2:[/b] start the EXE directly from Explorer.
+[*][b]It does not find Skyrim:[/b] Settings lets you pick the Data folder or a Mod Organizer 2 profile by hand.
+[*][b]A vision tool is installed but not found:[/b] Settings > Locate... and point at its program.
+[/list]
+When reporting a problem, include the version shown in Settings, the text in the status bar, and whether you use Vortex, Mod Organizer 2 or a manual install.
+
+[size=5][b]Pair tool[/b][/size]
+[url=https://github.com/SenjuWoo/FollowerForge]FollowerForge[/url] builds a follower NPC plugin from the head you export in RaceMenu.
+
+[size=5][b]Credits and permissions[/b][/size]
+Original code under the MIT licence. Face landmarks by MediaPipe Tasks Vision (Apache 2.0). Built with .NET, Microsoft Edge WebView2, React and Vite; full notices in the source repository. No game assets are redistributed. Skyrim, RaceMenu and the other mod names belong to their authors; FaceForge is unofficial.
+Development used AI coding assistants. The gallery shows the app itself; no image is an AI-generated stand-in for an in-game result.
+
+Source and full changelog: [url=https://github.com/SenjuWoo/FaceForge]github.com/SenjuWoo/FaceForge[/url]

@@ -1,0 +1,1186 @@
+using System.IO.Compression;
+using System.Text.Json;
+using FaceForge.Core;
+
+// Reports what the vision-provider detection sees on this machine: which CLI (if any) each provider
+// resolves to, and from which path. Support uses it to answer "I installed it and FaceForge says it
+// is missing" without guessing.
+if (args is ["--vision"])
+{
+    // Both halves matter when someone reports "I set a path and it still says missing": the stored
+    // overrides show what FaceForge saved, the statuses show what it resolved them to.
+    Console.WriteLine(JsonSerializer.Serialize(new
+    {
+        Overrides = CliVisionProvider.GetPathOverrides(),
+        Statuses = CliVisionProvider.GetStatuses()
+    }, new JsonSerializerOptions
+    {
+        WriteIndented = true
+    }));
+    return;
+}
+
+if (args is ["--discover"])
+{
+    var location = EnvironmentDiscovery.TryDiscover();
+    Console.WriteLine(JsonSerializer.Serialize(location, new JsonSerializerOptions
+    {
+        WriteIndented = true
+    }));
+    if (location is null) Environment.ExitCode = 2;
+    return;
+}
+
+// Measures a real .tri against the installed game rather than a fixture: vertex count, morph
+// count, leftover bytes (must be 0), and the displacement each morph produces at weight 1. This is
+// how the estimated slider response weights get replaced with measured ones.
+if (args is ["--tri", var triPath])
+{
+    var tri = TriFile.Read(triPath);
+    Console.WriteLine(JsonSerializer.Serialize(new
+    {
+        tri.Path,
+        tri.VertexCount,
+        tri.TriangleCount,
+        MorphCount = tri.Morphs.Count,
+        tri.TrailingBytes,
+        // Extent of the base mesh, so a morph displacement can be read as a fraction of the head
+        // rather than an abstract number.
+        Size = new[] { 0, 1, 2 }.Select(axis =>
+        {
+            var values = Enumerable
+                .Range(0, tri.VertexCount)
+                .Select(vertex => tri.Vertices[(vertex * 3) + axis])
+                .ToArray();
+            return MathF.Round(values.Max() - values.Min(), 3);
+        }),
+        Morphs = tri.Morphs
+            .Select(morph => new
+            {
+                morph.Name,
+                morph.Multiplier,
+                MaxDisplacement = MathF.Round(morph.MaxDisplacement(), 4)
+            })
+            .OrderByDescending(morph => morph.MaxDisplacement)
+    }, new JsonSerializerOptions { WriteIndented = true }));
+    if (tri.TrailingBytes != 0) Environment.ExitCode = 2;
+    return;
+}
+
+// Reports, per head mesh, which RaceMenu sliders the installation can actually move. A slider is
+// live only when its race registers it AND its morph pair exists in a .tri matching that head's
+// vertex count; the second half is what catches Expressive Facegen Morphs on High Poly Head.
+if (args is ["--morphs", var morphsData, ..])
+{
+    var race = args.Length > 2 ? args[2] : "NordRace";
+    var registry = MorphRegistry.Build(morphsData);
+    Console.WriteLine(JsonSerializer.Serialize(new
+    {
+        Race = race,
+        registry.Complete,
+        registry.UnreadArchives,
+        Heads = registry.Heads.Select(head =>
+        {
+            var available = new HashSet<string>(head.MorphNames, StringComparer.OrdinalIgnoreCase);
+            var sliders = registry.SliderSets
+                .Where(set => set.Sex.Equals(head.TargetSex, StringComparison.OrdinalIgnoreCase)
+                    && set.Races.Contains(race, StringComparer.OrdinalIgnoreCase))
+                .SelectMany(set => set.Sliders)
+                .DistinctBy(slider => slider.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var inert = sliders
+                .Where(slider => !available.Contains(slider.NegativeMorph)
+                    || !available.Contains(slider.PositiveMorph))
+                .ToList();
+            return new
+            {
+                head.ChargenTriPath,
+                head.TargetSex,
+                head.HighPoly,
+                head.VertexCount,
+                MorphCount = head.MorphNames.Count,
+                Registered = sliders.Count,
+                Live = sliders.Count - inert.Count,
+                Inert = inert.Count,
+                InertPrefixes = inert.GroupBy(slider => slider.Name.Split('_')[0])
+                    .ToDictionary(group => group.Key, group => group.Count()),
+                RejectedExtensions = head.Extensions
+                    .Where(extension => !extension.TopologyMatches)
+                    .Select(extension => new { extension.ExtensionPath, extension.Rejection })
+            };
+        })
+    }, new JsonSerializerOptions { WriteIndented = true }));
+    return;
+}
+
+if (args is ["--index", var gameData])
+{
+    var catalog = EnvironmentCatalog.Build(gameData);
+    var summary = catalog.Summary;
+    Console.WriteLine(JsonSerializer.Serialize(new
+    {
+        summary.GameDataPath,
+        summary.ManifestPath,
+        summary.StagingPath,
+        summary.DeploymentTimeUtcMs,
+        summary.SourceModCount,
+        summary.PluginCount,
+        summary.RelevantAssetCount,
+        summary.BsaCount,
+        summary.PresetCount,
+        summary.DetectionMethod,
+        summary.AutoDetected,
+        appearanceRecommendations = summary.AppearanceRecommendations.Select(item => new
+        {
+            item.Category,
+            item.SourceMod,
+            item.ConfidenceScore,
+            item.AssetCount,
+            plugins = item.PluginRequirements.Select(plugin => new
+            {
+                plugin.PluginName,
+                plugin.Masters,
+                plugin.MissingMasters
+            }),
+            item.CompatibilityNotes
+        }),
+        playableRaces = summary.PlayableRaces.Select(item => new
+        {
+            item.EditorId,
+            item.Name,
+            item.FormIdentifier,
+            item.FaceGenHead
+        }),
+        appearanceChoiceCount = summary.AppearanceChoices.Count,
+        appearanceChoiceCounts = summary.AppearanceChoices
+            .GroupBy(item => item.Category)
+            .ToDictionary(group => group.Key, group => group.Count()),
+        appearanceChoiceSexCounts = summary.AppearanceChoices
+            .GroupBy(item => item.Sex)
+            .ToDictionary(group => group.Key, group => group.Count()),
+        appearanceChoicesWithResolvedRaces =
+            summary.AppearanceChoices.Count(item => item.ValidRaces.Count > 0),
+        appearanceChoicesTypedFromRecord =
+            summary.AppearanceChoices.Count(item => item.TypeFromRecord),
+        // Mirrors the gate the output panel applies, so the effect of a race/sex choice on the
+        // real installed library is visible without opening the app.
+        eligiblePerActor = new[] { "NordRace", "HighElfRace", "ArgonianRace" }
+            .SelectMany(race => new[] { "male", "female" }.Select(sex => new { race, sex }))
+            .ToDictionary(
+                actor => $"{actor.race}/{actor.sex}",
+                actor => summary.AppearanceChoices
+                    .Where(item =>
+                        item.Playable &&
+                        (item.Sex is "any" or "unflagged" || item.Sex == actor.sex) &&
+                        (item.ValidRaces.Count == 0 || item.ValidRaces.Contains(actor.race)))
+                    .GroupBy(item => item.Category)
+                    .OrderBy(group => group.Key, StringComparer.Ordinal)
+                    .ToDictionary(group => group.Key, group => group.Count())),
+        appearanceChoiceSamples = summary.AppearanceChoices
+            .Where(item =>
+                item.PluginName.Contains("TRE_Brows", StringComparison.OrdinalIgnoreCase) ||
+                item.PluginName.Contains("Koralina", StringComparison.OrdinalIgnoreCase) ||
+                item.PluginName.Contains("Kyoe", StringComparison.OrdinalIgnoreCase))
+            .Take(20)
+            .Select(item => new
+            {
+                item.Category,
+                item.DisplayName,
+                item.EditorId,
+                item.FormIdentifier,
+                item.PluginName,
+                item.SourceMod,
+                item.Sex,
+                item.Playable,
+                item.ValidRacesEditorId,
+                item.ValidRaces,
+                item.MatchEvidence
+            }),
+        completePresetTrios = summary.Presets.Count(item => item.HasNif && item.HasDds),
+        missingDependencies = summary.Presets
+            .SelectMany(item => catalog.ResolveDependencies(item.RequiredPlugins))
+            .Where(item => !item.Present)
+            .Select(item => item.PluginName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(item => item)
+            .ToArray()
+    }, new JsonSerializerOptions { WriteIndented = true }));
+    return;
+}
+
+if (args is ["--inspect", var presetPath, var inspectData])
+{
+    var inspectCatalog = EnvironmentCatalog.Build(inspectData);
+    Console.WriteLine(JsonSerializer.Serialize(
+        PresetInspector.Inspect(presetPath, inspectCatalog),
+        new JsonSerializerOptions { WriteIndented = true }));
+    return;
+}
+
+var root = Path.Combine(Path.GetTempPath(), "FaceForge-CoreTests-" + Guid.NewGuid().ToString("N"));
+try
+{
+    var data = Path.Combine(root, "Data");
+    var charGen = Path.Combine(data, "SKSE", "Plugins", "CharGen");
+    var presets = Path.Combine(charGen, "Presets");
+    Directory.CreateDirectory(presets);
+    File.WriteAllText(Path.Combine(data, "Skyrim.esm"), "");
+    WriteTes4Plugin(Path.Combine(data, "High Poly Head.esm"), "Skyrim.esm");
+    WriteTes4Plugin(
+        Path.Combine(data, "Exact Brows.esp"),
+        "Skyrim.esm",
+        "High Poly Head.esm");
+    File.WriteAllBytes(Path.Combine(charGen, "TestFace.nif"), [0x4E, 0x49, 0x46]);
+    File.WriteAllBytes(Path.Combine(charGen, "TestFace.dds"), [0x44, 0x44, 0x53, 0x20]);
+    var jslot = """
+                {
+                  "modNames": ["Skyrim.esm", "High Poly Head.esm", "Missing Eyes.esp"],
+                  "headParts": [{"formIdentifier":"Exact Brows.esp|000801"}],
+                  "morphs": {
+                    "custom": [],
+                    "sculpt": [
+                      {"host":"KL\\High Poly Head\\FemaleHeadCharGen.tri","vertices":3832,"data":[]},
+                      {"host":"Actors\\Character\\Character Assets\\EyesFemaleChargen.tri","vertices":176,"data":[]}
+                    ]
+                  },
+                  "version":{"formatVersion":3}
+                }
+                """;
+    File.WriteAllText(Path.Combine(presets, "TestFace.jslot"), jslot);
+    File.WriteAllText(
+        Path.Combine(data, DeploymentManifestReader.FileName),
+        """
+        {
+          "deploymentMethod":"hardlink_activator",
+          "gameId":"skyrimse",
+          "deploymentTime":12345,
+          "stagingPath":"C:\\Vortex\\mods",
+          "targetPath":"C:\\Skyrim\\Data",
+          "files":[
+            {"relPath":"High Poly Head.esm","source":"High Poly Head Exact","time":1},
+            {"relPath":"High Poly Head Patch.esm","source":"Similarly Named Patch","time":1},
+            {"relPath":"Exact Brows.esp","source":"Exact Brows Package","time":1},
+            {"relPath":"meshes\\actors\\character\\character assets\\brows\\exact_brow_01.nif","source":"Exact Brows Package","time":1},
+            {"relPath":"textures\\actors\\character\\eyes\\exact_eye_01.dds","source":"Exact Eye Textures","time":1},
+            {"relPath":"meshes\\actors\\character\\character assets\\hair\\exact_hair_01.nif","source":"Exact Hair Pack","time":1},
+            {"relPath":"textures\\actors\\character\\female\\femalehead_d.dds","source":"Exact Skin Pack","time":1},
+            {"relPath":"textures\\actors\\character\\overlays\\femalehead_freckles.dds","source":"Community Overlays","time":1},
+            {"relPath":"High Poly Head.bsa","source":"High Poly Head Exact","time":1},
+            {"relPath":"meshes\\KL\\High Poly Head\\femalehead.nif","source":"High Poly Head Exact","time":1}
+          ]
+        }
+        """);
+
+    var catalog = EnvironmentCatalog.Build(data, "test fixture", autoDetected: true);
+    Assert(catalog.Summary.PluginCount == 4, "plugin count");
+    Assert(catalog.Summary.PresetCount == 1, "preset count");
+    var preset = catalog.Summary.Presets.Single();
+    Assert(preset.SculptHostCount == 2, "multi-sculpt host count");
+    Assert(preset.HasNif && preset.HasDds, "CharGen trio");
+    Assert(preset.RequiredPlugins.Contains("Exact Brows.esp"), "head-part dependency");
+
+    var resolved = catalog.ResolveDependencies(preset.RequiredPlugins);
+    var hph = resolved.Single(item => item.PluginName == "High Poly Head.esm");
+    Assert(hph.Present && hph.SourceMod == "High Poly Head Exact", "exact source provenance");
+    Assert(hph.SourceBsaCount == 1, "BSA provenance");
+    Assert(!resolved.Single(item => item.PluginName == "Missing Eyes.esp").Present, "missing plugin");
+    Assert(catalog.Summary.AutoDetected, "automatic detection marker");
+    Assert(catalog.Summary.DetectionMethod == "test fixture", "detection method");
+    Assert(
+        EnvironmentDiscovery.TryNormalizeDataPath(root, out var normalizedData) &&
+        normalizedData.Equals(data, StringComparison.OrdinalIgnoreCase),
+        "normalize game root");
+    Assert(
+        EnvironmentDiscovery.TryNormalizeDataPath(charGen, out var normalizedCharGen) &&
+        normalizedCharGen.Equals(data, StringComparison.OrdinalIgnoreCase),
+        "normalize CharGen path");
+    var browRecommendation = catalog.Summary.AppearanceRecommendations.Single(item =>
+        item.Category == "brows" && item.SourceMod == "Exact Brows Package");
+    Assert(browRecommendation.AssetCount == 1, "brow asset evidence");
+    var browPlugin = browRecommendation.PluginRequirements.Single(item =>
+        item.PluginName == "Exact Brows.esp");
+    Assert(browPlugin.Masters.Contains("High Poly Head.esm"), "brow plugin master");
+    Assert(browPlugin.MissingMasters.Count == 0, "brow requirements present");
+    Assert(
+        new[] { "brows", "eyes", "hair" }.All(category =>
+            catalog.Summary.AppearanceRecommendations.Any(item => item.Category == category)),
+        "appearance categories");
+    Assert(
+        catalog.Summary.AppearanceRecommendations.All(item =>
+            item.SourceMod != "Exact Skin Pack" && item.SourceMod != "Community Overlays"),
+        "skin and overlays are not head-part recommendations");
+    Assert(HeadPartCatalog.HasShapeWords("TRE Brows Wide"), "explicit shape word");
+    Assert(!HeadPartCatalog.HasShapeWords("Character Brows 01"), "shape words require boundaries");
+
+    // Category must follow the HDPT Type subrecord, not the record name. "Blackbriar" contains
+    // no category word at all and 0.6.0 would have dropped it entirely.
+    Assert(
+        HeadPartCatalog.CategoryFor(Mutagen.Bethesda.Skyrim.HeadPart.TypeEnum.Eyebrows) == "brows",
+        "Eyebrows type maps to brows");
+    Assert(
+        HeadPartCatalog.CategoryFor(Mutagen.Bethesda.Skyrim.HeadPart.TypeEnum.FacialHair) == "facialhair",
+        "FacialHair type is its own category");
+    Assert(HeadPartCatalog.CategoryFor(null) is null, "missing type falls back to the name");
+    Assert(
+        HeadPartCatalog.SexFor(
+            Mutagen.Bethesda.Skyrim.HeadPart.Flag.Male |
+            Mutagen.Bethesda.Skyrim.HeadPart.Flag.Female) == "any",
+        "both gender flags means any");
+    Assert(
+        HeadPartCatalog.SexFor(Mutagen.Bethesda.Skyrim.HeadPart.Flag.Female) == "female",
+        "female-only flag");
+    Assert(
+        HeadPartCatalog.SexFor(Mutagen.Bethesda.Skyrim.HeadPart.Flag.Playable) == "unflagged",
+        "no gender flag is unrestricted, not hidden");
+    Assert(
+        SkyrimRecordIndex.PresentBaseGamePlugins(data).SequenceEqual(["Skyrim.esm"]),
+        "base game plugin detection");
+    Assert(
+        SkyrimRecordIndex.Build(data).ResolveValidRaces(null).Races.Count == 0,
+        "unlinked ValidRaces resolves to unknown, not empty-valid");
+
+    var requestJson = OpenRouterVision.BuildRequestJson(
+        "vendor/image-model",
+        "data:image/png;base64,QUJD");
+    using (var request = JsonDocument.Parse(requestJson))
+    {
+        var provider = request.RootElement.GetProperty("provider");
+        // Routing clauses are filters. Requiring ZDR endpoints and strict structured-output
+        // support together left no endpoint for any model, which OpenRouter reports as a 404,
+        // so every request failed. Only the clause that protects the photograph is kept.
+        Assert(provider.GetProperty("data_collection").GetString() == "deny", "data collection denial");
+        Assert(!provider.TryGetProperty("zdr", out _), "ZDR filter dropped");
+        Assert(!provider.TryGetProperty("require_parameters", out _), "parameter filter dropped");
+    }
+
+    // Providers that ignore response_format may fence their JSON or wrap it in prose.
+    Assert(
+        OpenRouterVision.ExtractJsonObject("{\"a\":1}") == "{\"a\":1}",
+        "bare JSON passes through");
+    Assert(
+        OpenRouterVision.ExtractJsonObject("```json\n{\"a\":{\"b\":2}}\n```") == "{\"a\":{\"b\":2}}",
+        "fenced JSON is unwrapped");
+    Assert(
+        OpenRouterVision.ExtractJsonObject("Here you go: {\"a\":\"}\"} thanks") == "{\"a\":\"}\"}",
+        "a brace inside a string does not end the object");
+    AssertThrows<InvalidDataException>(
+        () => OpenRouterVision.ExtractJsonObject("no json here"),
+        "prose without JSON is rejected");
+    AssertThrows<InvalidDataException>(
+        () => OpenRouterVision.ExtractJsonObject("{\"a\":1"),
+        "truncated JSON is rejected");
+
+    // A failure has to name the cause; the old text sent every user to check their key.
+    var notFound = OpenRouterVision.DescribeFailure(
+        System.Net.HttpStatusCode.NotFound,
+        "{\"error\":{\"message\":\"No endpoints found matching your data policy\"}}");
+    Assert(notFound.Contains("No endpoints found"), "failure repeats the OpenRouter message");
+    Assert(notFound.Contains("404"), "failure names the status code");
+
+    // Refinement rides on top of a local estimate that is itself bounded at the EFM range, so a
+    // full-range delta could invert it outright. Interpreting from neutral has nothing to refine.
+    Assert(OpenRouterVision.VisionContext.Refinement.Limit == 1, "refinement delta is a third of range");
+    Assert(new OpenRouterVision.VisionContext(false, true).Limit == 3, "interpretation gets full range");
+    Assert(
+        OpenRouterVision.BuildSystemPrompt(new OpenRouterVision.VisionContext(true, false))
+            .Contains("corrective deltas", StringComparison.Ordinal),
+        "refinement prompt asks for corrections");
+    Assert(
+        OpenRouterVision.BuildSystemPrompt(new OpenRouterVision.VisionContext(false, true))
+            .Contains("too unreliable", StringComparison.Ordinal) &&
+        OpenRouterVision.BuildUserPrompt(new OpenRouterVision.VisionContext(false, true))
+            .Contains("distinctive feature relationships", StringComparison.Ordinal),
+        "interpretation prompt replaces unreliable landmarks without neutralizing identity");
+    Assert(
+        OpenRouterVision.BuildSystemPrompt(new OpenRouterVision.VisionContext(true, true))
+            .Contains("stylized illustration", StringComparison.Ordinal) &&
+        !OpenRouterVision.BuildSystemPrompt(new OpenRouterVision.VisionContext(true, false))
+            .Contains("stylized illustration", StringComparison.Ordinal),
+        "style instruction follows the detected source kind");
+    Assert(
+        CliVisionProvider.BuildInvocation(
+                CliVisionProviderKind.Codex,
+                "p.jpg",
+                "s.json",
+                "r.json",
+                new OpenRouterVision.VisionContext(false, false))
+            .StandardInput!.Contains("-3 to 3", StringComparison.Ordinal),
+        "CLI prompt carries the context-specific bound");
+    // A CLI installed after Explorer started is invisible to the app's inherited PATH, which is the
+    // "I installed it and it still says install" report. These pin the manual-path resolver behind
+    // the Settings "Locate…" button.
+    {
+        var cliRoot = Path.Combine(Path.GetTempPath(), "FaceForgeCliTest-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cliRoot);
+        try
+        {
+            var shim = Path.Combine(cliRoot, "codex.cmd");
+            File.WriteAllText(shim, "@echo off\r\n");
+            File.WriteAllText(Path.Combine(cliRoot, "codex.ps1"), "# shim\r\n");
+            Assert(
+                CliVisionProvider.ResolveExecutable("codex", cliRoot) == Path.GetFullPath(shim),
+                "a picked folder resolves the CLI inside it");
+            Assert(
+                CliVisionProvider.ResolveExecutable("codex", Path.Combine(cliRoot, "codex.ps1")) ==
+                Path.GetFullPath(shim),
+                "a PowerShell shim resolves to its runnable sibling");
+            Assert(
+                CliVisionProvider.ResolveExecutable("codex", Path.Combine(cliRoot, "missing.exe")) is null,
+                "a missing path resolves to nothing");
+        }
+        finally
+        {
+            Directory.Delete(cliRoot, true);
+        }
+    }
+    // npm installs three shims side by side: an extensionless POSIX script, a .cmd and a .ps1. Only the
+    // .cmd can be started on Windows, so detection must never hand back the extensionless one.
+    {
+        var npmRoot = Path.Combine(Path.GetTempPath(), "FaceForgeNpmTest-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(npmRoot);
+        try
+        {
+            var posix = Path.Combine(npmRoot, "gemini");
+            var cmd = Path.Combine(npmRoot, "gemini.cmd");
+            File.WriteAllText(posix, "#!/bin/sh\r\n");
+            File.WriteAllText(cmd, "@echo off\r\n");
+            File.WriteAllText(Path.Combine(npmRoot, "gemini.ps1"), "# shim\r\n");
+            Assert(
+                CliVisionProvider.ResolveExecutable("gemini", npmRoot) == Path.GetFullPath(cmd),
+                "an npm shim folder resolves to the .cmd, not the POSIX script");
+            Assert(
+                CliVisionProvider.ResolveExecutable("gemini", posix) == Path.GetFullPath(cmd),
+                "picking the extensionless npm shim resolves to its .cmd sibling");
+
+            // A real process, because the failure is in how the command line reaches cmd.exe.
+            var echo = Path.Combine(npmRoot, "echoargs.cmd");
+            File.WriteAllText(echo, "@echo off\r\necho [%~1][%~2][%~3]\r\n");
+            var echoed = CliVisionProvider.RunAsync(
+                echo,
+                ["-p", "two words (and, punctuation) it's 0-100 @{image0.jpg}", "last"],
+                npmRoot,
+                null,
+                CancellationToken.None,
+                TimeSpan.FromSeconds(20)).GetAwaiter().GetResult();
+            Assert(
+                echoed.ExitCode == 0 &&
+                echoed.StandardOutput.Trim() == "[-p][two words (and, punctuation) it's 0-100 @{image0.jpg}][last]",
+                "a .cmd shim receives each argument intact: " + echoed.StandardOutput.Trim() + echoed.StandardError.Trim());
+
+            // A CLI that reads stdin to EOF must not stall when FaceForge has nothing to send.
+            var reader = Path.Combine(npmRoot, "readstdin.cmd");
+            File.WriteAllText(reader, "@echo off\r\nfindstr \"^\" >nul\r\necho done\r\n");
+            var drained = CliVisionProvider.RunAsync(
+                reader, [], npmRoot, null, CancellationToken.None, TimeSpan.FromSeconds(15))
+                .GetAwaiter().GetResult();
+            Assert(drained.StandardOutput.Trim() == "done", "stdin is closed when there is no prompt to pipe");
+        }
+        finally
+        {
+            Directory.Delete(npmRoot, true);
+        }
+    }
+    // Claude Code's --disallowedTools is variadic: a prompt placed after it is read as a tool name and
+    // the CLI reports that no input was given. The prompt travels on stdin instead.
+    foreach (var claudeInvocation in new[]
+             {
+                 CliVisionProvider.BuildInvocation(CliVisionProviderKind.Claude, "p.jpg", "s.json", "r.json"),
+                 CliVisionProvider.BuildInvocationMulti(
+                     CliVisionProviderKind.Claude,
+                     [("Target portrait (front)", "image0.jpg")],
+                     "response-schema.json",
+                     "result.json",
+                     false,
+                     OpenRouterVision.VisionContext.Refinement)
+             })
+    {
+        Assert(
+            claudeInvocation.StandardInput is { Length: > 0 } &&
+            claudeInvocation.Arguments.All(argument => !argument.Contains(' ')),
+            "Claude prompt goes on stdin, never after a variadic option");
+    }
+    // The interface labels its images with an em dash and an ampersand. Gemini's prompt is an argument,
+    // and an npm .cmd shim sends arguments through cmd.exe, which refuses those characters.
+    {
+        var geminiMulti = CliVisionProvider.BuildInvocationMulti(
+            CliVisionProviderKind.Gemini,
+            [
+                ("Target photo \u2014 front", "image0.jpg"),
+                ("Current render \u2014 profile (depth: nose & chin projection)", "image1.png")
+            ],
+            "response-schema.json",
+            "result.json",
+            true,
+            OpenRouterVision.VisionContext.Refinement);
+        Assert(
+            geminiMulti.Arguments.All(argument =>
+                argument.IndexOfAny(['\r', '\n', '&', '|', '<', '>', '^', '%', '!', '"']) < 0 &&
+                argument.All(character => character < 0x7F)),
+            "Gemini arguments built from interface labels survive a .cmd shim");
+        Assert(
+            geminiMulti.Arguments.Any(argument => argument.Contains("nose and chin projection")),
+            "label meaning is kept when it is made shell-safe");
+    }
+    AssertThrows<InvalidOperationException>(
+        () => CliVisionProvider.UnwrapProviderResponse(
+            CliVisionProviderKind.Claude,
+            "{\"is_error\":true,\"result\":\"Not logged in · Please run /login\"}"),
+        "a signed-out Claude CLI is reported as an error, not parsed as a result");
+    using (var refinementSchema = JsonDocument.Parse(
+               OpenRouterVision.BuildResultSchemaJson(OpenRouterVision.VisionContext.Refinement)))
+    {
+        var bound = refinementSchema.RootElement.GetProperty("properties")
+            .GetProperty("slider_deltas")
+            .GetProperty("properties")
+            .GetProperty("EFM_Nose_Width")
+            .GetProperty("maximum")
+            .GetDouble();
+        Assert(bound == 1, "refinement schema bound");
+    }
+    AssertThrows<InvalidDataException>(
+        () => OpenRouterVision.ParseStructuredResult(
+            "test",
+            "{\"confidence\":0.5,\"observations\":[],\"slider_deltas\":{" +
+            string.Join(
+                ",",
+                OpenRouterVision.AllowedSliderKeys.Select(
+                    (key, index) => $"\"{key}\":{(index == 0 ? "2.5" : "0")}")) +
+            "}}",
+            OpenRouterVision.VisionContext.Refinement),
+        "refinement rejects an out-of-range delta");
+
+    var deltas = string.Join(",", OpenRouterVision.AllowedSliderKeys.Select(key => $"\"{key}\":0"));
+    var visionContent =
+        "{\"confidence\":0.8,\"observations\":[\"balanced\"],\"slider_deltas\":{" +
+        deltas +
+        "}}";
+    var response = JsonSerializer.Serialize(new
+    {
+        choices = new[] { new { message = new { content = visionContent } } }
+    });
+    var vision = OpenRouterVision.ParseResponse("vendor/image-model", response);
+    Assert(vision.SliderDeltas.Count == 35, "vision slider schema");
+    using (var schema = JsonDocument.Parse(OpenRouterVision.BuildResultSchemaJson()))
+    {
+        var required = schema.RootElement.GetProperty("properties")
+            .GetProperty("slider_deltas")
+            .GetProperty("required");
+        Assert(required.GetArrayLength() == 35, "shared CLI result schema");
+    }
+    var codexInvocation = CliVisionProvider.BuildInvocation(
+        CliVisionProviderKind.Codex,
+        Path.Combine(root, "portrait.jpg"),
+        Path.Combine(root, "schema.json"),
+        Path.Combine(root, "result.json"));
+    Assert(codexInvocation.Arguments.Contains("--image") &&
+           codexInvocation.StandardInput is not null, "Codex image invocation");
+    var claudeResponse = JsonSerializer.Serialize(new { result = visionContent });
+    var claudeContent = CliVisionProvider.UnwrapProviderResponse(
+        CliVisionProviderKind.Claude,
+        claudeResponse);
+    Assert(
+        OpenRouterVision.ParseStructuredResult("Claude", claudeContent).SliderDeltas.Count == 35,
+        "Claude response wrapper");
+    var geminiResponse = JsonSerializer.Serialize(
+        new { response = "```json\n" + visionContent + "\n```" });
+    var geminiContent = CliVisionProvider.UnwrapProviderResponse(
+        CliVisionProviderKind.Gemini,
+        geminiResponse);
+    Assert(
+        OpenRouterVision.ParseStructuredResult(
+            "Gemini",
+            CliVisionProvider.ExtractJson(geminiContent)).SliderDeltas.Count == 35,
+        "Gemini response wrapper");
+
+    var dependencyList = resolved;
+    var presetZip = Path.Combine(root, "preset.zip");
+    var presetResult = ExportPackager.Build(new ExportRequest(
+        "preset-pack",
+        presetZip,
+        "TestFace",
+        jslot,
+        preset.NifPath,
+        preset.DdsPath,
+        true,
+        false,
+        dependencyList));
+    Assert(presetResult.Entries.Contains("SKSE/Plugins/CharGen/Presets/TestFace.jslot"), "preset JSlot path");
+    Assert(presetResult.Entries.Contains("SKSE/Plugins/CharGen/TestFace.nif"), "preset NIF path");
+
+    var workflowZip = Path.Combine(root, "workflow.zip");
+    var workflowResult = ExportPackager.Build(new ExportRequest(
+        "racemenu-export-stage",
+        workflowZip,
+        "PhotoFace",
+        jslot,
+        null,
+        null,
+        false,
+        false,
+        dependencyList,
+        [
+            new AppearanceChoice(
+                "brows",
+                "TRE_Brows_008_Alternative",
+                "_TRE_Brows_008Alt_FP",
+                "TRE_Brows.esp|000D92",
+                "TRE_Brows.esp",
+                "TRE Brows",
+                ["Skyrim.esm"],
+                [],
+                "HDPT Type subrecord; visual confirmation still required",
+                "female",
+                true,
+                "HeadPartsAllRacesMinusBeast",
+                ["BretonRace", "NordRace"],
+                true)
+        ],
+        "NordRace",
+        "female"));
+    Assert(
+        workflowResult.Entries.Contains("SKSE/Plugins/CharGen/Presets/PhotoFace.jslot"),
+        "RaceMenu export stage JSlot path");
+    using (var zip = ZipFile.OpenRead(workflowZip))
+    {
+        var job = zip.GetEntry("FaceForge/racemenu-export-job.json");
+        Assert(job is not null, "RaceMenu export manifest");
+        Assert(
+            zip.GetEntry("FaceForge/appearance-selections.json") is not null,
+            "exact appearance selection manifest");
+        using var reader = new StreamReader(job!.Open());
+        var jobText = reader.ReadToEnd();
+        // These are the paths RaceMenu actually writes and FollowerForge actually scans. Every
+        // installed preset mod on this machine ships <name>.nif/.dds beside Presets\<name>.jslot.
+        Assert(
+            jobText.Contains("Data/SKSE/Plugins/CharGen/PhotoFace.nif", StringComparison.Ordinal),
+            "RaceMenu export expected NIF");
+        Assert(
+            jobText.Contains("Data/SKSE/Plugins/CharGen/PhotoFace.dds", StringComparison.Ordinal),
+            "RaceMenu export expected DDS");
+        Assert(
+            !jobText.Contains("Meshes/CharGen/Exported", StringComparison.Ordinal),
+            "no invented Exported mesh path");
+        Assert(
+            jobText.Contains("\"targetRaceEditorId\": \"NordRace\"", StringComparison.Ordinal),
+            "target race recorded");
+
+        // The job manifest carries the same instruction in machine-readable form; both used to name
+        // Save Preset, which writes only the .jslot.
+        // The serializer escapes '>' as \u003E, so match the words rather than the escaped literal.
+        Assert(
+            jobText.Contains("materializeWith", StringComparison.Ordinal) &&
+            jobText.Contains("Export Head", StringComparison.Ordinal),
+            "manifest names the Export Head command");
+        Assert(
+            !jobText.Contains("Save preset", StringComparison.Ordinal),
+            "manifest does not tell users to save the preset to get the mesh");
+
+        // The generated README is the only place a user is told how to get the NIF/DDS, and an earlier
+        // version told them to nudge a sculpt slider and save the preset again - which does not produce
+        // a head mesh. Export Head is a separate RaceMenu command.
+        var readme = zip.GetEntry("README.txt");
+        Assert(readme is not null, "generated README exists");
+        using var readmeReader = new StreamReader(readme!.Open());
+        var readmeText = readmeReader.ReadToEnd();
+        Assert(
+            readmeText.Contains("Export Head", StringComparison.Ordinal),
+            "README names the Export Head command");
+        Assert(
+            readmeText.Contains("separate operation from Save Preset", StringComparison.Ordinal),
+            "README separates Export Head from Save Preset");
+        Assert(
+            !readmeText.Contains("Nudge any sculpt control", StringComparison.OrdinalIgnoreCase) &&
+            !readmeText.Contains("save the preset back", StringComparison.OrdinalIgnoreCase),
+            "README does not ask for a fake sculpt edit to produce the mesh");
+    }
+    // Re-reading a finished preset must recompute its needs from the file's own head-part
+    // records, because the export-time dependency report goes stale the moment the user picks
+    // different eyes or hair in RaceMenu.
+    var report = PresetInspector.Inspect(Path.Combine(presets, "TestFace.jslot"), catalog);
+    Assert(report.FileName == "TestFace.jslot", "report names the file");
+    Assert(report.HeadParts.Count == 1, "report lists the preset's head parts");
+    Assert(
+        report.HeadParts[0].FormIdentifier == "Exact Brows.esp|000801" &&
+        report.HeadParts[0].PluginName == "Exact Brows.esp",
+        "head part plugin resolved from the form identifier");
+    Assert(
+        report.Dependencies.Any(item => item.PluginName == "Exact Brows.esp"),
+        "the head part's own plugin is a requirement even when modNames omits it");
+    Assert(
+        report.Dependencies.Any(item => item.PluginName == "Missing Eyes.esp" && !item.Present),
+        "a declared but uninstalled plugin is reported absent");
+    Assert(!report.ShareReady, "a preset with a missing plugin is not share-ready");
+    Assert(
+        report.Blockers.Any(item => item.Contains("Missing Eyes.esp", StringComparison.Ordinal)),
+        "the missing plugin is named as a blocker");
+    Assert(report.SculptHosts.Count == 2, "sculpt hosts are reported");
+    // RaceMenu writes a light plugin's head part with the 0xFE load index still embedded in the
+    // identifier -- "Foo.esp|4BED40" for the record the plugin calls 000D40. Matching the string
+    // as written misses every ESL head part, which is most modern eye and brow mods.
+    File.WriteAllText(
+        Path.Combine(presets, "LightPart.jslot"),
+        """
+        {
+          "headParts": [
+            {"formId": 4266388800, "formIdentifier": "Exact Brows.esp|4BED40", "type": 8}
+          ],
+          "morphs": { "custom": [{"name":"EFM_Nose_Width","value":1}] },
+          "version": {"formatVersion": 3}
+        }
+        """);
+    var lightReport = PresetInspector.Inspect(Path.Combine(presets, "LightPart.jslot"), catalog);
+    Assert(
+        lightReport.HeadParts.Single().FormIdentifier == "Exact Brows.esp|000D40",
+        "light plugin head part is masked to its real local FormID");
+    Assert(!report.HasVanillaBase, "the fixture has no vanilla CharGen base block");
+    Assert(
+        PresetInspector.Inspect(Path.Combine(presets, "TestFace.jslot"), null)
+            .Dependencies.All(item => !item.Present),
+        "without an index nothing is claimed to be present");
+
+    Assert(
+        CharGenCatalog.FindBakedHead(data, "TestFace") is { HasNif: true, HasDds: true },
+        "baked head round-trip discovery");
+    Assert(
+        CharGenCatalog.FindBakedHead(data, "NeverSculpted") is null,
+        "missing baked head is not guessed");
+
+    var kitZip = Path.Combine(root, "kit.zip");
+    var kitResult = ExportPackager.Build(new ExportRequest(
+        "follower-head-kit",
+        kitZip,
+        "TestFace",
+        jslot,
+        preset.NifPath,
+        preset.DdsPath,
+        true,
+        false,
+        dependencyList));
+    using (var zip = ZipFile.OpenRead(kitZip))
+    {
+        Assert(zip.GetEntry("FaceForge/follower-head-manifest.json") is not null, "head kit manifest");
+        Assert(zip.GetEntry("dependencies.json") is not null, "head kit dependencies");
+    }
+    // A refused export must leave the chosen path alone: the user picked it in a save dialog that
+    // already asked about overwriting, and an empty ZIP in place of a good one is data loss.
+    {
+        var keptZip = Path.Combine(root, "kept-kit.zip");
+        File.WriteAllText(keptZip, "previous export");
+        AssertThrows<InvalidOperationException>(
+            () => ExportPackager.Build(new ExportRequest(
+                "follower-head-kit", keptZip, "TestFace", jslot, preset.NifPath, preset.DdsPath,
+                false, false, dependencyList)),
+            "head kit without Preserve Sculpt is refused");
+        Assert(File.ReadAllText(keptZip) == "previous export", "a refused export keeps the existing file");
+        Assert(
+            Directory.GetFiles(root, "kept-kit.zip*").Length == 1,
+            "a refused export leaves no partial file behind");
+    }
+    // The debug sink deletes and rewrites one folder per trace name; a name must never climb out of it.
+    {
+        var debugRoot = Path.Combine(root, "FaceForge Debug");
+        Assert(
+            DebugTrace.ResolveFolder(debugRoot, "photo_1") == Path.Combine(debugRoot, "photo_1"),
+            "debug trace folder sits under the debug root");
+        foreach (var hostile in new[] { "..", ".", "...", " .. ", "..\\x", "a/b", "C:", "" })
+            Assert(
+                DebugTrace.ResolveFolder(debugRoot, hostile) is null,
+                "debug trace name cannot escape its root: '" + hostile + "'");
+    }
+    AssertThrows<InvalidOperationException>(
+        () => ExportPackager.Build(new ExportRequest(
+            "follower-head-kit",
+            Path.Combine(root, "invalid-kit.zip"),
+            "TestFace",
+            jslot,
+            preset.NifPath,
+            preset.DdsPath,
+            false,
+            false,
+            dependencyList)),
+        "head kit rejects a cleared sculpt");
+
+    // A .tri holds the base vertex positions RaceMenu sculpt indexes into, and the named morph
+    // targets every EFM slider drives. The parse is a fixed layout with no length prefix on the
+    // blocks, so a single wrong stride does not fail -- it silently returns the wrong geometry.
+    // TrailingBytes is what makes that loud: the file must be consumed exactly.
+    var triFixture = Path.Combine(root, "Fixture.tri");
+    WriteTriFixture(triFixture);
+    var tri = TriFile.Read(triFixture);
+    Assert(tri.VertexCount == 3 && tri.TriangleCount == 1, "tri header counts");
+    Assert(tri.TrailingBytes == 0, "tri parse consumes the file exactly");
+    Assert(tri.Vertices[0] == 1f && tri.Vertices[4] == 5f, "tri base vertex positions");
+
+    // nameLength counts the trailing NUL. Reading it as text length leaves one byte per morph in
+    // the stream, which shifts every delta that follows.
+    Assert(tri.Morphs.Count == 2 && tri.Morphs[0].Name == "TestUp", "tri morph name excludes the terminator");
+    Assert(tri.FindMorph("testup") is not null, "tri morph lookup is case-insensitive");
+
+    // Displacement at weight w is delta * multiplier * w: vertex 0 carries dx 100 at multiplier
+    // 0.5, so weight 2 moves it a full unit from 1.0 to 101.0.
+    var morphed = tri.ApplyMorphs(new Dictionary<string, float> { ["TestUp"] = 2f });
+    Assert(MathF.Abs(morphed[0] - 101f) < 1e-3f, "tri morph applies delta * multiplier * weight");
+    Assert(MathF.Abs(morphed[3] - tri.Vertices[3]) < 1e-6f, "tri morph leaves unaffected vertices alone");
+    Assert(
+        tri.ApplyMorphs(new Dictionary<string, float> { ["NoSuchMorph"] = 3f }).SequenceEqual(tri.Vertices),
+        "tri unknown morph name is ignored");
+    Assert(MathF.Abs(tri.Morphs[0].MaxDisplacement() - 50f) < 1e-3f, "tri max displacement at weight 1");
+
+    File.WriteAllBytes(Path.Combine(root, "NotATri.tri"), new byte[128]);
+    AssertThrows<InvalidDataException>(
+        () => TriFile.Read(Path.Combine(root, "NotATri.tri")),
+        "tri rejects a file without the FRTRI003 magic");
+    File.WriteAllBytes(
+        Path.Combine(root, "Truncated.tri"),
+        File.ReadAllBytes(triFixture)[..96]);
+    AssertThrows<InvalidDataException>(
+        () => TriFile.Read(Path.Combine(root, "Truncated.tri")),
+        "tri rejects a truncated file instead of reading past the end");
+
+    // A RaceMenu slider is a name in an ini pointing at two named morphs. It appears in the menu
+    // whenever a races.ini registers it, and it MOVES the face only when those morphs exist in a
+    // mesh with the same vertex count as the head being worn. Those conditions are independent,
+    // which is how an install ends up showing sliders that do nothing -- so the registry proves
+    // the second one rather than trusting the first.
+    var morphRoot = Path.Combine(root, "morphdata");
+    var headDir = Path.Combine(morphRoot, "meshes", "Actors", "Character", "Character Assets");
+    var pluginDir = Path.Combine(
+        morphRoot, "meshes", "actors", "character", "facegenmorphs", "Fake.esp");
+    var extensionDir = Path.Combine(
+        morphRoot, "meshes", "actors", "character", "facegenmorphs", "Morphs", "Fake");
+    Directory.CreateDirectory(headDir);
+    Directory.CreateDirectory(Path.Combine(pluginDir, "sliders"));
+    Directory.CreateDirectory(extensionDir);
+
+    WriteTriFixture(Path.Combine(headDir, "FemaleHeadChargen.tri"));
+    WriteMorphExtension(Path.Combine(extensionDir, "Fits.tri"), 3, ["FitsUp", "FitsDown"]);
+    // Second extension on the SAME line. High Poly Head puts nine there; 0.23.0 read only the
+    // first and lost the rest, which is half of why it declared working sliders dead.
+    WriteMorphExtension(Path.Combine(extensionDir, "AlsoFits.tri"), 3, ["SecondUp", "SecondDown"]);
+    // Same morph names a real mod would ship, built for a head this character is not wearing.
+    WriteMorphExtension(Path.Combine(extensionDir, "WrongTopology.tri"), 9, ["WideUp", "WideDown"]);
+    File.WriteAllText(Path.Combine(pluginDir, "morphs.ini"), """
+        #Female
+        extension = Actors\Character\Character Assets\FemaleHeadChargen.tri, Fake\Fits.tri, Fake\AlsoFits.tri
+        extension = Actors\Character\Character Assets\FemaleHeadChargen.tri, Fake\WrongTopology.tri,
+        """);
+    File.WriteAllText(Path.Combine(pluginDir, "races.ini"), """
+        # Determines what sliders are available for the particular race
+        NordRace   = sliders\human.ini
+        OrcRace    = sliders\missing.ini
+        """);
+    File.WriteAllText(Path.Combine(pluginDir, "sliders", "human.ini"), """
+        [Female]
+        Fake_Fits    = 128, Slider, FitsDown, FitsUp
+        Fake_Wide    = 128, Slider, WideDown, WideUp
+        Fake_Lashes  = 256, HeadPart, 179
+        [Male]
+        Fake_MaleOnly = 128, Slider, FitsDown, FitsUp
+        """);
+
+    var morphRegistry = MorphRegistry.Build(morphRoot);
+    var femaleHead = morphRegistry.Heads.Single(item =>
+        item.TargetSex == "female" && !item.HighPoly);
+    Assert(femaleHead.VertexCount == 3, "morph registry reads the head vertex count");
+    Assert(
+        femaleHead.MorphNames.Contains("FitsUp") && femaleHead.MorphNames.Contains("TestUp"),
+        "morph registry unions the head's own morphs with a matching extension");
+    Assert(
+        !femaleHead.MorphNames.Contains("WideUp"),
+        "morph registry excludes morphs from an extension built for another vertex count");
+    var rejected = femaleHead.Extensions.Single(item => !item.TopologyMatches);
+    Assert(
+        rejected.ExtensionPath.EndsWith("WrongTopology.tri", StringComparison.OrdinalIgnoreCase)
+            && rejected.VertexCount == 9
+            && rejected.Rejection is not null,
+        "morph registry reports why an extension was rejected");
+    Assert(
+        femaleHead.Parts.Count == 4 && femaleHead.Parts[0].VertexCount == 3,
+        "morph registry inspects every chargen mesh a character wears, not just the head");
+    Assert(
+        femaleHead.MorphNames.Contains("SecondUp"),
+        "morph registry reads every extension on one line, not just the first");
+    Assert(
+        morphRegistry.Complete && morphRegistry.UnreadArchives.Count == 0,
+        "morph registry is complete when no archive declares facegenmorphs content");
+
+    var femaleSet = morphRegistry.SliderSets.Single(item =>
+        item.Sex == "female" && item.Plugin == "Fake.esp");
+    Assert(
+        femaleSet.Races.SequenceEqual(["NordRace"]),
+        "morph registry maps a slider ini to the races whose races.ini names it");
+    Assert(
+        femaleSet.Sliders.Any(item =>
+            item.Name == "Fake_Fits" && item.NegativeMorph == "FitsDown" && item.PositiveMorph == "FitsUp"),
+        "morph registry reads the negative and positive morph of a Slider row");
+    Assert(
+        femaleSet.Sliders.All(item => item.Name != "Fake_Lashes"),
+        "morph registry ignores HeadPart rows, which carry no morph geometry");
+    Assert(
+        femaleSet.Sliders.All(item => item.Name != "Fake_MaleOnly"),
+        "morph registry keeps [Female] and [Male] sections apart");
+    Assert(
+        morphRegistry.SliderSets.All(item => !item.IniPath.Contains("missing")),
+        "morph registry skips a races.ini entry pointing at a slider ini that is not installed");
+
+    // The renderer used to read every chargen .tri (several MB each on a real install) and rescan the
+    // morph extensions for every one of up to 300 parallel renders. Parsed meshes now live with the
+    // index that resolved them: the same index reuses them, a new index (a re-index) reads afresh,
+    // and the shared copy must never carry one render's morphs into the next.
+    var renderRoot = Path.Combine(root, "renderdata");
+    var renderHeadDir = Path.Combine(renderRoot, "meshes", "Actors", "Character", "Character Assets");
+    var renderPluginDir = Path.Combine(
+        renderRoot, "meshes", "actors", "character", "facegenmorphs", "Render.esp");
+    Directory.CreateDirectory(renderHeadDir);
+    Directory.CreateDirectory(Path.Combine(renderPluginDir, "sliders"));
+    var renderHead = Path.Combine(renderHeadDir, "FemaleHeadChargen.tri");
+    WriteTriFixture(renderHead);
+    File.WriteAllText(Path.Combine(renderPluginDir, "races.ini"), "NordRace = sliders\\human.ini\n");
+    File.WriteAllText(
+        Path.Combine(renderPluginDir, "sliders", "human.ini"),
+        "[Female]\nRender_Test = 128, Slider, TestDown, TestUp\n");
+    var renderView = ResolvedDataView.Physical(renderRoot);
+    var renderMorphs = MorphRegistry.Build(renderView);
+    HeadRenderer.RenderRequest RenderAt(double value) => new(
+        "female", false, null, new Dictionary<string, double> { ["Render_Test"] = value }, Size: 128);
+    var neutralBefore = HeadRenderer.RenderPng(renderView, renderMorphs, RenderAt(0));
+    var moved = HeadRenderer.RenderPng(renderView, renderMorphs, RenderAt(1));
+    var neutralAfter = HeadRenderer.RenderPng(renderView, renderMorphs, RenderAt(0));
+    Assert(neutralBefore is not null && moved is not null && neutralAfter is not null,
+        "renderer draws the fixture head");
+    Assert(!moved!.AsSpan().SequenceEqual(neutralBefore!), "a slider morph changes the render");
+    Assert(neutralAfter!.AsSpan().SequenceEqual(neutralBefore!),
+        "a slider render leaves no trace in the next render from the same cached mesh");
+    File.Delete(renderHead);
+    var cachedMoved = HeadRenderer.RenderPng(renderView, renderMorphs, RenderAt(1));
+    Assert(cachedMoved is not null && cachedMoved.AsSpan().SequenceEqual(moved),
+        "the same index renders from meshes it already parsed");
+    Assert(HeadRenderer.RenderPng(ResolvedDataView.Physical(renderRoot), renderMorphs, RenderAt(1)) is null,
+        "a new index reads the meshes afresh");
+
+    // The game prefers a loose file over the same file inside an archive. High Poly Head ships its
+    // morph registrations and extension .tri files in a .bsa; a loose fix of one of them used to lose
+    // to the archived copy in the preview and the fit.
+    var bsaRoot = Path.Combine(root, "bsadata");
+    var bsaHeadDir = Path.Combine(bsaRoot, "meshes", "Actors", "Character", "Character Assets");
+    Directory.CreateDirectory(bsaHeadDir);
+    WriteTriFixture(Path.Combine(bsaHeadDir, "FemaleHeadChargen.tri"));
+    const string archivedIni = @"meshes\actors\character\facegenmorphs\test.esp";
+    const string archivedMorphs = @"meshes\actors\character\facegenmorphs\morphs\test";
+    WriteBsa(Path.Combine(bsaRoot, "Test.bsa"), new()
+    {
+        [archivedIni] = [("morphs.ini", System.Text.Encoding.ASCII.GetBytes(
+            "extension = Actors\\Character\\Character Assets\\FemaleHeadChargen.tri, Test\\Ext.tri\r\n"))],
+        [archivedMorphs] = [("ext.tri", MorphExtensionBytes(3, ["ExtUp"], 10))]
+    });
+    const string headRel = @"Actors\Character\Character Assets\FemaleHeadChargen.tri";
+    int FirstDelta(IReadOnlyList<TriMorph> morphs) => morphs.Single(m => m.Name == "ExtUp").Deltas[0];
+    var archiveOnly = BsaMorphIndex.Build(ResolvedDataView.Physical(bsaRoot)).ExtensionMorphs(headRel, 3);
+    Assert(archiveOnly.Count == 1 && FirstDelta(archiveOnly) == 10,
+        "archive morph extensions are read when nothing loose overrides them");
+    var looseExtension = Path.Combine(bsaRoot, "meshes", "actors", "character", "facegenmorphs", "Morphs", "Test");
+    Directory.CreateDirectory(looseExtension);
+    File.WriteAllBytes(Path.Combine(looseExtension, "Ext.tri"), MorphExtensionBytes(3, ["ExtUp"], 77));
+    var looseWins = BsaMorphIndex.Build(ResolvedDataView.Physical(bsaRoot)).ExtensionMorphs(headRel, 3);
+    Assert(looseWins.Count == 1 && FirstDelta(looseWins) == 77,
+        "a loose extension .tri overrides the archived file with the same path");
+    var looseIniDir = Path.Combine(bsaRoot, "meshes", "actors", "character", "facegenmorphs", "Test.esp");
+    Directory.CreateDirectory(looseIniDir);
+    File.WriteAllText(Path.Combine(looseIniDir, "morphs.ini"), "# registrations moved elsewhere\r\n");
+    Assert(BsaMorphIndex.Build(ResolvedDataView.Physical(bsaRoot)).ExtensionMorphs(headRel, 3).Count == 0,
+        "a loose morphs.ini overrides the archived morphs.ini with the same path");
+
+    // A damaged .tri from a mod must fail as bad data, never as an overflowed index or an allocation
+    // of whatever the header claims.
+    foreach (var (field, what) in new[] { (8, "vertex count"), (12, "triangle count"), (36, "morph count") })
+    {
+        var damaged = new byte[TriFile.HeaderLength + 64];
+        "FRTRI003"u8.CopyTo(damaged);
+        BitConverter.GetBytes(0x7FFFFFF0u).CopyTo(damaged, field);
+        AssertThrows<InvalidDataException>(
+            () => TriFile.Read(damaged, "damaged.tri"),
+            "a .tri with an absurd " + what + " is rejected as invalid data");
+    }
+
+    Console.WriteLine("FaceForge.Core validation: PASS");
+    Console.WriteLine($"Assertions: {Tally.Count} | Presets: {catalog.Summary.PresetCount} | Plugins: {catalog.Summary.PluginCount}");
+}
+finally
+{
+    if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+}
+
+static void Assert(bool condition, string name)
+{
+    if (!condition) throw new InvalidOperationException("Assertion failed: " + name);
+    Tally.Count++;
+}
+
+static void AssertThrows<TException>(Action action, string name)
+    where TException : Exception
+{
+    try
+    {
+        action();
+    }
+    catch (TException)
+    {
+        Tally.Count++;
+        return;
+    }
+    throw new InvalidOperationException("Assertion failed: " + name);
+}
+
+// A minimal but structurally real FRTRI003: 3 vertices, 1 triangle, UVs present so the reader has
+// to skip both UV blocks, and two morphs so a name-length mistake shows up as a wrong second name.
+static void WriteTriFixture(string path)
+{
+    using var file = File.Create(path);
+    file.Write("FRTRI003"u8);
+    foreach (var value in new uint[] { 3, 1, 0, 0, 0, 3, 1, 2, 0, 0, 0, 0, 0, 0 })
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    foreach (var value in new[] { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f })   // vertices
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    foreach (var value in new uint[] { 0, 1, 2 })                          // triangle
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    foreach (var value in new[] { 0f, 0f, 0.5f, 0.5f, 1f, 1f })            // uvs
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    foreach (var value in new uint[] { 0, 1, 2 })                          // triangle uvs
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+
+    WriteTriMorph(file, "TestUp", 0.5f, [100, 0, 0, 0, 0, 0, 0, 0, 0]);
+    WriteTriMorph(file, "TestDown", 0.25f, [-40, 0, 0, 0, 0, 0, 0, 0, 0]);
+}
+
+// An extension .tri: no UVs, whatever vertex count the caller wants, and one morph per name. The
+// vertex count is the point -- it is what decides whether the morphs can reach a given head.
+static void WriteMorphExtension(string path, int vertexCount, string[] morphNames)
+{
+    using var file = File.Create(path);
+    file.Write("FRTRI003"u8);
+    foreach (var value in new uint[]
+             { (uint)vertexCount, 0, 0, 0, 0, 0, 0, (uint)morphNames.Length, 0, 0, 0, 0, 0, 0 })
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    for (var index = 0; index < vertexCount * 3; index++) file.Write(BitConverter.GetBytes((float)index));
+    foreach (var name in morphNames)
+    {
+        WriteTriMorph(file, name, 1f, new short[vertexCount * 3]);
+    }
+}
+
+// An extension .tri as bytes, every delta of every morph set to `delta`, for archive fixtures.
+static byte[] MorphExtensionBytes(int vertexCount, string[] morphNames, short delta)
+{
+    using var file = new MemoryStream();
+    file.Write("FRTRI003"u8);
+    foreach (var value in new uint[]
+             { (uint)vertexCount, 0, 0, 0, 0, 0, 0, (uint)morphNames.Length, 0, 0, 0, 0, 0, 0 })
+    {
+        file.Write(BitConverter.GetBytes(value));
+    }
+    for (var index = 0; index < vertexCount * 3; index++) file.Write(BitConverter.GetBytes((float)index));
+    foreach (var name in morphNames)
+    {
+        WriteTriMorph(file, name, 1f, Enumerable.Repeat(delta, vertexCount * 3).ToArray());
+    }
+    return file.ToArray();
+}
+
+// A minimal uncompressed BSA v105 with directory and file names, laid out the way BsaIndex and
+// BsaArchive read it: header, folder records, per-folder name + file records, file-name block, data.
+static void WriteBsa(string path, Dictionary<string, (string Name, byte[] Data)[]> folders)
+{
+    const int headerLength = 36;
+    var folderList = folders.ToList();
+    var fileCount = folderList.Sum(item => item.Value.Length);
+    var folderNameBytes = folderList.Sum(item => item.Key.Length + 2); // length byte + name + null
+    var fileNameBlock = folderList.SelectMany(item => item.Value)
+        .SelectMany(file => System.Text.Encoding.ASCII.GetBytes(file.Name + "\0")).ToArray();
+    var recordsStart = headerLength + folderList.Count * 24;
+    var dataStart = recordsStart + folderNameBytes + fileCount * 16 + fileNameBlock.Length;
+
+    using var stream = File.Create(path);
+    using var writer = new BinaryWriter(stream);
+    writer.Write("BSA\0"u8);
+    writer.Write(105u);
+    writer.Write((uint)headerLength);
+    writer.Write(0x3u);                                   // include directory and file names
+    writer.Write((uint)folderList.Count);
+    writer.Write((uint)fileCount);
+    writer.Write((uint)folderNameBytes);
+    writer.Write((uint)fileNameBlock.Length);
+    writer.Write(0u);
+
+    var blockOffset = recordsStart;
+    foreach (var (name, files) in folderList)
+    {
+        writer.Write(0ul);                                // name hash: not checked by the readers
+        writer.Write((uint)files.Length);
+        writer.Write(0u);
+        writer.Write((ulong)(blockOffset + fileNameBlock.Length)); // biased by the file-name length
+        blockOffset += name.Length + 2 + files.Length * 16;
+    }
+    var dataOffset = dataStart;
+    foreach (var (name, files) in folderList)
+    {
+        writer.Write((byte)(name.Length + 1));
+        writer.Write(System.Text.Encoding.ASCII.GetBytes(name + "\0"));
+        foreach (var file in files)
+        {
+            writer.Write(0ul);
+            writer.Write((uint)file.Data.Length);
+            writer.Write((uint)dataOffset);
+            dataOffset += file.Data.Length;
+        }
+    }
+    writer.Write(fileNameBlock);
+    foreach (var file in folderList.SelectMany(item => item.Value)) writer.Write(file.Data);
+}
+
+static void WriteTriMorph(Stream file, string name, float multiplier, short[] deltas)
+{
+    var text = System.Text.Encoding.ASCII.GetBytes(name + "\0");
+    file.Write(BitConverter.GetBytes((uint)text.Length));
+    file.Write(text);
+    file.Write(BitConverter.GetBytes(multiplier));
+    foreach (var delta in deltas) file.Write(BitConverter.GetBytes(delta));
+}
+
+static void WriteTes4Plugin(string path, params string[] masters)
+{
+    using var body = new MemoryStream();
+    foreach (var master in masters)
+    {
+        var value = System.Text.Encoding.UTF8.GetBytes(master + "\0");
+        body.Write("MAST"u8);
+        body.Write(BitConverter.GetBytes((ushort)value.Length));
+        body.Write(value);
+        body.Write("DATA"u8);
+        body.Write(BitConverter.GetBytes((ushort)8));
+        body.Write(new byte[8]);
+    }
+    var payload = body.ToArray();
+    using var file = File.Create(path);
+    file.Write("TES4"u8);
+    file.Write(BitConverter.GetBytes((uint)payload.Length));
+    file.Write(new byte[16]);
+    file.Write(payload);
+}
+
+/// <summary>Counts assertions that actually ran, so the printed total cannot drift from the code.</summary>
+static class Tally
+{
+    public static int Count;
+}

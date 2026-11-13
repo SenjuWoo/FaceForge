@@ -1,5 +1,24 @@
 # Decisions
 
+## 0.26.0 - a style factor states a direction; follow the rule already written down (2026-11-13)
+
+- **One convention for baseline factors.** A factor below 1 lowers the reference, so the same face reads
+  as having more of the feature. The sex touch-up documented this; the shape style ignored it and did the
+  opposite of its own label for six measurements. A new factor table is checked against that sentence,
+  and its test asserts the exported direction, not just "the value changed".
+- **Cues derive from factors.** A style's "already leans this way" cue is the baseline divided by its
+  factor. Absolute cue numbers drift every time the baselines are recalibrated; derived ones cannot.
+- **Cache by index, not by time.** Parsed meshes live in a weak table keyed by the ResolvedDataView. A
+  re-index builds a new view, so changed mods are picked up with no invalidation code, and a failed load
+  is not cached. The shared copy is read-only; every render clones vertices before morphing.
+- **Loose beats archived, by path.** The precedence follows the game's file rule (same path: loose wins),
+  not a morph-name rule, which the game does not define.
+- **Child parts are excluded by name.** Their race list is often unresolved, and the name is the only
+  evidence available for every case seen. Documented as a known limit rather than guessed further.
+- **Screenshots find what tests do not.** Capturing the release gallery from the packaged EXE against a
+  real install exposed the child parts and the window scroll; neither shows in a test without the
+  install's catalogue. Both are now covered by a test or a QA check.
+
 ## 0.24.3 - a layout change is not verified by a type check (2026-08-12)
 
 - **Fix the cause, then stop.** The clipped export button had exactly one cause: `overflow:

@@ -1,0 +1,25 @@
+{
+ "date": "2026-10-30",
+ "what": "Ported dense-landmark fit (src/domain/denseFit.ts) benchmarked headless against the real C# HeadRenderer; hph_female, 30 synthetic cases (seed 1)",
+ "caveats": "[U] linear head model; synthetic flat renders, not photographs; vertex skill scores head-mesh EFM sliders only (the fit may also move eye/mouth sliders, unscored); fit run on hph_female only",
+ "setup": "Jacobian measured with the C# renderer at 768px, 4 jitters; photo 8 jitters; ~10 s one-time Jacobian build, ~0.9-1.2 s per photo",
+ "same_renderer_photos_lambda_sweep_skill": {
+  "100": 0.411,
+  "300": 0.406,
+  "1000": 0.385,
+  "3000": 0.328
+ },
+ "cross_renderer_photos_lambda_sweep_skill": {
+  "30": -0.386,
+  "300": 0.203,
+  "1000": 0.339,
+  "3000": 0.344
+ },
+ "default_lambda": 1000,
+ "robust_reweighting_tried": "no effect (-0.383 vs -0.386; +0.393 vs +0.391); removed",
+ "prototype_vs_port": "python prototype hph_female +0.59 (1024px, 16 jitters, 65 head sliders); port best case +0.41 (768px, 4/8 jitters, all 83 EFM sliders incl. eye/mouth ones the score ignores)",
+ "prior_art_same_cases": {
+  "oneshot": 0.08,
+  "pr1_fit_best_case": -1.77
+ }
+}

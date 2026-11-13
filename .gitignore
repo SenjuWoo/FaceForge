@@ -91,3 +91,6 @@ FaceForge 0.24.2/
 
 # Private working plans
 docs/superpowers/
+
+# Release screenshots are uploaded to Nexus, not kept in git (docs/images has the README copy)
+NEXUS-UPLOAD/media-*/

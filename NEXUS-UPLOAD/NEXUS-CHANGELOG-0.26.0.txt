@@ -1,0 +1,17 @@
+0.26.0
+- "Compact soft midface" now narrows the cheeks, bridge and jaw as described (it widened them before).
+- Child head parts are no longer offered for adult characters.
+- High Poly Head parts no longer drop off the appearance list.
+- Head previews and the measured fit are about 3x faster, same result.
+- Loose morph files now override the copies inside archives, like the game.
+- The window no longer slides up when you scroll past the end of a panel.
+- Legacy ratios fit: mouth-opening, eyelid, eyeball, eye-socket, iris and cheek-shape sliders are fitted properly.
+- About 4 MB smaller.
+
+0.25.0
+- Sliders are fitted against your installed head: FaceForge renders it and measures each slider.
+- Skin tone and hair colour are written into the preset.
+- High Poly Head morphs inside .bsa archives are read.
+- Mod Organizer 2 profiles are read directly.
+- Vision refinement through ChatGPT/Codex, Claude Code or Gemini CLIs works; Settings > Locate finds them.
+- The interface cannot open network connections on its own.

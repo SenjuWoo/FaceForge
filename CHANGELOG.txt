@@ -2,6 +2,70 @@
 # One living file.
 
 ================================================================================
+## [0.26.0] - 2026-11-13 - audit, fixes, faster previews
+Parent: 0.25.0-beta.4. Snapshot: `FaceForge 0.26.0/`. The GitHub release is marked pre-release until a
+preset from it has been checked in RaceMenu.
+
+Read line by line this pass (earlier passes covered the rest): face measurement, pose and expression
+correction, multi-view fusion, forehead occlusion, image style, head-part preferences, High Poly Head
+calibration, the slider catalogue, the second half of the ratio fit, and the output, source and match
+panels. The packaged EXE was driven against a real install to capture the release screenshots, which is
+how the last two interface defects below were found.
+
+Fixed, each with a test that failed before the fix:
+- The "Compact soft midface" style exported the opposite of its description. A baseline factor below 1
+  makes the same face read as having MORE of a feature (the rule the sex touch-up documents), and its
+  width factors were below 1, so the "narrower cheeks, bridge and jaw" style widened all of them. Higher
+  cheeks and a shorter lower face were reversed the same way.
+- Its "geometry cue fit" could not score well for any face: the cues were written on the scale used
+  before the 0.19.0 calibration (nose bridge 0.21 against a measured 0.079). Cues now come from the
+  style's own factors and are compared relatively.
+- The brow and eye description used to rank head parts called every face "wide" and "wide-set",
+  including the neutral head itself: fixed cut-offs from before the calibration. Now relative to the
+  measured neutral head.
+- Child head parts were offered as the head mesh, hair or brows of an adult character when their race
+  list could not be resolved (more than twenty such records on the test install, from several mods).
+  They are filtered out and never auto-selected.
+- A preferred High Poly Head part could be missing from the appearance list: the list was cut to 80
+  entries alphabetically before the preference sort ran.
+- The window itself could scroll. A visually hidden checkbox with no positioned parent stretched the
+  page to three screens, so scrolling past the end of a panel slid the whole app up and left an empty
+  band. Browser QA now fails if the window scrolls at a size the layout fits.
+- "Legacy ratios" fit stages: the mouth stage never matched the mouth-opening sliders (a letter-case
+  mismatch), the eye stage left out the eyelid, eyeball, eye-socket and iris sliders, cheek shape had no
+  stage, and one slider was listed twice. Every accepted step still has to lower the overall loss.
+- A loose morph file lost to the copy inside an archive (left open in beta.3). A loose morphs.ini or
+  extension .tri now overrides the same path in a .bsa, as the game does. Renders on the test install are
+  unchanged because it has no such overrides.
+- A removed angle photo in the Match pane kept its memory until the app closed.
+- beta.4 embedded an unused 12.9 MB runtime left over from MediaPipe 1.2.0. The copy step now starts from
+  an empty folder; the EXE is about 4 MB smaller.
+- A damaged archive record could ask for a multi-gigabyte decompression buffer; capped at 256 MB.
+- Names of real people removed from source comments.
+
+Faster:
+- Parsed chargen meshes and their morph tables are kept per index instead of re-read for every render
+  (left open in beta.3). On a High Poly Head install, a batch of 64 renders went from about 155 ms to
+  about 47 ms once warm, and the first batch from about 400 ms to about 210 ms. The PNG output is
+  byte-identical to 0.25.0 (same SHA-256 over every render). Most of a fit's remaining time is the
+  landmark detector in the interface, which this does not touch.
+
+Better:
+- The version is stated once, in VERSION.txt. build.ps1 fails when the projects or package.json
+  disagree with it, and the interface text, export metadata, request header and unpack folder read it
+  instead of repeating the number.
+
+Known and left:
+- On a Vortex or direct install, a plugin deployed to Data but disabled in the load order is still
+  treated as installed (unchanged from beta.3, same reason: not reproducible on the test install).
+- The child-part filter reads record names. A child part named otherwise, with an unresolved race list,
+  would still be listed; none was seen.
+- Nothing was loaded in Skyrim, and no live vision request returned slider values.
+
+Files: `FaceForge-0.26.0-STANDALONE.exe` 125,436,817 bytes, SHA-256 `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC`;
+`FaceForge-0.26.0-STANDALONE.zip` 118,563,185 bytes, SHA-256 `1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62`.
+
+================================================================================
 ## [0.25.0-beta.4] - 2026-11-13 - dependency updates
 Parent: 0.25.0-beta.3. Snapshot: `FaceForge 0.25.0/`. Pre-release, same reason as before.
 

@@ -1,0 +1,13 @@
+FaceForge 0.26.0
+
+Parent: FaceForge 0.25.0 (GitHub pre-release v0.25.0-beta.4)
+Status: GitHub release v0.26.0, marked pre-release until a preset has been checked in RaceMenu.
+- Audit of the code earlier passes had not read line by line: the face-measurement, pose-correction,
+  multi-view, occlusion, style, head-part and output-panel modules and the second half of the ratio fit.
+- Fixes: compact-soft-midface style exported the opposite of its description; brow/eye feature labels
+  used pre-calibration cut-offs; style cues on the wrong scale; ratio-fit stages missed the mouth-opening,
+  eyelid/eyeball/socket/iris and cheek-shape sliders; a preferred head part could fall off the 80-item list;
+  a loose morph file lost to the archived copy; a removed angle photo kept its memory.
+- Faster: parsed chargen meshes are reused per index (64-render batch about 3x faster, same pixels).
+- Version is stated once (VERSION.txt) and checked by build.ps1 against the projects and package.json.
+Verified: see VALIDATION.md (0.26.0 entry).
