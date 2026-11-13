@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "1.2.0",
+    "@mediapipe/tasks-vision": "1.2.2",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
