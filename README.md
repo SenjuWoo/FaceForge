@@ -35,7 +35,7 @@
 
 ## Quick start
 
-Download **[v0.26.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0)**. It is marked pre-release because no generated preset has been loaded
+Download **[v0.26.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0)**. No generated preset has been loaded
 in Skyrim yet, so treat the in-game look as unproven. The last full release is
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
 
@@ -88,7 +88,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 
 **Beta.** Everything below was produced out of game. No FaceForge preset has been loaded in RaceMenu
 and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified —
-that is why 0.26.0 ships as a pre-release.
+so 0.26.0 is labelled that way here rather than on the release.
 
 Verified in this tree:
 

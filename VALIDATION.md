@@ -1,7 +1,7 @@
 # FaceForge validation
 
-Active candidate: **0.26.0** - built, packaged and published as a GitHub release marked
-**pre-release**. Every gate below is out of game; the one still missing is a RaceMenu load.
+Active release: **0.26.0** - built, packaged and published as the GitHub Latest release. Every
+gate below is out of game; the one still missing is a RaceMenu load.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
 

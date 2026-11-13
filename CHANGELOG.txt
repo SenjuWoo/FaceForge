@@ -3,8 +3,8 @@
 
 ================================================================================
 ## [0.26.0] - 2026-11-13 - audit, fixes, faster previews
-Parent: 0.25.0-beta.4. Snapshot: `FaceForge 0.26.0/`. The GitHub release is marked pre-release until a
-preset from it has been checked in RaceMenu.
+Parent: 0.25.0-beta.4. Snapshot: `FaceForge 0.26.0/`. Full GitHub release; no preset from it has been
+checked in RaceMenu yet.
 
 Read line by line this pass (earlier passes covered the rest): face measurement, pose and expression
 correction, multi-view fusion, forehead occlusion, image style, head-part preferences, High Poly Head

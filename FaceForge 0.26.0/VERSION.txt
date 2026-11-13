@@ -1,7 +1,7 @@
 FaceForge 0.26.0
 
-Parent: FaceForge 0.25.0 (GitHub pre-release v0.25.0-beta.4)
-Status: GitHub release v0.26.0, marked pre-release until a preset has been checked in RaceMenu.
+Parent: FaceForge 0.25.0 (GitHub v0.25.0-beta.4)
+Status: GitHub release v0.26.0 (full release, Latest). No preset from it has been loaded in RaceMenu yet.
 - Audit of the code earlier passes had not read line by line: the face-measurement, pose-correction,
   multi-view, occlusion, style, head-part and output-panel modules and the second half of the ratio fit.
 - Fixes: compact-soft-midface style exported the opposite of its description; brow/eye feature labels

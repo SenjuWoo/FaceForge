@@ -7,7 +7,7 @@
 | **Size** | 118,563,185 bytes |
 | **SHA-256** | `1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62` |
 | **EXE inside** | `FaceForge-0.26.0-STANDALONE.exe`, 125,436,817 bytes, `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC` |
-| **GitHub** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0 (same bytes; marked pre-release until a RaceMenu check) |
+| **GitHub** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0 (same bytes; full release, Latest) |
 | **On Nexus now** | 0.24.3. 0.25.0 was never uploaded to Nexus, so this upload carries both changelogs. |
 
 ## What to paste where
@@ -38,8 +38,7 @@ Summary:
 3. Replace the page description with `NEXUS-DESCRIPTION.bbcode`; set the summary.
 4. Add the changelog entries.
 5. Add images 00-04 in order, hero first. Read the provenance note in the media plan first.
-6. Optional, after you have loaded a 0.26.0 preset in RaceMenu (`FaceForge 0.26.0\qa\RACEMENU-CHECKLIST-0.26.0.md`):
-   `gh release edit v0.26.0 --repo SenjuWoo/FaceForge --prerelease=false --latest`, and add an in-game
-   screenshot to the gallery.
+6. Optional, once you have loaded a 0.26.0 preset in RaceMenu (`FaceForge 0.26.0\qa\RACEMENU-CHECKLIST-0.26.0.md`): add an in-game
+   screenshot to the gallery. Nothing else is pending on the GitHub side.
 
 What was verified for this file, and what was not: `VALIDATION.md`, section "2026-11-13 - 0.26.0".

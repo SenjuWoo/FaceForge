@@ -14,5 +14,5 @@ No other FaceForge project or prior release was found before this project was cr
   `SenjuWoo/FaceForge` `main`, snapshot-folder layout kept. Active owner: Claude Code.
 - 2026-11-13: the root is a real git checkout again (it had been a copy without `.git`). Active
   version: `FaceForge 0.25.0`, published as pre-release `v0.25.0-beta.4`.
-- 2026-11-13: active version `FaceForge 0.26.0`, GitHub release `v0.26.0` (marked pre-release).
+- 2026-11-13: active version `FaceForge 0.26.0`, GitHub release `v0.26.0` (Latest).
   `FaceForge 0.25.0` stays as the last known-good snapshot (`v0.25.0-beta.4`).

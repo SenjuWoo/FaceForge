@@ -1,6 +1,6 @@
 **FaceForge 0.26.0.** An audit of the code earlier passes had not read line by line, the fixes it
-found, and faster head previews. Marked pre-release until a preset from this build has been checked in
-RaceMenu; everything below was verified out of game.
+found, and faster head previews. No preset from this build has been loaded in RaceMenu yet; everything
+below was verified out of game.
 
 ## Fixed
 

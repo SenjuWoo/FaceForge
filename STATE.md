@@ -10,7 +10,7 @@ shipped code.
 ## 2026-11-13 (audit, 0.26.0)
 
 Goal: finish the audit (the files beta.3 listed as not read line by line), fix, optimise, release
-0.26.0 and prepare the Nexus upload. Done; GitHub release `v0.26.0` marked pre-release.
+0.26.0 and prepare the Nexus upload. Done; GitHub release `v0.26.0`, full release and Latest (first published as pre-release, promoted the same day at the operator's request).
 
 Snapshot `FaceForge 0.26.0/` copied from the tracked files of 0.25.0 (which stays as beta.4, last
 known good). CURRENT.txt and Dependabot point at 0.26.0; CI picks the newest snapshot by itself.
@@ -34,8 +34,9 @@ Nexus kit: NEXUS-RELEASE.md (index), NEXUS-UPLOAD/ (paste, BBCode description, c
 plan, media-0.26.0/ screenshots from the packaged EXE; screenshots are local only, not in git).
 
 Open:
-- RaceMenu load of a 0.26.0 preset (qa/RACEMENU-CHECKLIST-0.26.0.md), then `gh release edit v0.26.0
-  --prerelease=false --latest` if it holds.
+- RaceMenu load of a 0.26.0 preset (qa/RACEMENU-CHECKLIST-0.26.0.md); still unproven in game.
+- The README inside the v0.26.0 ZIP still says "marked as a pre-release". The assets and tag were left
+  untouched (published bytes); the source README is fixed and ships corrected in the next build.
 - Nexus upload itself (the user's account). Nexus currently has 0.24.3; 0.25.0 was never uploaded there.
 - Provenance of qa/synthetic-neutral-portrait.png is not recorded in the repo; confirm before using
   the screenshots publicly.

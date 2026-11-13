@@ -105,4 +105,4 @@ you save them.
 
 GitHub: https://github.com/SenjuWoo/FaceForge
 
-0.26.0 is marked as a pre-release on GitHub until a preset from it has been checked in game. The changelog is in the repository's `CHANGELOG.txt`.
+0.26.0 is a full release, but no preset from it has been loaded in Skyrim yet, so the in-game look is unproven. The changelog is in the repository's `CHANGELOG.txt`.
