@@ -15,3 +15,7 @@ qa/bench/out/
 __pycache__/
 qa/bench/host/bin/
 qa/bench/host/obj/
+
+# Kept local on purpose (commit d9b09b0): CodeQL reads its report writer as clear-text storage of
+# sensitive data. It measures local presets only; re-adding it reopens that alert.
+qa/bench/audit_presets.py

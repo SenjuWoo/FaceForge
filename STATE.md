@@ -53,6 +53,10 @@ Not done / not verified:
 - The bench Python tests were not re-run (the venv was removed by the earlier cleanup; no bench code
   changed).
 
+- `qa/bench/audit_presets.py` stays untracked on purpose (commit `d9b09b0`; it is in the snapshot
+  `.gitignore` now). Re-adding it during this audit reopened code-scanning alert 3, so it was taken
+  out of the tree again rather than dismissing the alert.
+
 Next: owner loads a preset in RaceMenu (`qa/RACEMENU-CHECKLIST-0.25.0.md`); then the unread files.
 
 ## 2026-11-09 (0.25.0-beta.1 published as a pre-release)
