@@ -36,7 +36,7 @@
 ## Quick start
 
 **0.25.0 is a public beta.** Download it from
-**[v0.25.0-beta.1](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.1)** — it is marked
+**[v0.25.0-beta.2](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.2)** — it is marked
 pre-release because no generated preset has been loaded in Skyrim yet, so treat the in-game look as
 unproven. The last full release is still
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
@@ -95,12 +95,15 @@ that is why 0.25.0 ships as a pre-release.
 Verified in this tree:
 
 - `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
-- 131 frontend tests and 99 native assertions
+- 131 frontend tests and 131 native assertions (the native count is tallied at run time)
 - TypeScript clean, .NET Release clean, 0 warnings
 - `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame)
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
   a CI job, not a manual step
 - Packaged `FaceForge-0.25.0-STANDALONE.exe` (FileVersion 0.25.0.0)
+- The download ZIP was extracted and its EXE driven: a photo analyses, the interface cannot open a
+  network connection (page policy plus a host filter, probed against the landmark library's logging
+  endpoint), and the window refuses to navigate elsewhere. `qa/packaged-app-check.mjs` repeats it
 - The packaged EXE was driven end to end over the WebView2 debugging port: photo, analysis, installed
   hair/eyes/brows/face picked from the real catalogue, then a preset pack whose four head parts carry
   unique HDPT types and whose reshaped export carries 1,793 sculpt deltas. Recipe in
@@ -112,6 +115,8 @@ Not claimed:
 - That a generated preset has been loaded in RaceMenu and looked at by a person
 - Photograph guidance (still unwritten)
 - A closed explanation for one report of a generic in-game result **with EFM present**
+- A live vision request. The provider CLI launch path is tested with real processes, but no photo was
+  sent to a model for this build
 
 0.24.3 stays downloadable. 0.25.0 changes how a face is measured - the defaults are different, so a 0.25.0 preset is not the same as a 0.24.3 preset for the same photo.
 
@@ -146,8 +151,12 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
   is shown in the card.
 - **BSA-packed morphs count.** `facegenmorphs` inside High Poly Head / RaceMenu / ECE archives is read,
   which corrects the earlier claim that EFM sliders are inert on High Poly Head.
+- **Vision through an installed CLI works now.** Before beta.2 Claude Code never received its prompt
+  and no npm-installed CLI could be started at all; see the changelog.
+- **The interface is offline by construction.** The landmark library ships a usage logger; the page
+  and the host both refuse it. Only vision refinement, run by the host after consent, uses the network.
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 129,222,097 bytes. SHA-256: `34BB816B356718F26C334CA89DA10312B785F27E489A234A3F5720746E0A6800`.
-Zip: 122,348,044 bytes. SHA-256: `BCB20B9E0E5C02244434502F40D25FAC123483FD9F7F5D81F6720031936C829D`.
+EXE: 129,232,432 bytes. SHA-256: `4AC2D24BEB32542CC12937DE3EB38F46BB904A549B5B69EE6A604C2AD4535C5C`.
+Zip: 122,355,391 bytes. SHA-256: `35CD28E71AB152F3748AADBC3EB047CDB1A73366F72B7633278E77866D3EF360`.

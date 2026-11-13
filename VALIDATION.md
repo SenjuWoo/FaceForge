@@ -1,10 +1,37 @@
 # FaceForge validation
 
-Active candidate: **0.25.0-beta.1** — built, packaged and published as a **pre-release**. Every gate
+Active candidate: **0.25.0-beta.2** - built, packaged and published as a **pre-release**. Every gate
 below is out of game; the one still missing is a RaceMenu load, which is why this is a beta and not a
 full release.
 
-Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 one.
+Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+
+## 2026-11-13 - audit and beta.2
+
+PASS, with the limits listed at the end.
+
+| Gate | Result |
+|---|---|
+| `package.ps1` (build gate, publish, single-file and inventory gates) | exit 0, 0 warnings, 0 errors |
+| Frontend tests | 131 passed, 12 files |
+| Native validation | PASS, 131 assertions, counted at run time (the earlier "99" was a fixed string) |
+| Browser QA `qa/browser-qa.mjs` | green; new checks: no request leaves localhost, and a POST to the landmark library's logging endpoint is refused |
+| Layout QA `qa/layout-qa.mjs` | green at all four sizes |
+| Install test | ZIP extracted to an empty folder: `FaceForge-0.25.0-STANDALONE.exe` + `README.md`, EXE hash equals the published one |
+| Packaged EXE `qa/packaged-app-check.mjs` | interface loads at `https://app.faceforge/`, indexes the real install, analyses the bundled synthetic portrait, network probe refused, foreign image refused, navigation to another site refused |
+
+Reproducers that failed before the fix and pass after it (all in `src/FaceForge.Core.Tests`):
+npm shim folder resolves to the `.cmd`; a `.cmd` shim started as a real process receives each argument
+intact; stdin is closed when there is no prompt; Claude's prompt is on stdin; a signed-out Claude
+envelope is an error; interface labels survive a `.cmd` shim; a refused export keeps the existing file
+and leaves no partial; a trace name cannot escape its folder; a damaged `.tri` is invalid data.
+
+Run for real against Claude Code 2.1.309: the old argument order answers "Input must be provided
+either through stdin or as a prompt argument"; the new form is accepted and reaches the account check.
+
+Not covered: a live vision request that returns slider values (the CLI in the test environment was
+signed out, and no photo was sent); Codex and Gemini CLIs are not installed here, so their invocations
+are covered by the shared launch tests only; nothing was loaded in Skyrim.
 
 ## 2026-11-09 — packaged-app export (0.25.0 candidate)
 

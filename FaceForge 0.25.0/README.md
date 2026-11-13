@@ -44,8 +44,23 @@ injection and explains it instead of failing on startup. Run it directly; it rea
 6. Optional: open **FollowerForge** and build the NPC plugin from that baked head.
 
 Optional AI vision is the only step that sends anything off the PC, and only when you configure an
-account and press the button. If a ChatGPT/Claude/Gemini CLI is installed but not detected, Settings →
-**Locate…** points FaceForge at its program once; the path is remembered.
+account and press the button. The window itself is not allowed to open network connections: the
+bundled landmark library contains a usage logger, and FaceForge blocks it. If a ChatGPT/Claude/Gemini
+CLI is installed but not detected, Settings → **Locate…** points FaceForge at its program once; the
+path is remembered.
+
+---
+
+## What it leaves on your PC, and removing it
+
+FaceForge has no installer. To remove it, delete the EXE, then delete this folder if you want every
+trace gone:
+
+- `%LOCALAPPDATA%\FaceForge` — the unpacked interface, WebView2 browser data, and the provider paths
+  you set with Locate…
+
+It writes nothing to the game folder, the mod manager or the registry. Exported packs go only where
+you save them.
 
 ---
 
@@ -90,5 +105,5 @@ account and press the button. If a ChatGPT/Claude/Gemini CLI is installed but no
 
 GitHub: https://github.com/SenjuWoo/FaceForge
 
-This build is not published as a release yet; **v0.24.3** is the latest public download.
-The changelog for 0.25.0 is in the repository's `CHANGELOG.txt`.
+0.25.0 is a public beta (pre-release) until a preset has been checked in game; **v0.24.3** is the
+latest full release. The changelog is in the repository's `CHANGELOG.txt`.

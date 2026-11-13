@@ -3,11 +3,11 @@
 | | |
 |--|--|
 | **Version** | 0.25.0 |
-| **Upload** | `NEXUS-UPLOAD\FaceForge-0.25.0-STANDALONE.zip` |
-| **Size** | 122,348,044 bytes |
-| **SHA-256** | `BCB20B9E0E5C02244434502F40D25FAC123483FD9F7F5D81F6720031936C829D` |
-| **EXE** | `FaceForge-0.25.0-STANDALONE.exe`, 129,222,097 bytes, `34BB816B356718F26C334CA89DA10312B785F27E489A234A3F5720746E0A6800` |
-| **GitHub** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0 |
+| **Upload** | `FaceForge 0.25.0\NEXUS-UPLOAD\FaceForge-0.25.0-STANDALONE.zip` |
+| **Size** | 122,355,391 bytes |
+| **SHA-256** | `35CD28E71AB152F3748AADBC3EB047CDB1A73366F72B7633278E77866D3EF360` |
+| **EXE** | `FaceForge-0.25.0-STANDALONE.exe`, 129,232,432 bytes, `4AC2D24BEB32542CC12937DE3EB38F46BB904A549B5B69EE6A604C2AD4535C5C` |
+| **GitHub** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.2 |
 
 Paste from `NEXUS-UPLOAD\NEXUS-PASTE-0.25.0.txt`.
 

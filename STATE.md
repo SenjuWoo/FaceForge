@@ -1,5 +1,60 @@
 # FaceForge state
 
+## 2026-11-13 (full audit, fixes, 0.25.0-beta.2)
+
+Goal: audit the whole tree, fix what is broken or untrue with a failing test first, release through
+the project's own path. Result: done for the code that was read (list below); pre-release
+`v0.25.0-beta.2`. Still no in-game load.
+
+Workspace: the project root is a real git checkout again (`.git` taken from a fresh clone of `main`
+at `8a2820f`). Tracked files the 2026-11-09 cleanup had deleted were restored (`qa/bench/host/`,
+the issue and PR templates, the Nexus paste).
+
+Fixed, each with a reproducer that failed first (details in CHANGELOG 0.25.0-beta.2):
+- Vision through a CLI: Claude Code never got its prompt (it sat after a variadic option); no npm
+  `.cmd` shim could start (wrong file picked, and a command line cmd.exe cannot parse); stdin left
+  open; a signed-out CLI read as "no JSON"; `&` in an image label refused a Gemini request.
+- The interface could reach the network (MediaPipe's usage logger posts to a Google endpoint). Now a
+  page connect policy plus a host request filter; browser QA and the packaged-app check prove it.
+- `DEBUG = 1` shipped in `fit.ts`: every "Legacy ratios" pass saved renders to Documents. Off.
+- Trace folder name could be `..` (recursive delete aimed at Documents). Resolved and checked.
+- Bridge accepts messages only from `https://app.faceforge/`; navigation elsewhere is cancelled.
+- A refused export truncated the chosen ZIP. Built beside the target, moved when complete.
+- `.tri` parser: overflowing counts and header-sized allocations rejected as invalid data.
+- Render/sculpt failures carry the request id, so the caller fails at once, not after 30 s.
+- Two UI texts still taught "save the preset back out with sculpt data".
+- Native assertion count was the literal "99"; now tallied (131).
+- `BCnEncoder.Net` pinned to a real version (0 build warnings); Dependabot watches 0.25.0.
+- Docs that were untrue: download README ("not published"), `GITHUB.md`, `VERSION.txt`,
+  `NEXUS-RELEASE.md` (linked a tag that never existed), a second Nexus paste with older hashes
+  (one copy now, in root `NEXUS-UPLOAD/`), `WORKSPACE_OWNERSHIP.md` (dead path).
+
+Verified by running: `package.ps1` exit 0 with 0 warnings; 131 frontend tests; 131 native assertions;
+browser QA and layout QA green; ZIP extracted to an empty folder and its EXE driven with
+`qa/packaged-app-check.mjs` (loads, indexes the real install, analyses, network and navigation
+refused). Claude Code 2.1.309 run by hand: old argument order rejected, new form accepted.
+
+Artifacts: EXE 129,232,432 bytes `4AC2D24BEB32542CC12937DE3EB38F46BB904A549B5B69EE6A604C2AD4535C5C`;
+ZIP 122,355,391 bytes `35CD28E71AB152F3748AADBC3EB047CDB1A73366F72B7633278E77866D3EF360`.
+
+Not done / not verified:
+- No preset loaded in RaceMenu (unchanged blocker for a full release).
+- No live vision request returned slider values: the CLI was signed out in the test shell, and Codex
+  and Gemini are not installed here.
+- Read in full this pass: MainWindow, EmbeddedWebBundle, ExportPackager, CliVisionProvider,
+  OpenRouterVision, BsaArchive, TriFile, nativeBridge, racemenu, headRender, build/package/CI, and
+  the message, vision and export parts of App.tsx. Read only by search (swallowed errors, storage,
+  links), not line by line: HeadRenderer, the catalog/MO2/DDS readers, faceAnalysis, fit, denseFit,
+  sourceCorrection, the panels, and the qa/bench scripts.
+- Known and left: an MO2 profile remembered from last run is re-indexed at start while automatic
+  Vortex detection also runs, and whichever finishes last wins. Web cache folders under
+  `%LOCALAPPDATA%\FaceForge\Web` are never pruned (the README now says the folder is removable).
+  `OpenRouterVision` rejects a whole reply when one delta is slightly out of range.
+- The bench Python tests were not re-run (the venv was removed by the earlier cleanup; no bench code
+  changed).
+
+Next: owner loads a preset in RaceMenu (`qa/RACEMENU-CHECKLIST-0.25.0.md`); then the unread files.
+
 ## 2026-11-09 (0.25.0-beta.1 published as a pre-release)
 
 Beta because nothing here has been seen in Skyrim. Everything else is closed out: the packaged EXE was
