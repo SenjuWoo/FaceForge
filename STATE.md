@@ -1,5 +1,12 @@
 # FaceForge state
 
+## 2026-11-13 (after the 0.26.0 release)
+
+Dependabot PR 25 (vitest 5.0.5 -> 5.1.0, dev dependency) merged as `e459022` after CI passed on its
+head; CI and CodeQL green on main, 0 open alerts, 0 open PRs, 148 frontend tests pass locally. The
+test runner is not in the EXE, so the released v0.26.0 assets are unchanged and still match main's
+shipped code.
+
 ## 2026-11-13 (audit, 0.26.0)
 
 Goal: finish the audit (the files beta.3 listed as not read line by line), fix, optimise, release
