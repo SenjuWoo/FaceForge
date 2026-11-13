@@ -23,8 +23,37 @@ public static class ExportPackager
         var output = Path.GetFullPath(request.OutputPath);
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 
+        // Built beside the target and moved into place only when complete. Opening the chosen path
+        // directly truncated it before the request was validated, so a refused or failed export
+        // replaced an existing archive with an empty one.
+        var partial = output + ".partial-" + Guid.NewGuid().ToString("N");
         var entries = new List<string>();
-        using (var stream = new FileStream(output, FileMode.Create, FileAccess.Write, FileShare.None))
+        try
+        {
+            WriteArchive(partial, mode, name, request, entries);
+            File.Move(partial, output, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(partial)) File.Delete(partial);
+        }
+
+        return new ExportResult(
+            output,
+            mode,
+            entries.Count,
+            Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(output))),
+            entries);
+    }
+
+    private static void WriteArchive(
+        string path,
+        string mode,
+        string name,
+        ExportRequest request,
+        List<string> entries)
+    {
+        using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         using (var archive = new ZipArchive(stream, ZipArchiveMode.Create))
         {
             if (mode == "preset-pack")
@@ -182,13 +211,6 @@ public static class ExportPackager
                     entries);
             }
         }
-
-        return new ExportResult(
-            output,
-            mode,
-            entries.Count,
-            Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(output))),
-            entries);
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()

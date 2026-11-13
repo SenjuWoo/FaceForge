@@ -72,9 +72,13 @@
     "http://localhost:4173/mediapipe/wasm//vision_wasm_internal.wasm",
     "http://localhost:4173/mediapipe/models/face_landmarker.task"
   ],
+  "outboundBlocked": true,
+  "externalRequests": [],
   "consoleErrors": [],
   "consoleNotes": [
-    "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+    "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "Connecting to 'https://odml.pa.googleapis.com/v1/log' violates the following Content Security Policy directive: \"connect-src 'self' data: blob:\". The action has been blocked.",
+    "Fetch API cannot load https://odml.pa.googleapis.com/v1/log. Refused to connect because it violates the document's Content Security Policy."
   ],
   "pageErrors": [],
   "requestFailures": [],

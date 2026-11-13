@@ -15,6 +15,13 @@ Start-Process -FilePath '<extracted>\FaceForge-0.25.0-STANDALONE.exe'
 
 Confirm the endpoint: `curl http://127.0.0.1:9222/json/version`.
 
+## The repeatable check
+
+`node qa/packaged-app-check.mjs` connects to that port and asserts the release-blocking basics: the
+interface loads from `https://app.faceforge/`, the install is indexed, the bundled synthetic portrait
+analyses, a request to another host is refused (the landmark library's usage logger is the reason),
+and the window refuses to navigate away. Run it against the extracted download before publishing.
+
 ## Drive the page
 
 The repo's own Playwright install is enough:

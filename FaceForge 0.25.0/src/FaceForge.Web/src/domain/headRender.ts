@@ -129,8 +129,10 @@ export function renderHeads(
     }, timeoutMs);
 
     const unsubscribe = subscribeNative((message) => {
-      if (message.type !== "heads-rendered") return;
+      // The host answers a request that threw with native-error carrying the same id.
+      if (message.type !== "heads-rendered" && message.type !== "native-error") return;
       const payload = message.payload as {
+        message?: string;
         requestId?: string;
         images?: { id: string; dataUrl: string }[];
         error?: string;
@@ -140,8 +142,8 @@ export function renderHeads(
       settled = true;
       window.clearTimeout(timer);
       unsubscribe();
-      if (payload.error) {
-        reject(new Error(payload.error));
+      if (message.type === "native-error" || payload.error) {
+        reject(new Error(payload.error ?? payload.message ?? "The desktop host reported an error."));
         return;
       }
       const map = new Map<string, string>();
@@ -224,8 +226,10 @@ export function computeSculpt(
     }, timeoutMs);
 
     const unsubscribe = subscribeNative((message) => {
-      if (message.type !== "sculpt-computed") return;
+      // The host answers a request that threw with native-error carrying the same id.
+      if (message.type !== "sculpt-computed" && message.type !== "native-error") return;
       const payload = message.payload as {
+        message?: string;
         requestId?: string;
         sculpt?: SculptEntry[];
         divisor?: number;
@@ -236,8 +240,8 @@ export function computeSculpt(
       settled = true;
       window.clearTimeout(timer);
       unsubscribe();
-      if (payload.error) {
-        reject(new Error(payload.error));
+      if (message.type === "native-error" || payload.error) {
+        reject(new Error(payload.error ?? payload.message ?? "The desktop host reported an error."));
         return;
       }
       resolve({ divisor: payload.divisor ?? 10000, entries: payload.sculpt ?? [] });

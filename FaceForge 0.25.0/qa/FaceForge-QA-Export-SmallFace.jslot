@@ -1,7 +1,7 @@
 {
    "actor": {
       "weight": 50,
-      "hairColor": 12553847
+      "hairColor": 12225655
    },
    "faceTextures": [],
    "headParts": [],
@@ -14,19 +14,19 @@
       "custom": [
          {
             "name": "EFM_Brow_Angle",
-            "value": -1
+            "value": -0.99
          },
          {
             "name": "EFM_Brow_Height",
-            "value": 0.84
+            "value": 0.82
          },
          {
             "name": "EFM_Brow_Thickness",
-            "value": -0.05
+            "value": -0.07
          },
          {
             "name": "EFM_Brow_Width",
-            "value": 0.26
+            "value": 0.27
          },
          {
             "name": "EFM_Cheek_Height",
@@ -38,7 +38,7 @@
          },
          {
             "name": "EFM_Cheek_Width",
-            "value": 0.06
+            "value": 0.05
          },
          {
             "name": "EFM_Chin_Depth",
@@ -46,19 +46,19 @@
          },
          {
             "name": "EFM_Chin_Height",
-            "value": -0.14
+            "value": -0.13
          },
          {
             "name": "EFM_Chin_Shape",
-            "value": -0.1
+            "value": -0.11
          },
          {
             "name": "EFM_Chin_Width",
-            "value": -0.49
+            "value": -0.51
          },
          {
             "name": "EFM_Eyeball_Height",
-            "value": 0.05
+            "value": 0.07
          },
          {
             "name": "EFM_Eyeball_Size",
@@ -70,7 +70,7 @@
          },
          {
             "name": "EFM_Eyeground_Height",
-            "value": 0.04
+            "value": 0.06
          },
          {
             "name": "EFM_Eyeground_Width",
@@ -78,35 +78,35 @@
          },
          {
             "name": "EFM_Eyelid_Lower",
-            "value": 0.99
+            "value": 1.05
          },
          {
             "name": "EFM_Eyelid_Upper",
-            "value": -0.02
+            "value": -0.04
          },
          {
             "name": "EFM_Eyes_Height",
-            "value": -0.3
+            "value": -0.31
          },
          {
             "name": "EFM_Eyes_Inner_Height",
-            "value": 0.93
+            "value": 1.02
          },
          {
             "name": "EFM_Eyes_Inner_Thickness",
-            "value": 0.75
+            "value": 0.83
          },
          {
             "name": "EFM_Eyes_Inner_Width",
-            "value": 1.29
+            "value": 1.36
          },
          {
             "name": "EFM_Eyes_Lower_Height",
-            "value": 0.05
+            "value": 0.08
          },
          {
             "name": "EFM_Eyes_Lower_Shape",
-            "value": 1.1
+            "value": 1.15
          },
          {
             "name": "EFM_Eyes_Outer_Height",
@@ -114,31 +114,31 @@
          },
          {
             "name": "EFM_Eyes_Outer_Thickness",
-            "value": -0.32
+            "value": -0.31
          },
          {
             "name": "EFM_Eyes_Outer_Width",
-            "value": -0.27
+            "value": -0.23
          },
          {
             "name": "EFM_Eyes_Size",
-            "value": 0.34
+            "value": 0.36
          },
          {
             "name": "EFM_Eyes_Upper_Height",
-            "value": 0.07
+            "value": 0.1
          },
          {
             "name": "EFM_Eyes_Upper_Shape",
-            "value": -0.03
+            "value": -0.05
          },
          {
             "name": "EFM_Eyes_Width",
-            "value": -0.48
+            "value": -0.45
          },
          {
             "name": "EFM_Face_Height",
-            "value": 0.25
+            "value": 0.27
          },
          {
             "name": "EFM_Iris_Width",
@@ -146,11 +146,11 @@
          },
          {
             "name": "EFM_Jaw_Height",
-            "value": -0.12
+            "value": -0.11
          },
          {
             "name": "EFM_Jaw_Shape",
-            "value": -0.12
+            "value": -0.14
          },
          {
             "name": "EFM_Jaw_Width",
@@ -166,27 +166,27 @@
          },
          {
             "name": "EFM_Lip_Lower_Thickness",
-            "value": 0.4
+            "value": 0.44
          },
          {
             "name": "EFM_Lip_Lower_Width",
-            "value": 0.01
+            "value": 0.03
          },
          {
             "name": "EFM_Lip_Upper_Thickness",
-            "value": 0.82
+            "value": 0.88
          },
          {
             "name": "EFM_Lip_Upper_Width",
-            "value": 0.01
+            "value": 0.03
          },
          {
             "name": "EFM_Lip_Width",
-            "value": 0.01
+            "value": 0.04
          },
          {
             "name": "EFM_Nose_Bridge_Width",
-            "value": 0.03
+            "value": 0.02
          },
          {
             "name": "EFM_Nose_Height",
@@ -194,31 +194,31 @@
          },
          {
             "name": "EFM_Nose_Root_Height",
-            "value": -0.11
+            "value": -0.12
          },
          {
             "name": "EFM_Nose_Root_Width",
-            "value": 0.03
+            "value": 0.02
          },
          {
             "name": "EFM_Nose_Size",
-            "value": 0.43
+            "value": 0.41
          },
          {
             "name": "EFM_Nose_Tip_Height",
-            "value": -0.2
+            "value": -0.19
          },
          {
             "name": "EFM_Nose_Tip_Thickness",
-            "value": -0.02
+            "value": -0.01
          },
          {
             "name": "EFM_Nose_Tip_Width",
-            "value": -0.03
+            "value": -0.01
          },
          {
             "name": "EFM_Nose_Width",
-            "value": -0.45
+            "value": -0.38
          },
          {
             "name": "EFM_Nose_Wing_Height",
@@ -226,11 +226,11 @@
          },
          {
             "name": "EFM_Nose_Wing_Thickness",
-            "value": -0.26
+            "value": -0.22
          },
          {
             "name": "EFM_Nose_Wing_Width",
-            "value": -0.37
+            "value": -0.31
          },
          {
             "name": "EFM_Oral_Height",
@@ -238,35 +238,35 @@
          },
          {
             "name": "EFM_Oral_Width",
-            "value": 0.01
+            "value": 0.02
          },
          {
             "name": "EFM_Philtrum_Width",
-            "value": -0.07
+            "value": -0.04
          },
          {
             "name": "EFM_Tubercle_Lower_Height",
-            "value": 0.32
+            "value": 0.35
          },
          {
             "name": "EFM_Tubercle_Lower_Thickness",
-            "value": 0.32
+            "value": 0.35
          },
          {
             "name": "EFM_Tubercle_Lower_Width",
-            "value": 0
+            "value": 0.02
          },
          {
             "name": "EFM_Tubercle_Upper_Height",
-            "value": 0.66
+            "value": 0.71
          },
          {
             "name": "EFM_Tubercle_Upper_Thickness",
-            "value": 0.66
+            "value": 0.71
          },
          {
             "name": "EFM_Tubercle_Upper_Width",
-            "value": -0.06
+            "value": -0.04
          }
       ],
       "sculpt": null,

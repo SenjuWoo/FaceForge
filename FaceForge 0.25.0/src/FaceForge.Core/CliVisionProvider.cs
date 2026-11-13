@@ -221,7 +221,7 @@ public sealed class CliVisionProvider
         OpenRouterVision.VisionContext context)
     {
         var limit = context.Limit.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-        var manifest = string.Join(" ", images.Select(item => $"[{item.Label} = {item.FileName}]"));
+        var manifest = string.Join(" ", images.Select(item => $"[{ShellSafeLabel(item.Label)} = {item.FileName}]"));
         var sliders = hasSliderContext
             ? "The current EFM slider values are in sliders.txt in the working directory. "
             : "";
@@ -233,6 +233,24 @@ public sealed class CliVisionProvider
             OpenRouterVision.BuildSystemPrompt(context) + " " +
             $"The images in the working directory are: {manifest}. " + sliders + task +
             " Do not modify any files.";
+    }
+
+    /// <summary>
+    /// Image labels come from the interface ("Current render - profile (depth: nose &amp; chin ...)") and
+    /// Gemini takes its prompt as an argument, which for an npm .cmd shim passes through cmd.exe. A
+    /// label is only a caption, so it is reduced to characters that survive that trip instead of
+    /// letting one ampersand refuse the whole request.
+    /// </summary>
+    internal static string ShellSafeLabel(string label)
+    {
+        var builder = new StringBuilder(label.Length);
+        foreach (var character in label.Replace("&", "and"))
+        {
+            if (character is '\u2014' or '\u2013') builder.Append('-');
+            else if (character is '%' or '!' or '^' or '<' or '>' or '|' or '"' or '\r' or '\n') builder.Append(' ');
+            else if (character < 0x7F && !char.IsControl(character)) builder.Append(character);
+        }
+        return builder.ToString().Trim();
     }
 
     internal static (IReadOnlyList<string> Arguments, string? StandardInput) BuildInvocationMulti(
@@ -255,14 +273,7 @@ public sealed class CliVisionProvider
                 codex.AddRange(["--output-schema", schemaFile, "--output-last-message", resultFile, "-"]);
                 return (codex, prompt);
             case CliVisionProviderKind.Claude:
-                return (
-                    [
-                        "-p", "--output-format", "json", "--max-turns", "3",
-                        "--allowedTools", "Read",
-                        "--disallowedTools", "Bash", "Edit", "Write", "NotebookEdit",
-                        prompt
-                    ],
-                    null);
+                return (ClaudeArguments, prompt);
             case CliVisionProviderKind.Gemini:
                 var refs = string.Join(" ", images.Select(item => $"@{{{item.FileName}}}"));
                 var slidersRef = hasSliderContext ? "@{sliders.txt} " : "";
@@ -299,16 +310,7 @@ public sealed class CliVisionProvider
                     "-"
                 ],
                 prompt),
-            CliVisionProviderKind.Claude => (
-                [
-                    "-p",
-                    "--output-format", "json",
-                    "--max-turns", "3",
-                    "--allowedTools", "Read",
-                    "--disallowedTools", "Bash", "Edit", "Write", "NotebookEdit",
-                    prompt
-                ],
-                null),
+            CliVisionProviderKind.Claude => (ClaudeArguments, prompt),
             CliVisionProviderKind.Gemini => (
                 [
                     "-p",
@@ -319,6 +321,21 @@ public sealed class CliVisionProvider
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
     }
+
+    /// <summary>
+    /// The prompt is piped on stdin, not passed as an argument. --allowedTools and --disallowedTools
+    /// are variadic, so a prompt placed after them is consumed as one more tool name and the CLI
+    /// reports that it was given no input. Stdin also keeps a long prompt off the cmd.exe command line
+    /// when the CLI is an npm .cmd shim.
+    /// </summary>
+    private static readonly string[] ClaudeArguments =
+    [
+        "-p",
+        "--output-format", "json",
+        "--max-turns", "3",
+        "--allowedTools", "Read",
+        "--disallowedTools", "Bash,Edit,Write,NotebookEdit"
+    ];
 
     public static string UnwrapProviderResponse(
         CliVisionProviderKind provider,
@@ -331,6 +348,19 @@ public sealed class CliVisionProvider
             CliVisionProviderKind.Gemini => "response",
             _ => throw new ArgumentException("This provider does not use a wrapped response.", nameof(provider))
         };
+        // Claude Code exits 0 and reports failures (signed out, quota, API error) inside the envelope.
+        // Parsing that text as a face result would surface as "did not return JSON" and hide the cause.
+        if (document.RootElement.TryGetProperty("is_error", out var failed) &&
+            failed.ValueKind == JsonValueKind.True)
+        {
+            var reason = document.RootElement.TryGetProperty(property, out var detail) &&
+                         detail.ValueKind == JsonValueKind.String
+                ? TrimError(detail.GetString() ?? "")
+                : "";
+            throw new InvalidOperationException(
+                $"The {provider} CLI reported an error" + (reason.Length > 0 ? $": {reason}" : ".") +
+                " Open Settings, connect the account, and try again.");
+        }
         if (!document.RootElement.TryGetProperty(property, out var value) ||
             value.ValueKind != JsonValueKind.String ||
             string.IsNullOrWhiteSpace(value.GetString()))
@@ -438,8 +468,16 @@ public sealed class CliVisionProvider
         var path = picked.Trim().Trim('"');
         if (Directory.Exists(path)) return FindInDirectory(command, path);
         if (!File.Exists(path)) return null;
-        if (path.EndsWith(".ps1", StringComparison.OrdinalIgnoreCase))
-            return FindInDirectory(command, Path.GetDirectoryName(path)!);
+        // npm writes "name", "name.cmd" and "name.ps1" side by side. Windows can start only the .cmd:
+        // the extensionless file is a POSIX shell script and a .ps1 is not an executable image.
+        var extension = Path.GetExtension(path);
+        if (OperatingSystem.IsWindows() &&
+            (extension.Length == 0 || extension.Equals(".ps1", StringComparison.OrdinalIgnoreCase)))
+        {
+            var folder = Path.GetDirectoryName(Path.GetFullPath(path))!;
+            return FindInDirectory(Path.GetFileNameWithoutExtension(path), folder)
+                   ?? FindInDirectory(command, folder);
+        }
         return Path.GetFullPath(path);
     }
 
@@ -476,29 +514,32 @@ public sealed class CliVisionProvider
         "FaceForge",
         "vision-paths.json");
 
+    // No empty extension on Windows: beside every npm .cmd shim sits an extensionless POSIX script of
+    // the same name, and CreateProcess cannot run it.
     private static readonly string[] ExecutableExtensions = OperatingSystem.IsWindows()
-        ? ["", ".exe", ".cmd", ".bat", ".com"]
+        ? [".exe", ".cmd", ".bat", ".com"]
         : [""];
 
-    private static async Task<ProcessResult> RunAsync(
+    internal static async Task<ProcessResult> RunAsync(
         string executable,
         IReadOnlyList<string> arguments,
         string workingDirectory,
         string? standardInput,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? limit = null)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(3));
+        timeout.CancelAfter(limit ?? TimeSpan.FromMinutes(3));
         var startInfo = CreateCaptureStartInfo(executable, arguments, workingDirectory);
         using var process = new Process { StartInfo = startInfo };
         if (!process.Start())
             throw new InvalidOperationException("The vision CLI could not be started.");
 
+        // Always close stdin, prompt or not: a CLI that reads it to EOF would otherwise wait on an open
+        // pipe until the time limit.
         if (standardInput is not null)
-        {
             await process.StandardInput.WriteAsync(standardInput.AsMemory(), timeout.Token);
-            process.StandardInput.Close();
-        }
+        process.StandardInput.Close();
         var outputTask = process.StandardOutput.ReadToEndAsync(timeout.Token);
         var errorTask = process.StandardError.ReadToEndAsync(timeout.Token);
         try
@@ -536,12 +577,14 @@ public sealed class CliVisionProvider
         };
         if (isBatch)
         {
-            startInfo.ArgumentList.Add("/d");
-            startInfo.ArgumentList.Add("/s");
-            startInfo.ArgumentList.Add("/c");
-            startInfo.ArgumentList.Add(
-                QuoteForCmd(executable) + " " +
-                string.Join(" ", arguments.Select(QuoteForCmd)));
+            // Written as one raw command line on purpose. ArgumentList would escape the inner quotes as
+            // \" for the C runtime, and cmd.exe does not read that: it then looks for a program whose
+            // name starts with a backslash and a quote, so no .cmd shim could ever be started. With /s,
+            // cmd strips exactly the outer pair of quotes and runs the rest verbatim.
+            startInfo.Arguments =
+                "/d /s /c \"" +
+                string.Join(" ", new[] { executable }.Concat(arguments).Select(QuoteForCmd)) +
+                "\"";
         }
         else
         {
@@ -579,5 +622,5 @@ public sealed class CliVisionProvider
         };
     }
 
-    private sealed record ProcessResult(int ExitCode, string StandardOutput, string StandardError);
+    internal sealed record ProcessResult(int ExitCode, string StandardOutput, string StandardError);
 }

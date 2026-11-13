@@ -433,6 +433,99 @@ try
             Directory.Delete(cliRoot, true);
         }
     }
+    // npm installs three shims side by side: an extensionless POSIX script, a .cmd and a .ps1. Only the
+    // .cmd can be started on Windows, so detection must never hand back the extensionless one.
+    {
+        var npmRoot = Path.Combine(Path.GetTempPath(), "FaceForgeNpmTest-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(npmRoot);
+        try
+        {
+            var posix = Path.Combine(npmRoot, "gemini");
+            var cmd = Path.Combine(npmRoot, "gemini.cmd");
+            File.WriteAllText(posix, "#!/bin/sh\r\n");
+            File.WriteAllText(cmd, "@echo off\r\n");
+            File.WriteAllText(Path.Combine(npmRoot, "gemini.ps1"), "# shim\r\n");
+            Assert(
+                CliVisionProvider.ResolveExecutable("gemini", npmRoot) == Path.GetFullPath(cmd),
+                "an npm shim folder resolves to the .cmd, not the POSIX script");
+            Assert(
+                CliVisionProvider.ResolveExecutable("gemini", posix) == Path.GetFullPath(cmd),
+                "picking the extensionless npm shim resolves to its .cmd sibling");
+
+            // A real process, because the failure is in how the command line reaches cmd.exe.
+            var echo = Path.Combine(npmRoot, "echoargs.cmd");
+            File.WriteAllText(echo, "@echo off\r\necho [%~1][%~2][%~3]\r\n");
+            var echoed = CliVisionProvider.RunAsync(
+                echo,
+                ["-p", "two words (and, punctuation) it's 0-100 @{image0.jpg}", "last"],
+                npmRoot,
+                null,
+                CancellationToken.None,
+                TimeSpan.FromSeconds(20)).GetAwaiter().GetResult();
+            Assert(
+                echoed.ExitCode == 0 &&
+                echoed.StandardOutput.Trim() == "[-p][two words (and, punctuation) it's 0-100 @{image0.jpg}][last]",
+                "a .cmd shim receives each argument intact: " + echoed.StandardOutput.Trim() + echoed.StandardError.Trim());
+
+            // A CLI that reads stdin to EOF must not stall when FaceForge has nothing to send.
+            var reader = Path.Combine(npmRoot, "readstdin.cmd");
+            File.WriteAllText(reader, "@echo off\r\nfindstr \"^\" >nul\r\necho done\r\n");
+            var drained = CliVisionProvider.RunAsync(
+                reader, [], npmRoot, null, CancellationToken.None, TimeSpan.FromSeconds(15))
+                .GetAwaiter().GetResult();
+            Assert(drained.StandardOutput.Trim() == "done", "stdin is closed when there is no prompt to pipe");
+        }
+        finally
+        {
+            Directory.Delete(npmRoot, true);
+        }
+    }
+    // Claude Code's --disallowedTools is variadic: a prompt placed after it is read as a tool name and
+    // the CLI reports that no input was given. The prompt travels on stdin instead.
+    foreach (var claudeInvocation in new[]
+             {
+                 CliVisionProvider.BuildInvocation(CliVisionProviderKind.Claude, "p.jpg", "s.json", "r.json"),
+                 CliVisionProvider.BuildInvocationMulti(
+                     CliVisionProviderKind.Claude,
+                     [("Target portrait (front)", "image0.jpg")],
+                     "response-schema.json",
+                     "result.json",
+                     false,
+                     OpenRouterVision.VisionContext.Refinement)
+             })
+    {
+        Assert(
+            claudeInvocation.StandardInput is { Length: > 0 } &&
+            claudeInvocation.Arguments.All(argument => !argument.Contains(' ')),
+            "Claude prompt goes on stdin, never after a variadic option");
+    }
+    // The interface labels its images with an em dash and an ampersand. Gemini's prompt is an argument,
+    // and an npm .cmd shim sends arguments through cmd.exe, which refuses those characters.
+    {
+        var geminiMulti = CliVisionProvider.BuildInvocationMulti(
+            CliVisionProviderKind.Gemini,
+            [
+                ("Target photo \u2014 front", "image0.jpg"),
+                ("Current render \u2014 profile (depth: nose & chin projection)", "image1.png")
+            ],
+            "response-schema.json",
+            "result.json",
+            true,
+            OpenRouterVision.VisionContext.Refinement);
+        Assert(
+            geminiMulti.Arguments.All(argument =>
+                argument.IndexOfAny(['\r', '\n', '&', '|', '<', '>', '^', '%', '!', '"']) < 0 &&
+                argument.All(character => character < 0x7F)),
+            "Gemini arguments built from interface labels survive a .cmd shim");
+        Assert(
+            geminiMulti.Arguments.Any(argument => argument.Contains("nose and chin projection")),
+            "label meaning is kept when it is made shell-safe");
+    }
+    AssertThrows<InvalidOperationException>(
+        () => CliVisionProvider.UnwrapProviderResponse(
+            CliVisionProviderKind.Claude,
+            "{\"is_error\":true,\"result\":\"Not logged in · Please run /login\"}"),
+        "a signed-out Claude CLI is reported as an error, not parsed as a result");
     using (var refinementSchema = JsonDocument.Parse(
                OpenRouterVision.BuildResultSchemaJson(OpenRouterVision.VisionContext.Refinement)))
     {
@@ -668,6 +761,32 @@ try
         Assert(zip.GetEntry("FaceForge/follower-head-manifest.json") is not null, "head kit manifest");
         Assert(zip.GetEntry("dependencies.json") is not null, "head kit dependencies");
     }
+    // A refused export must leave the chosen path alone: the user picked it in a save dialog that
+    // already asked about overwriting, and an empty ZIP in place of a good one is data loss.
+    {
+        var keptZip = Path.Combine(root, "kept-kit.zip");
+        File.WriteAllText(keptZip, "previous export");
+        AssertThrows<InvalidOperationException>(
+            () => ExportPackager.Build(new ExportRequest(
+                "follower-head-kit", keptZip, "TestFace", jslot, preset.NifPath, preset.DdsPath,
+                false, false, dependencyList)),
+            "head kit without Preserve Sculpt is refused");
+        Assert(File.ReadAllText(keptZip) == "previous export", "a refused export keeps the existing file");
+        Assert(
+            Directory.GetFiles(root, "kept-kit.zip*").Length == 1,
+            "a refused export leaves no partial file behind");
+    }
+    // The debug sink deletes and rewrites one folder per trace name; a name must never climb out of it.
+    {
+        var debugRoot = Path.Combine(root, "FaceForge Debug");
+        Assert(
+            DebugTrace.ResolveFolder(debugRoot, "photo_1") == Path.Combine(debugRoot, "photo_1"),
+            "debug trace folder sits under the debug root");
+        foreach (var hostile in new[] { "..", ".", "...", " .. ", "..\\x", "a/b", "C:", "" })
+            Assert(
+                DebugTrace.ResolveFolder(debugRoot, hostile) is null,
+                "debug trace name cannot escape its root: '" + hostile + "'");
+    }
     AssertThrows<InvalidOperationException>(
         () => ExportPackager.Build(new ExportRequest(
             "follower-head-kit",
@@ -804,8 +923,20 @@ try
         morphRegistry.SliderSets.All(item => !item.IniPath.Contains("missing")),
         "morph registry skips a races.ini entry pointing at a slider ini that is not installed");
 
+    // A damaged .tri from a mod must fail as bad data, never as an overflowed index or an allocation
+    // of whatever the header claims.
+    foreach (var (field, what) in new[] { (8, "vertex count"), (12, "triangle count"), (36, "morph count") })
+    {
+        var damaged = new byte[TriFile.HeaderLength + 64];
+        "FRTRI003"u8.CopyTo(damaged);
+        BitConverter.GetBytes(0x7FFFFFF0u).CopyTo(damaged, field);
+        AssertThrows<InvalidDataException>(
+            () => TriFile.Read(damaged, "damaged.tri"),
+            "a .tri with an absurd " + what + " is rejected as invalid data");
+    }
+
     Console.WriteLine("FaceForge.Core validation: PASS");
-    Console.WriteLine($"Assertions: 99 | Presets: {catalog.Summary.PresetCount} | Plugins: {catalog.Summary.PluginCount}");
+    Console.WriteLine($"Assertions: {Tally.Count} | Presets: {catalog.Summary.PresetCount} | Plugins: {catalog.Summary.PluginCount}");
 }
 finally
 {
@@ -815,6 +946,7 @@ finally
 static void Assert(bool condition, string name)
 {
     if (!condition) throw new InvalidOperationException("Assertion failed: " + name);
+    Tally.Count++;
 }
 
 static void AssertThrows<TException>(Action action, string name)
@@ -826,6 +958,7 @@ static void AssertThrows<TException>(Action action, string name)
     }
     catch (TException)
     {
+        Tally.Count++;
         return;
     }
     throw new InvalidOperationException("Assertion failed: " + name);
@@ -908,4 +1041,10 @@ static void WriteTes4Plugin(string path, params string[] masters)
     file.Write(BitConverter.GetBytes((uint)payload.Length));
     file.Write(new byte[16]);
     file.Write(payload);
+}
+
+/// <summary>Counts assertions that actually ran, so the printed total cannot drift from the code.</summary>
+static class Tally
+{
+    public static int Count;
 }

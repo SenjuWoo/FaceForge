@@ -125,6 +125,12 @@ public partial class MainWindow : Window
             Browser.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
             Browser.CoreWebView2.DownloadStarting += OnDownloadStarting;
             Browser.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
+            Browser.CoreWebView2.NavigationStarting += OnNavigationStarting;
+            Browser.CoreWebView2.NewWindowRequested += (_, args) => args.Handled = true;
+            // Second layer under the page's own policy: the host answers any request that is not for
+            // the embedded interface itself, so nothing the page loads can reach the network.
+            Browser.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+            Browser.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
             Browser.Source = new Uri($"https://{VirtualHost}/index.html");
         }
         catch (Exception exception)
@@ -190,14 +196,43 @@ public partial class MainWindow : Window
         await AutoIndexEnvironmentAsync();
     }
 
+    private static bool IsAppOrigin(string? uri) =>
+        Uri.TryCreate(uri, UriKind.Absolute, out var parsed) &&
+        parsed.Scheme == Uri.UriSchemeHttps &&
+        string.Equals(parsed.Host, VirtualHost, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The window only ever shows the embedded interface. The bridge below can start programs and
+    /// write files, so no other document is allowed to load in this WebView at all.
+    /// </summary>
+    private static void OnNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
+    {
+        if (!IsAppOrigin(e.Uri)) e.Cancel = true;
+    }
+
+    private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var uri = e.Request.Uri;
+        if (IsAppOrigin(uri) ||
+            uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ||
+            uri.StartsWith("blob:", StringComparison.OrdinalIgnoreCase) ||
+            uri.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return;
+        e.Response = Browser.CoreWebView2.Environment.CreateWebResourceResponse(
+            null, 403, "Blocked by FaceForge", "");
+    }
+
     private async void OnWebMessageReceived(
         object? sender,
         CoreWebView2WebMessageReceivedEventArgs e)
     {
+        // Second check behind the navigation guard: a message is honoured only from the embedded interface.
+        if (!IsAppOrigin(e.Source)) return;
+        var requestId = "";
         try
         {
             using var message = JsonDocument.Parse(e.WebMessageAsJson);
             var root = message.RootElement;
+            requestId = ReadRequestId(root);
             if (!root.TryGetProperty("type", out var typeElement)) return;
             switch (typeElement.GetString())
             {
@@ -283,7 +318,9 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            Post("native-error", new { message = SafeError(exception) });
+            // The request id lets a caller waiting on this exact request fail at once instead of
+            // sitting out its timeout.
+            Post("native-error", new { message = SafeError(exception), requestId });
         }
     }
 
@@ -797,12 +834,15 @@ public partial class MainWindow : Window
     // Gated on the frontend by the fit.ts DEBUG constant; here it just persists whatever it is handed.
     private void SaveDebug(JsonElement root)
     {
-        var baseName = Sanitize(root.TryGetProperty("baseName", out var bn) ? bn.GetString() : null) ?? "fit";
-        var pass = root.TryGetProperty("pass", out var pe) && pe.TryGetInt32(out var p) ? p : 0;
+        var pass = root.TryGetProperty("pass", out var pe) && pe.TryGetInt32(out var p) ? Math.Clamp(p, 0, 99) : 0;
         var reset = root.TryGetProperty("reset", out var re) && re.ValueKind == JsonValueKind.True;
-        var dir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "FaceForge Debug", baseName);
+        var debugRoot = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "FaceForge Debug");
+        // reset deletes this folder recursively, so the name is resolved and checked, not just filtered:
+        // ".." survives a character filter and would point the delete at Documents itself.
+        var dir = DebugTrace.ResolveFolder(
+                      debugRoot, root.TryGetProperty("baseName", out var bn) ? bn.GetString() : null)
+                  ?? Path.Combine(debugRoot, "fit");
         if (reset && Directory.Exists(dir))
         {
             try { Directory.Delete(dir, true); } catch { /* best effort */ }
@@ -834,13 +874,6 @@ public partial class MainWindow : Window
         var comma = dataUrl.IndexOf(',');
         var b64 = comma >= 0 ? dataUrl[(comma + 1)..] : dataUrl;
         try { return Convert.FromBase64String(b64); } catch { return null; }
-    }
-
-    private static string? Sanitize(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return null;
-        var cleaned = new string(name.Where(c => !Path.GetInvalidFileNameChars().Contains(c)).ToArray());
-        return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned.Trim();
     }
 
     private void ExportPackage(JsonElement root)

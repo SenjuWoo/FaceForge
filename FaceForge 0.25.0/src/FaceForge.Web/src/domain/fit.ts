@@ -48,9 +48,10 @@ export const EFM_FIT_SLIDERS: readonly string[] = [
  * DEBUG TRACE toggle. 1 = the fit attaches a per-pass numeric trace to every FitProgress AND the app
  * saves each pass's render (`<name>_pass<N>_front/profile.png`) plus a markdown log (and, if a vision
  * provider is configured, an LM justification per pass). 0 = off, zero overhead. Flip this one constant
- * between app versions to turn the whole debug harness on or off.
+ * between app versions to turn the whole debug harness on or off. It ships OFF: left on, every ratio-fit
+ * pass rendered two extra heads and wrote images of the fit into Documents without saying so.
  */
-export const DEBUG = 1;
+export const DEBUG: number = 0;
 
 const EFM_LIMIT = 3;
 const PERTURB = 1.0; // slider units used to probe each slider's measurement response

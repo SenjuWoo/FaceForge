@@ -502,7 +502,7 @@ export default function App() {
       case "baked-head-missing":
         setError(null);
         setNotice(
-          `No baked head named "${String(payload.name ?? "")}" yet. In RaceMenu, load the preset, then save it back out with sculpt data so Skyrim writes ${String(payload.expectedNif ?? "the CharGen NIF")} beside it.`
+          `No baked head named "${String(payload.name ?? "")}" yet. In RaceMenu, load the preset, open the Sculpt tab and choose Export Head with that name; that is the command that writes ${String(payload.expectedNif ?? "the CharGen NIF")}. Save Preset alone only writes the .jslot.`
         );
         break;
       case "template-loaded":
@@ -647,6 +647,9 @@ export default function App() {
         break;
       }
       case "native-error": {
+        // An error that carries a request id belongs to one render or sculpt request; whoever is
+        // awaiting that request reports it (or deliberately ignores it, for a best-effort preview).
+        if (typeof payload.requestId === "string" && payload.requestId.length > 0) break;
         const messageText = String(payload.message ?? "The desktop operation failed.");
         setIsAnalyzing(false);
         setIsIndexing(false);

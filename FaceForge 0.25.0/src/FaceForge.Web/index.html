@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#11151a" />
+    <!-- The interface never calls out. MediaPipe Tasks ships a usage logger that posts to Google; this
+         refuses every connection that is not to the app itself. Network features (vision refinement)
+         run in the desktop host, behind an explicit consent, not from this page. -->
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' data: blob:" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23d39a4a' d='M16 1 29 8.5v15L16 31 3 23.5v-15z'/%3E%3Cpath fill='%2311151a' d='M15 7h2v18h-2zM8 15h16v2H8z'/%3E%3C/svg%3E" />
     <title>FaceForge</title>
   </head>

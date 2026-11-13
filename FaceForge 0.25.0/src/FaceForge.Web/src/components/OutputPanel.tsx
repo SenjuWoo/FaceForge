@@ -707,7 +707,8 @@ export default function OutputPanel({
             A JSlot is not a head. FollowerForge lists a face only once Skyrim has baked the
             matching <code>{presetName}.nif</code> and <code>.dds</code> into
             <code> Data\SKSE\Plugins\CharGen</code>. Export the head stage, load it in RaceMenu at
-            the race and sex above, save the preset back out with sculpt data, then come back here.
+            the race and sex above, open the Sculpt tab and choose Export Head with this name, then come
+            back here. Save Preset alone writes only the JSlot.
           </p>
           <button
             type="button"

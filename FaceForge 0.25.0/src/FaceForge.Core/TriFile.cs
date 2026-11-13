@@ -98,19 +98,26 @@ public sealed class TriFile
         var morphCount = ReadCount(data, 36, path, "morph count");
         var hasUv = (flags & 1) != 0;
 
+        // Counts come from a mod file. Multiplied as plain ints, a damaged header wraps negative and the
+        // length checks below pass on nonsense; Advance refuses anything that cannot fit instead.
+        var deltaCount = Advance(vertexCount, 3, path);
+        var triangleIndexCount = Advance(triangleCount, 3, path);
         var offset = HeaderLength;
-        var vertices = ReadFloats(data, ref offset, vertexCount * 3, path);
-        var triangles = ReadIndices(data, ref offset, triangleCount * 3, path);
+        var vertices = ReadFloats(data, ref offset, deltaCount, path);
+        var triangles = ReadIndices(data, ref offset, triangleIndexCount, path);
         var uvs = Array.Empty<float>();
         var triangleUvs = Array.Empty<int>();
         if (hasUv)
         {
-            uvs = ReadFloats(data, ref offset, uvCount * 2, path);
-            triangleUvs = ReadIndices(data, ref offset, triangleCount * 3, path);
+            uvs = ReadFloats(data, ref offset, Advance(uvCount, 2, path), path);
+            triangleUvs = ReadIndices(data, ref offset, triangleIndexCount, path);
         }
 
+        // Every morph needs at least its 8-byte name length and multiplier, so a count the remaining
+        // bytes cannot hold is a damaged header, not a reason to reserve gigabytes.
+        if ((long)morphCount * 8 > data.Length - offset)
+            throw new InvalidDataException($"Implausible morph count in {path}.");
         var morphs = new List<TriMorph>(morphCount);
-        var deltaCount = vertexCount * 3;
         for (var index = 0; index < morphCount; index++)
         {
             var nameLength = ReadCount(data, offset, path, "morph name length");
@@ -123,7 +130,7 @@ public sealed class TriFile
             var multiplier = BinaryPrimitives.ReadSingleLittleEndian(data.AsSpan(offset));
             offset += sizeof(float);
 
-            Require(data, offset, deltaCount * sizeof(short), path, "morph deltas");
+            Require(data, offset, (long)deltaCount * sizeof(short), path, "morph deltas");
             var deltas = MemoryMarshal
                 .Cast<byte, short>(data.AsSpan(offset, deltaCount * sizeof(short)))
                 .ToArray();
@@ -171,7 +178,7 @@ public sealed class TriFile
 
     private static float[] ReadFloats(byte[] data, ref int offset, int count, string path)
     {
-        Require(data, offset, count * sizeof(float), path, "vertex block");
+        Require(data, offset, (long)count * sizeof(float), path, "vertex block");
         var values = MemoryMarshal
             .Cast<byte, float>(data.AsSpan(offset, count * sizeof(float)))
             .ToArray();
@@ -198,7 +205,7 @@ public sealed class TriFile
 
     private static void Require(byte[] data, int offset, long length, string path, string what)
     {
-        if (offset < 0 || offset + length > data.Length)
+        if (offset < 0 || length < 0 || offset + length > data.Length)
         {
             throw new InvalidDataException($"Truncated {what} in {path}.");
         }

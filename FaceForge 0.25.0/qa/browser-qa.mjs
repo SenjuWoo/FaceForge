@@ -31,9 +31,18 @@ const consoleNotes = [];
 const pageErrors = [];
 const requestFailures = [];
 const httpErrors = [];
+// The interface must not talk to the network at all: the landmark library ships a usage logger
+// that posts to a Google endpoint, and FaceForge promises that analysis stays on the machine.
+const externalRequests = [];
+const isLocal = (url) => /^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/|data:|blob:|about:)/.test(url);
+page.on("request", (request) => {
+  if (!isLocal(request.url())) externalRequests.push(request.url());
+});
 page.on("console", (message) => {
   if (message.type() === "error") {
-    if (message.text().includes("Created TensorFlow Lite XNNPACK delegate")) {
+    if (message.text().includes("Created TensorFlow Lite XNNPACK delegate") ||
+        // The page's own policy refusing an outbound call is the guard working, not a defect.
+        message.text().includes("Content Security Policy")) {
       consoleNotes.push(message.text());
     } else {
       consoleErrors.push(message.text());
@@ -351,10 +360,21 @@ const checks = {
       .map((entry) => entry.name)
       .filter((name) => name.includes("face_landmarker.task") || name.includes("vision_wasm"))
   ),
+  // Deterministic proof, independent of whether the library's logger happened to fire during the run:
+  // the page tries the logger's own endpoint and must be refused before anything is sent.
+  outboundBlocked: await page.evaluate(async () => {
+    try {
+      await fetch("https://odml.pa.googleapis.com/v1/log", { method: "POST", body: "probe" });
+      return false;
+    } catch {
+      return true;
+    }
+  }),
+  externalRequests,
   consoleErrors,
   consoleNotes,
   pageErrors,
-  requestFailures,
+  requestFailures: requestFailures.filter((entry) => !entry.startsWith("https://odml.pa.googleapis.com/")),
   httpErrors
 };
 
@@ -423,6 +443,8 @@ if (
   !checks.freshDependencies ||
   !checks.freshHeadPartsEmpty ||
   checks.modelRequests.length < 2 ||
+  !checks.outboundBlocked ||
+  checks.externalRequests.length > 0 ||
   checks.consoleErrors.length > 0 ||
   checks.pageErrors.length > 0 ||
   checks.requestFailures.length > 0 ||
