@@ -1,7 +1,7 @@
 FaceForge 0.25.0
 
 Parent: FaceForge 0.24.3 (GitHub main) + GitHub PR #1 commit 70939cd (closed, never merged)
-Status: public beta, GitHub pre-release v0.25.0-beta.3 (2026-11-13). Not a full release until a
+Status: public beta, GitHub pre-release v0.25.0-beta.4 (2026-11-13). Not a full release until a
 preset has been checked in RaceMenu.
 - src/ = 0.24.3 with the 33 files of PR #1 overlaid (native head renderer, measured-Jacobian fit,
   Match pane, sculpt reshape, BSA/MO2/DDS support).
@@ -9,7 +9,7 @@ preset has been checked in RaceMenu.
 - Adds photo colour extraction and export (skin-tone tint, hair colour) with swatches in the output panel.
 - Adds qa/bench/: synthetic round-trip benchmark (head model, render, pipeline runner, scorer).
 Agents: Claude Code (Sonnet 5.5) started 0.25.0; continued by Hermes on 2026-11-07.
-Verified (beta.3): package.ps1 end to end with 0 warnings, 136 frontend tests, 131 native assertions
+Verified (beta.4): package.ps1 end to end with 0 warnings, 136 frontend tests, 131 native assertions
 (counted at run time), browser and layout QA, and the extracted download driven over the WebView2
 debugging port (qa/packaged-app-check.mjs).
 - Adds manual vision-provider paths (Settings > Locate...) and known install folders to CLI detection.

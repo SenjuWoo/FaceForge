@@ -16,10 +16,22 @@ const { chromium } = createRequire(new URL("../src/FaceForge.Web/package.json", 
 const browser = await chromium.connectOverCDP("http://127.0.0.1:9222");
 const page = browser.contexts()[0].pages()[0];
 await page.waitForLoadState("domcontentloaded");
+// The first launch of a freshly extracted EXE can still be navigating when the debugger attaches (seen once
+// in four runs), which destroys the execution context under a probe. A probe is read-only, so it is retried.
+async function probe(fn) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await page.evaluate(fn);
+    } catch (error) {
+      if (attempt >= 3 || !/context was destroyed|navigation/i.test(String(error))) throw error;
+      await page.waitForLoadState("domcontentloaded");
+    }
+  }
+}
 const result = { url: page.url(), title: await page.title() };
 
 // 1. The page cannot reach the usage logger's endpoint (page policy + host filter).
-result.outboundBlocked = await page.evaluate(async () => {
+result.outboundBlocked = await probe(async () => {
   try {
     await fetch("https://odml.pa.googleapis.com/v1/log", { method: "POST", body: "probe" });
     return false;
@@ -28,7 +40,7 @@ result.outboundBlocked = await page.evaluate(async () => {
   }
 });
 // 2. An image request to another host is answered by the host filter, not the network.
-result.foreignImageBlocked = await page.evaluate(
+result.foreignImageBlocked = await probe(
   () =>
     new Promise((resolve) => {
       const image = new Image();

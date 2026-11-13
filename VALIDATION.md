@@ -1,10 +1,26 @@
 # FaceForge validation
 
-Active candidate: **0.25.0-beta.3** - built, packaged and published as a **pre-release**. Every gate
+Active candidate: **0.25.0-beta.4** - built, packaged and published as a **pre-release**. Every gate
 below is out of game; the one still missing is a RaceMenu load, which is why this is a beta and not a
 full release.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+
+## 2026-11-13 - dependency updates and beta.4
+
+PASS, with the limits listed at the end.
+
+| Gate | Result |
+|---|---|
+| `package.ps1` | exit 0, 0 warnings, 0 errors; lockfile accepted by `--frozen-lockfile` |
+| Frontend tests | 136 passed, 12 files, under TypeScript 7.0.2 |
+| Native validation | PASS, 131 assertions |
+| Browser QA / layout QA | green / 4 of 4 sizes |
+| Install test | ZIP extracted to an empty folder; EXE hash equals the built one |
+| Packaged EXE `qa/packaged-app-check.mjs` | passed 3 of 3 reruns; the first run failed once on a start-up navigation, now retried in the script |
+| MediaPipe 1.2.0 vs 1.2.2 | landmarks for p1-p5 identical (0.0 difference in eye-distance units) through the app's own detector; the WASM binaries differ |
+
+Not covered: nothing was loaded in Skyrim; no live vision request; the bench Python tests were not re-run.
 
 ## 2026-11-13 - second audit pass and beta.3
 

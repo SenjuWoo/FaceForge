@@ -1,5 +1,15 @@
 # FaceForge state
 
+## 2026-11-13 (dependency updates, 0.25.0-beta.4)
+
+The six open Dependabot PRs (18, 20-24) were reviewed, applied in one commit and closed by Dependabot
+once merged: TypeScript 7.0.2 (needs `src/assets.d.ts` for CSS imports), vite 8.3.7, plugin-react 6.3.0,
+react + react-dom 19.3.1 + @types/react-dom 19.3.0, @mediapipe/tasks-vision 1.2.2, upload-artifact 7.
+MediaPipe 1.2.2 landmarks equal 1.2.0 on p1-p5 (0.0 difference). Gate and packaged-EXE check as in
+VALIDATION.md. Artifacts: EXE 129,379,846 bytes `821A5106DDA562987D653D1428CDB1980D2CC77739399260DBB80BBB1C09CF13`;
+ZIP 122,498,437 bytes `E7F67A2E454552E22A5BBC87721CD958D6CC7D4CC0F9278B01C34C73DD66221E`.
+Open items unchanged from the beta.3 entry below.
+
 ## 2026-11-13 (second audit pass, 0.25.0-beta.3)
 
 Read in full: HeadRenderer, MorphRegistry, EnvironmentCatalog, EnvironmentDiscovery, Mo2Environment,

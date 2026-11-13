@@ -36,7 +36,7 @@
 ## Quick start
 
 **0.25.0 is a public beta.** Download it from
-**[v0.25.0-beta.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.3)** — it is marked
+**[v0.25.0-beta.4](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.4)** — it is marked
 pre-release because no generated preset has been loaded in Skyrim yet, so treat the in-game look as
 unproven. The last full release is still
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
@@ -158,5 +158,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 129,232,434 bytes. SHA-256: `1CD32494B51CB1277D2FBF6F46D0AFE289B28280C1CAD9EFD2D3129EF2E63375`.
-Zip: 122,356,054 bytes. SHA-256: `972989A62012B1F75931E45B42791C86837F31EE4F2F666DDE693B078EECFC27`.
+EXE: 129,379,846 bytes. SHA-256: `821A5106DDA562987D653D1428CDB1980D2CC77739399260DBB80BBB1C09CF13`.
+Zip: 122,498,437 bytes. SHA-256: `E7F67A2E454552E22A5BBC87721CD958D6CC7D4CC0F9278B01C34C73DD66221E`.

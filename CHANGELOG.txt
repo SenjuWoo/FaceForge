@@ -2,6 +2,23 @@
 # One living file.
 
 ================================================================================
+## [0.25.0-beta.4] - 2026-11-13 - dependency updates
+Parent: 0.25.0-beta.3. Snapshot: `FaceForge 0.25.0/`. Pre-release, same reason as before.
+
+No behaviour change. The six open Dependabot pull requests were reviewed and applied together:
+- `typescript` 5.9.3 -> 7.0.2. TypeScript 7 checks side-effect imports, so `import "./styles.css"` needed a
+  declaration (`src/assets.d.ts`); that was the only error it raised.
+- `vite` 8.3.5 -> 8.3.7, `@vitejs/plugin-react` 6.1.2 -> 6.3.0.
+- `react` and `react-dom` 19.2.8 -> 19.3.1 together, `@types/react-dom` 19.2.3 -> 19.3.0.
+- `@mediapipe/tasks-vision` 1.2.0 -> 1.2.2. Landmarks for the five fixture photos were compared against 1.2.0
+  through the app's own detector: identical (0.0 difference). The package no longer ships the no-SIMD
+  fallback WASM; WebView2 supports SIMD.
+- `actions/upload-artifact` 4 -> 7 in CI.
+
+The packaged-app check retries a probe if the first launch of a freshly extracted EXE is still navigating
+(it failed once in four runs; the three reruns passed).
+
+================================================================================
 ## [0.25.0-beta.3] - 2026-11-13 - second audit pass
 Parent: 0.25.0-beta.2. Snapshot: `FaceForge 0.25.0/`. Pre-release, same reason as before.
 

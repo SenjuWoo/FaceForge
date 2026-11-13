@@ -13,4 +13,4 @@ No other FaceForge project or prior release was found before this project was cr
 - Root moved 2026-10-30 (after a PC reset): the authoritative project root is the checkout of GitHub
   `SenjuWoo/FaceForge` `main`, snapshot-folder layout kept. Active owner: Claude Code.
 - 2026-11-13: the root is a real git checkout again (it had been a copy without `.git`). Active
-  version: `FaceForge 0.25.0`, published as pre-release `v0.25.0-beta.3`.
+  version: `FaceForge 0.25.0`, published as pre-release `v0.25.0-beta.4`.
