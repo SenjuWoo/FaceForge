@@ -36,7 +36,7 @@
 ## Quick start
 
 **0.25.0 is a public beta.** Download it from
-**[v0.25.0-beta.2](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.2)** — it is marked
+**[v0.25.0-beta.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.25.0-beta.3)** — it is marked
 pre-release because no generated preset has been loaded in Skyrim yet, so treat the in-game look as
 unproven. The last full release is still
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
@@ -95,7 +95,7 @@ that is why 0.25.0 ships as a pre-release.
 Verified in this tree:
 
 - `FaceForge 0.25.0/` is the ship snapshot (`CURRENT.txt`)
-- 131 frontend tests and 131 native assertions (the native count is tallied at run time)
+- 136 frontend tests and 131 native assertions (the native count is tallied at run time)
 - TypeScript clean, .NET Release clean, 0 warnings
 - `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame)
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
@@ -158,5 +158,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-EXE: 129,232,432 bytes. SHA-256: `4AC2D24BEB32542CC12937DE3EB38F46BB904A549B5B69EE6A604C2AD4535C5C`.
-Zip: 122,355,391 bytes. SHA-256: `35CD28E71AB152F3748AADBC3EB047CDB1A73366F72B7633278E77866D3EF360`.
+EXE: 129,232,434 bytes. SHA-256: `1CD32494B51CB1277D2FBF6F46D0AFE289B28280C1CAD9EFD2D3129EF2E63375`.
+Zip: 122,356,054 bytes. SHA-256: `972989A62012B1F75931E45B42791C86837F31EE4F2F666DDE693B078EECFC27`.

@@ -10,6 +10,7 @@ import {
   type RenderTargetMeta
 } from "./domain/headRender";
 import { readPhotoColors } from "./domain/appearance";
+import { clearJacobians } from "./domain/denseFit";
 import { classifyIris, type PhotoColors } from "./domain/photoColors";
 import { efmSliderNames } from "./domain/fit";
 import Header from "./components/Header";
@@ -488,6 +489,8 @@ export default function App() {
         break;
       case "environment-indexed": {
         const indexed = message.payload as EnvironmentSummary;
+        // Measured slider responses belong to the install they were measured on.
+        clearJacobians();
         setEnvironment(indexed);
         setAppearanceSelections({});
         setManualAppearanceCategories(new Set());

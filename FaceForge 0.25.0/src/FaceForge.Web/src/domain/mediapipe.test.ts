@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
-import { selectPrimaryFace, withPrimaryFaceFirst } from "./mediapipe";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getFaceLandmarker, selectPrimaryFace, withPrimaryFaceFirst } from "./mediapipe";
 import type { FaceLandmarkerResult, NormalizedLandmark } from "@mediapipe/tasks-vision";
+
+// Only the construction path is faked; the pure selection helpers below never touch the library.
+const library = vi.hoisted(() => ({ create: vi.fn() }));
+vi.mock("@mediapipe/tasks-vision", () => ({
+  FaceLandmarker: { createFromOptions: library.create },
+  FilesetResolver: { forVisionTasks: vi.fn(async () => ({})) }
+}));
 
 const box = (
   minX: number,
@@ -63,5 +70,25 @@ describe("primary face selection", () => {
     expect(ordered.faceLandmarks[0]).toBe(result.faceLandmarks[1]);
     expect(ordered.faceBlendshapes[0].categories[0].categoryName).toBe("face1");
     expect(ordered.faceLandmarks).toHaveLength(2);
+  });
+});
+
+describe("landmarker construction", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    library.create.mockReset();
+  });
+
+  it("retries after a failed load instead of caching the failure for the rest of the session", async () => {
+    vi.stubGlobal("window", { location: { href: "https://app.faceforge/index.html" } });
+    // GPU delegate fails, then the CPU fallback fails too: the whole load rejects.
+    library.create
+      .mockRejectedValueOnce(new Error("gpu unavailable"))
+      .mockRejectedValueOnce(new Error("model file unreadable"))
+      .mockResolvedValue({ detect: vi.fn() });
+
+    await expect(getFaceLandmarker()).rejects.toThrow("model file unreadable");
+    // A transient failure (file briefly locked, WASM not yet extracted) must not poison later attempts.
+    await expect(getFaceLandmarker()).resolves.toBeDefined();
   });
 });

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   applySimilarity,
+  assembleJacobian,
   boundedRidge,
   cachedJacobian,
+  clearJacobians,
   deserializeJacobian,
   DENSE_LANDMARKS,
   fitSimilarity,
@@ -11,7 +13,8 @@ import {
   serializeJacobian,
   storeJacobian,
   solveDense,
-  type DenseJacobian
+  type DenseJacobian,
+  type DetectedPoints
 } from "./denseFit";
 
 // Produced by qa/bench/phase2.py (bounded_ridge, umeyama) on a seeded problem; the TypeScript port must agree.
@@ -107,5 +110,52 @@ describe("dense fit solver", () => {
     expect(cachedJacobian(jac.key)?.names).toEqual(jac.names);
     forgetJacobian(jac.key);
     expect(cachedJacobian(jac.key)).toBeNull();
+  });
+
+  // Re-indexing can change which mods (and so which morphs) the head has; a response measured before
+  // that no longer describes the head, so a new index must start from nothing.
+  it("drops every measured Jacobian when the install is re-indexed", () => {
+    const jac = syntheticJacobian(["EFM_A", "EFM_B"]);
+    storeJacobian(jac);
+    clearJacobians();
+    expect(cachedJacobian(jac.key)).toBeNull();
+  });
+
+  // A render the detector could not read used to become an all-zero column with no trace, so the slider
+  // looked measured and simply never moved in the fit.
+  describe("assembling a Jacobian from detections", () => {
+    const detection = (offset: number): DetectedPoints => {
+      const points = new Float64Array(ROWS);
+      for (let i = 0; i < ROWS; i++) points[i] = 100 + (i % 17) + offset * (i % 3);
+      return { points, width: 768, height: 768, samples: 4 };
+    };
+    const meta = { sex: "female" as const, highPoly: true, race: null };
+
+    it("names the slider responses it could not read", () => {
+      const detected = new Map<string, DetectedPoints | null>([
+        ["neutral", detection(0)],
+        ["EFM_A|pos", detection(1)],
+        ["EFM_A|neg", detection(-1)],
+        ["EFM_B|pos", detection(2)],
+        ["EFM_B|neg", null]
+      ]);
+      const jac = assembleJacobian(meta, ["EFM_A", "EFM_B"], detected);
+      expect(jac.columns).toHaveLength(4);
+      expect(jac.unreadable).toEqual(["EFM_B|neg"]);
+      expect(Array.from(jac.columns[3]).every((value) => value === 0)).toBe(true);
+    });
+
+    it("reports nothing unreadable when every render was read", () => {
+      const detected = new Map<string, DetectedPoints | null>([
+        ["neutral", detection(0)],
+        ["EFM_A|pos", detection(1)],
+        ["EFM_A|neg", detection(-1)]
+      ]);
+      expect(assembleJacobian(meta, ["EFM_A"], detected).unreadable).toEqual([]);
+    });
+
+    it("refuses to build without a readable neutral head", () => {
+      expect(() => assembleJacobian(meta, ["EFM_A"], new Map([["neutral", null]]))).toThrow(/neutral head/);
+    });
   });
 });

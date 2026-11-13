@@ -183,6 +183,11 @@ export interface DenseJacobian {
   neutral: Points;
   /** 2n columns of 936: the n positive-morph responses, then the n negative-morph responses, per slider unit. */
   columns: Float64Array[];
+  /**
+   * Render ids ("EFM_X|pos") whose landmarks could not be read. Their column is all zeros, so those
+   * slider directions cannot move in a fit; this list is how that is said out loud.
+   */
+  unreadable?: string[];
 }
 
 export interface DenseSolution {
@@ -365,11 +370,26 @@ export async function measureJacobian(
       fraction: Math.min(1, (start + batch.length) / requests.length)
     });
   }
+  return assembleJacobian(meta, names, detected);
+}
+
+/** Builds the Jacobian from the detections of the neutral render and of every slider at +-DENSE_DELTA. */
+export function assembleJacobian(
+  meta: RenderTargetMeta,
+  names: readonly string[],
+  detected: ReadonlyMap<string, DetectedPoints | null>
+): DenseJacobian {
   const neutral = detected.get("neutral");
   if (!neutral) throw new Error("The detector could not read the neutral head render. Confirm Skyrim is indexed.");
+  const unreadable: string[] = [];
   const column = (id: string): Float64Array => {
     const d = detected.get(id);
-    if (!d) return new Float64Array(ROWS); // unreadable render: this slider is treated as having no effect
+    if (!d) {
+      // The render is missing or the detector found no face in it. The slider direction then has no
+      // measured effect; it is recorded so the fit result can say so instead of looking complete.
+      unreadable.push(id);
+      return new Float64Array(ROWS);
+    }
     const mapped = applySimilarity(fitSimilarity(d.points, neutral.points), d.points);
     const out = new Float64Array(ROWS);
     for (let k = 0; k < ROWS; k++) out[k] = (mapped[k] - neutral.points[k]) / DENSE_DELTA;
@@ -380,7 +400,8 @@ export async function measureJacobian(
     names: [...names],
     delta: DENSE_DELTA,
     neutral: neutral.points,
-    columns: [...names.map((n) => column(`${n}|pos`)), ...names.map((n) => column(`${n}|neg`))]
+    columns: [...names.map((n) => column(`${n}|pos`)), ...names.map((n) => column(`${n}|neg`))],
+    unreadable
   };
 }
 
@@ -443,6 +464,11 @@ export function forgetJacobian(key: string): void {
   memory.delete(key);
 }
 
+/** Forgets every measured Jacobian, for when the install behind them has been re-indexed. */
+export function clearJacobians(): void {
+  memory.clear();
+}
+
 export interface DenseFitOptions {
   meta: RenderTargetMeta;
   sliderNames: readonly string[];
@@ -460,6 +486,8 @@ export interface DenseFitResult {
   sliders: Record<string, number>;
   residual: number;
   measuredJacobian: boolean;
+  /** Slider names with at least one direction whose head render the detector could not read. */
+  unreadableSliders: string[];
 }
 
 export async function denseFitSliders(options: DenseFitOptions): Promise<DenseFitResult> {
@@ -482,5 +510,6 @@ export async function denseFitSliders(options: DenseFitOptions): Promise<DenseFi
   // Every fitted slider is written, zeros included: the caller merges this over the existing values, and a
   // slider the photo does not move must not keep a value from an earlier one-shot pass.
   for (const name of sliderNames) sliders[name] = solution.sliders[name] ?? 0;
-  return { sliders, residual: solution.residual, measuredJacobian: measured };
+  const unreadableSliders = [...new Set((jac.unreadable ?? []).map((id) => id.split("|")[0]))];
+  return { sliders, residual: solution.residual, measuredJacobian: measured, unreadableSliders };
 }

@@ -1,10 +1,36 @@
 # FaceForge validation
 
-Active candidate: **0.25.0-beta.2** - built, packaged and published as a **pre-release**. Every gate
+Active candidate: **0.25.0-beta.3** - built, packaged and published as a **pre-release**. Every gate
 below is out of game; the one still missing is a RaceMenu load, which is why this is a beta and not a
 full release.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+
+## 2026-11-13 - second audit pass and beta.3
+
+PASS, with the limits listed at the end.
+
+| Gate | Result |
+|---|---|
+| `package.ps1` | exit 0, 0 warnings, 0 errors |
+| Frontend tests | 136 passed, 12 files (+5: landmarker retry, cache clear, Jacobian assembly x3) |
+| Native validation | PASS, 131 assertions |
+| Browser QA | green: no request leaves localhost, logger endpoint refused, 0 console errors |
+| Layout QA | 4 of 4 sizes pass |
+| Install test | ZIP extracted to an empty folder; EXE hash equals the built one |
+| Packaged EXE `qa/packaged-app-check.mjs` | loads at `https://app.faceforge/`, analyses the bundled portrait, network probe refused, foreign image refused, navigation refused |
+
+Failing-first reproducers: the landmarker retry test failed with the cached rejection before the fix.
+The Jacobian tests cover the new functions (they could not fail before: they did not exist).
+
+Robustness probe (scratch test, removed): `measureFace` + `generateEfmSliders` on all-equal points,
+pseudo-random noise, a NaN landmark and sub-pixel spread gave a clear error or 64 finite sliders.
+
+Not covered: the bench Python tests were not re-run (their virtual environment was removed by an
+earlier cleanup and no bench code changed); a live vision request; nothing was loaded in Skyrim.
+Files read by search only, not line by line: `faceAnalysis.ts`, `sourceCorrection.ts`, `multiView.ts`,
+`occlusion.ts`, `imageStyle.ts`, `headPartPreferences.ts`, `hphCalibration.ts`, `sliderCatalog.ts`
+and the panels. They are covered by 136 tests and by browser QA, not by review.
 
 ## 2026-11-13 - audit and beta.2
 

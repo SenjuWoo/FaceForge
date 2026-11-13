@@ -43,7 +43,12 @@ const createLandmarker = async (confidence: number): Promise<FaceLandmarker> => 
 };
 
 export const getFaceLandmarker = (): Promise<FaceLandmarker> => {
-  landmarkerPromise ??= createLandmarker(0.6);
+  // A failed load must not be remembered: a cached rejection would make every later photo fail the same
+  // way until the app is restarted, even if the cause (a file still being extracted) was momentary.
+  landmarkerPromise ??= createLandmarker(0.6).catch((error: unknown) => {
+    landmarkerPromise = null;
+    throw error;
+  });
   return landmarkerPromise;
 };
 
@@ -52,7 +57,10 @@ export const getFaceLandmarker = (): Promise<FaceLandmarker> => {
  * Thresholds are fixed at construction, so a lenient retry needs its own instance.
  */
 const getLenientLandmarker = (): Promise<FaceLandmarker> => {
-  lenientLandmarkerPromise ??= createLandmarker(0.2);
+  lenientLandmarkerPromise ??= createLandmarker(0.2).catch((error: unknown) => {
+    lenientLandmarkerPromise = null;
+    throw error;
+  });
   return lenientLandmarkerPromise;
 };
 

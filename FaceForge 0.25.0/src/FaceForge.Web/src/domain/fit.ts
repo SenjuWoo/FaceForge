@@ -257,7 +257,7 @@ const RENDER_RELIABILITY: Partial<Record<MeasurementKey, number>> = {
  * Extra loss weight on the proportions that define the overall silhouette and the chin-anchored lower
  * face -- the two things a real-photo fit most often leaves on the table.
  *
- * Measured on Gal Gadot's front photo through the app's own measureFace (the authority, not the rough
+ * Measured on a real front photo through the app's own measureFace (the authority, not the rough
  * offline landmarks): the neutral Imperial-HPH head is far too round -- faceAspect 1.08 against a
  * target of 1.23 -- and its jaw is too wide (0.84 vs 0.78). Those are the biggest residuals in the
  * whole fit, and the face reads "round, not elongated" until they are paid down; faceAspect is raised

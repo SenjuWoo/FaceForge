@@ -293,7 +293,10 @@ export default function MatchPanel({
           void renderPreviews(dense.sliders);
           setNotice(
             `Sliders fitted to the front photo from 468 landmarks${dense.measuredJacobian ? " (this head's slider response was measured and saved)" : ""}. ` +
-              `Remaining landmark error ${(dense.residual * 100).toFixed(1)}% of eye distance. Side views are not used by this method.`
+              `Remaining landmark error ${(dense.residual * 100).toFixed(1)}% of eye distance. Side views are not used by this method.` +
+              (dense.unreadableSliders.length > 0
+                ? ` ${dense.unreadableSliders.length} slider${dense.unreadableSliders.length === 1 ? "" : "s"} could not be measured on this head (the detector lost the face in their test render) and stayed at zero: ${dense.unreadableSliders.slice(0, 6).join(", ")}${dense.unreadableSliders.length > 6 ? ", …" : ""}.`
+                : "")
           );
           return;
         } catch (reason) {

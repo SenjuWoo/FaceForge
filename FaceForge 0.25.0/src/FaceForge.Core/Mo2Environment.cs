@@ -96,7 +96,7 @@ public static partial class Mo2Environment
 
     /// <summary>
     /// Reads <c>ModOrganizer.ini</c> for the managed game path -- the reliable source, since a single
-    /// MO2 instance manages exactly one game install (here, Skyrim VR). Falls back to FaceForge's own
+    /// MO2 instance manages exactly one game install. Falls back to FaceForge's own
     /// Skyrim discovery, then returns null so the caller can surface a clear error.
     /// </summary>
     private static string? ResolveGameDataPath(string baseDir)

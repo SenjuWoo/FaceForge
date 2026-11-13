@@ -1,5 +1,36 @@
 # FaceForge state
 
+## 2026-11-13 (second audit pass, 0.25.0-beta.3)
+
+Read in full: HeadRenderer, MorphRegistry, EnvironmentCatalog, EnvironmentDiscovery, Mo2Environment,
+ResolvedDataView, DdsTexture, CharGenCatalog, PresetInspector, PluginHeaderReader, HeadPartCatalog,
+SkyrimRecordIndex, BsaIndex, BsaMorphIndex, DeploymentManifestReader, denseFit.ts, photoColors.ts,
+mediapipe.ts, the analysis/vision/export parts of App.tsx, and fit.ts lines 1-390.
+Not read line by line: faceAnalysis.ts, sourceCorrection.ts, multiView.ts, occlusion.ts,
+imageStyle.ts, headPartPreferences.ts, hphCalibration.ts, sliderCatalog.ts, OutputPanel, SourcePanel,
+AnalysisPanel, AboutModal, the second half of fit.ts. They have tests (136) and browser QA.
+
+Fixed (see CHANGELOG 0.25.0-beta.3): landmarker load failure was cached for the session; measured
+Jacobians survived a re-index; unreadable slider renders were silent zeros; Dependabot split
+react/react-dom; a real person's name in a comment. Test: mediapipe retry (failed first), Jacobian
+clear and assembly. 136 frontend tests, 131 native assertions, 0 build warnings.
+
+Verified by running: package.ps1 exit 0; browser QA and layout QA green; beta.3 ZIP extracted and its
+EXE driven with qa/packaged-app-check.mjs. Degenerate-landmark probe: clear error or finite sliders.
+
+Artifacts: EXE 129,232,434 bytes `1CD32494B51CB1277D2FBF6F46D0AFE289B28280C1CAD9EFD2D3129EF2E63375`;
+ZIP 122,356,054 bytes `972989A62012B1F75931E45B42791C86837F31EE4F2F666DDE693B078EECFC27`.
+
+Left, with reasons (details in CHANGELOG):
+- Physical (Vortex/direct) installs treat every deployed plugin as installed, ignoring plugins.txt.
+  All 3,017 plugins here are active (plugins.txt + Skyrim.ccc + base), so it cannot be shown to matter
+  on this machine; filtering on another layout without a way to test risks dropping real parts.
+- BsaMorphIndex prefers archive morphs to loose ones (the game prefers loose).
+- Chargen meshes are re-read for every render (first measurement ~10 s).
+- Dependabot PRs 18-23 are open; 19 (react alone) must not be merged by itself.
+- A Claude/Codex/Gemini round trip returning slider values is still unproven (CLI signed out here).
+- Bench Python tests not re-run (no venv; no bench code changed).
+
 ## 2026-11-13 (full audit, fixes, 0.25.0-beta.2)
 
 Goal: audit the whole tree, fix what is broken or untrue with a failing test first, release through

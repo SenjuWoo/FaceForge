@@ -86,8 +86,8 @@ public sealed class DdsTexture
                 _ => 0 // uncompressed
             };
 
-            // Walk the mip chain to the smallest mip whose largest side is still >= maxSize (or the
-            // last mip), so the decode stays cheap.
+            // Walk the mip chain to the first (largest) mip whose longest side is <= maxSize, or the
+            // last mip, so the decode stays cheap.
             var offset = headerSize;
             var mipWidth = width;
             var mipHeight = height;
