@@ -1,0 +1,125 @@
+{
+ "date": "2026-10-30",
+ "tree": "FaceForge 0.25.0 (0.24.3 + PR #1); one-shot path code identical to 0.24.3 (faceAnalysis.ts diff is +33/-0)",
+ "model": "[U] linear EFM head-mesh model (headmodel.py), renders not photographs, EFM family only, seed 1, 30 cases of 6-12 sliders in [-2,2] drawn from the 56 sliders the one-shot path writes",
+ "oneshot_by_head": {
+  "hph_female": {
+   "n": 30,
+   "found": 30,
+   "slider_corr": 0.05443966543376611,
+   "sign_agree": 0.38990825688073394,
+   "rmse_rel_height": 0.007610411293686998,
+   "null_rmse_rel_height": 0.007935274769747086,
+   "skill": 0.08020230339397727,
+   "neutral_bias_rmse_rel_height": 0.0026791361160576344
+  },
+  "hph_male": {
+   "n": 30,
+   "found": 30,
+   "slider_corr": 0.02784317388882054,
+   "sign_agree": 0.44495412844036697,
+   "rmse_rel_height": 0.0063058438524750664,
+   "null_rmse_rel_height": 0.00577642590657382,
+   "skill": -0.19170293959479068,
+   "neutral_bias_rmse_rel_height": 0.0028240110259503126
+  },
+  "vanilla_female": {
+   "n": 30,
+   "found": 30,
+   "slider_corr": 0.01167078212098145,
+   "sign_agree": 0.41284403669724773,
+   "rmse_rel_height": 0.008470143665857792,
+   "null_rmse_rel_height": 0.00812608297079451,
+   "skill": -0.08647327644147551,
+   "neutral_bias_rmse_rel_height": 0.004778377711772919
+  },
+  "vanilla_male": {
+   "n": 30,
+   "found": 30,
+   "slider_corr": -0.016991788712372242,
+   "sign_agree": 0.3944954128440367,
+   "rmse_rel_height": 0.007992515204182081,
+   "null_rmse_rel_height": 0.005769988792744171,
+   "skill": -0.9187438596009323,
+   "neutral_bias_rmse_rel_height": 0.005499807186424732
+  }
+ },
+ "hph_female_fit_vs_oneshot_python_photos": {
+  "oneshot": {
+   "n": 30,
+   "found": 30,
+   "found_rate": 1.0,
+   "slider_corr": 0.05443966543376611,
+   "sign_agree": 0.38990825688073394,
+   "rmse_rel_height": 0.007610411293686998,
+   "null_rmse_rel_height": 0.007935274769747086,
+   "skill": 0.08020230339397727
+  },
+  "fit": {
+   "n": 30,
+   "found": 30,
+   "found_rate": 1.0,
+   "slider_corr": 0.04107710039086214,
+   "sign_agree": 0.2798165137614679,
+   "rmse_rel_height": 0.01886416261214036,
+   "null_rmse_rel_height": 0.007935274769747086,
+   "skill": -4.651335936214128
+  },
+  "fit_seconds_mean": 8.3287,
+  "fit_renders_mean": 404.8
+ },
+ "hph_female_same_renderer_best_case": {
+  "oneshot": {
+   "n": 30,
+   "found": 30,
+   "found_rate": 1.0,
+   "slider_corr": 0.05506586000544198,
+   "sign_agree": 0.40825688073394495,
+   "rmse_rel_height": 0.007672332678769891,
+   "null_rmse_rel_height": 0.007935274769747086,
+   "skill": 0.06517371946515349
+  },
+  "fit": {
+   "n": 30,
+   "found": 30,
+   "found_rate": 1.0,
+   "slider_corr": 0.05141981295611426,
+   "sign_agree": 0.3119266055045872,
+   "rmse_rel_height": 0.01319688418737652,
+   "null_rmse_rel_height": 0.007935274769747086,
+   "skill": -1.7657878988089197
+  }
+ },
+ "hph_female_image_skill_incl_reshape_python_photos": {
+  "yaw0": {
+   "oneshot": -0.37305295806223393,
+   "fit": -2.439639945095548,
+   "neutral_err_sum": 0.1193701826268807
+  },
+  "yaw35": {
+   "oneshot": -0.33567778206400534,
+   "fit": -3.0025922833347245,
+   "neutral_err_sum": 0.10316395782865584
+  }
+ },
+ "hph_female_objective_vs_optimiser_same_renderer_12_cases": {
+  "truth": {
+   "median": 0.42426944002729083,
+   "mean": 0.5269097637269649
+  },
+  "neutral": {
+   "median": 0.8066856325080198,
+   "mean": 0.8542431251551373
+  },
+  "oneshot": {
+   "median": 0.2701790942152043,
+   "mean": 0.298750533341723
+  },
+  "fit": {
+   "median": 0.1450487231273378,
+   "mean": 0.1432390521767912
+  },
+  "truth_loss_lt_neutral": 9,
+  "fit_loss_lt_truth": 12
+ }
+}

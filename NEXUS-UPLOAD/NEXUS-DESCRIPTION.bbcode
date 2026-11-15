@@ -6,6 +6,7 @@
 [size=5][b]What it does[/b][/size]
 [list]
 [*][b]Measures against your head, not a generic one.[/b] FaceForge renders the chargen head your install actually uses (vanilla or High Poly Head), measures how each slider moves it, and fits the photo's 468 face landmarks to that measured response.
+[*][b]Rates each photo honestly.[/b] Quality is read from the face itself: resolution, sharpness, exposure. Each angle photo shows its measured turn and whether it was used.
 [*][b]Corrects the photo before measuring.[/b] Head tilt is rotated out, a slight turn or nod is un-foreshortened, left and right are averaged, and a smile, a blink or a fringe over the brows fades the affected measurements instead of baking them into the face.
 [*][b]Writes colour.[/b] Skin tone and hair colour read from the photo go into the preset; the swatches show what was read before you export.
 [*][b]Uses what you have installed.[/b] Head meshes, hair, brows and eyes are listed from your own plugins, filtered by the race and sex you pick, with High Poly Head preferred when present.
@@ -16,7 +17,7 @@
 [size=5][b]Quick start[/b][/size]
 [list=1]
 [*]Unzip anywhere outside the game and run the EXE. It finds Skyrim and indexes your setup, read-only.
-[*]Choose a clear front photo and press [i]Analyze face[/i], then [i]Analyze & improve[/i].
+[*]Choose a clear front photo and press [i]Analyze face[/i], then [i]Analyze & improve[/i]. Optional: [i]Guided multi-view[/i] adds left and right photos with the head turned 25-45°.
 [*]Pick race and sex, then the installed head parts you want.
 [*]Export the preset pack.
 [*]In Skyrim, open RaceMenu, load the preset at that race and sex, and adjust. Use Sculpt > Export Head if you want to build a follower from it later.
@@ -36,7 +37,7 @@ No .NET install is needed; the app is one self-contained EXE.
 [size=5][b]Limits, said plainly[/b][/size]
 [list]
 [*]Expect a starting point that is measurably closer to the photo than the race default, not a finished likeness. Finish it in RaceMenu.
-[*]One front photo cannot see depth; nose and chin projection are estimated. Add left and right angle photos for a better read.
+[*]One front photo cannot see depth; nose and chin projection are estimated. Angle photos help with vertical proportions and let you compare the head from the side, but the depth of the nose is still yours to adjust in RaceMenu.
 [*]Skin tone is matched on lightness; strong lighting or makeup in the photo is not reproduced. Lip and eye colour are shown, not written.
 [*]The sculpt part of the export is a few broad shape moves, not a per-vertex copy of the photo.
 [*]Everything FaceForge checks is done outside the game. How a given preset looks in game depends on your skin, lighting and head-part mods.

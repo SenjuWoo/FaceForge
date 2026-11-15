@@ -2,6 +2,64 @@
 # One living file.
 
 ================================================================================
+## [0.27.0] - 2026-11-14 - multi-view and image quality that work
+Parent: 0.26.0. Snapshot: `FaceForge 0.27.0/`. Full GitHub release; no preset from it has been checked
+in RaceMenu yet.
+
+Reported: left/right photos "don't even work", and the quality rating was off for good photos. Both
+were reproduced on renders of the installed head at known turns and on real photos before any change.
+
+Fixed, each with a test that failed before the fix:
+- Angle photos were rejected. A side view was accepted only while the nose sat 2.5-20% of the face
+  width off centre, which on the real head is roughly 2-15 degrees of turn (0.20 at 15 degrees, 0.48
+  at 35), so every real three-quarter photo was "too close to a full profile". Views are now judged by
+  the head's measured turn in degrees, which tracks the true turn (32.8 degrees read at 35): 25-45 is
+  ideal, 12-60 is accepted, and the message says which limit a photo missed.
+- Side labels were inverted. The side was read from the nose-offset sign, the opposite of the
+  renderer's, so a correctly placed left photo was told it "reads as the opposite side" and "was
+  relabeled automatically", which nothing did. A photo in the wrong slot is now used as the side it
+  shows and the message says so. The turn-video frame picker had the same inverted sign and the same
+  15-degree window.
+- The quality score could not see blur or resolution. It shrank the whole frame to 128 px and counted
+  edges, background included: a sharp 1254 px portrait scored 0.65 and was called blurred, a 4 px
+  blur scored 0.64, an upscaled thumbnail 0.64. Quality is now read from the face only, at the
+  landmark model's own scale: resolution (face width in pixels), blur by re-blurring, exposure of the
+  central face, and contrast, combined so one real fault pulls the score down. Good photos now score
+  0.91-1.00; the 4 px blur scores 0.35 and is named.
+- The front photo's pose score came from the same noisy nose offset: a photo 1.3 degrees off axis
+  scored 0.11 for pose, and in single-photo mode that score decides whether the result is "reliable
+  enough", so a slightly soft, straight photo could be called unreliable. It now uses the measured turn.
+- Quality read pixels from the original photo with landmarks from the straightened or reframed
+  second detection pass. Both now come from the same frame.
+- The Match pane rendered added angles at an unsigned offset (always turned the same way) and guided
+  angles at a fixed 30 degrees; vision refinement also sent fixed 30-degree renders. Each angle is now
+  rendered at its photo's measured turn and side. Two photos of the same side no longer overwrite each
+  other's render in the vision request.
+- The view slots said "Ignored · 80% quality" when the turn, not the quality, was the reason. They now
+  show the turn and the reason ("Ignored · only 4° turned", "Used · left 34° · 89%").
+- The ratio fit weighed widths from angled photos almost like the front photo's; widths now come from
+  the front photo, heights from all, as the analysis fusion already did.
+- Every new build left its unpacked interface (about 50 MB) under %LOCALAPPDATA%\FaceForge\Web: one
+  test profile held 510 MB from eleven builds. Copies the running build cannot use are removed on start
+  (best effort; folders in use and unrecognised names are left alone). Measured: 510 MB to 35 MB.
+- A missing WebView2 runtime showed the raw exception; it now says what to install.
+
+Removed, because it could not do what it claimed:
+- The automatic profile nose pass (ratio fit). A round trip on the real head -- a render with a known
+  nose reshape as the "photo", rendered back at the photo's exact turn -- could not recover the nose
+  (+0.8 came back 1.0, -1.0 came back +0.47, 0 came back -1.23): landmark jitter between renders is
+  larger than the whole effect of the nose lever, so the pass moved the nose by noise. It was also not
+  added to the dense fit. The manual "Nose forward" control stays. Angled photos still give vertical
+  proportions to the analysis and the ratio fit, sit beside matched renders, and go to vision refinement.
+
+Known and left:
+- Nothing was loaded in Skyrim; no live vision request.
+- An upscaled small photo reads slightly soft rather than blurred (0.86): at the detector's scale it is.
+
+Files: `FaceForge-0.27.0-STANDALONE.exe` 125,445,990 bytes, SHA-256 `38967EDE43524C88683F70C8559A92AFDB8F049680B59C3A0F2FC495514E51C1`;
+`FaceForge-0.27.0-STANDALONE.zip` 118,566,624 bytes, SHA-256 `8172DC6000F2A3556011AC3F8854A0D191C5B6CA7A4A220A2DD3D9870F35DDA3`.
+
+================================================================================
 ## [0.26.0] - 2026-11-13 - audit, fixes, faster previews
 Parent: 0.25.0-beta.4. Snapshot: `FaceForge 0.26.0/`. Full GitHub release; no preset from it has been
 checked in RaceMenu yet.

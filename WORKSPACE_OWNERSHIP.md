@@ -16,3 +16,5 @@ No other FaceForge project or prior release was found before this project was cr
   version: `FaceForge 0.25.0`, published as pre-release `v0.25.0-beta.4`.
 - 2026-11-13: active version `FaceForge 0.26.0`, GitHub release `v0.26.0` (Latest).
   `FaceForge 0.25.0` stays as the last known-good snapshot (`v0.25.0-beta.4`).
+- 2026-11-14: active version `FaceForge 0.27.0`, GitHub release `v0.27.0` (Latest). `FaceForge 0.26.0`
+  stays as the previous known-good snapshot.

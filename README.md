@@ -35,12 +35,12 @@
 
 ## Quick start
 
-Download **[v0.26.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0)**. No generated preset has been loaded
+Download **[v0.27.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.27.0)**. No generated preset has been loaded
 in Skyrim yet, so treat the in-game look as unproven. The last full release is
 **[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
-2. Double-click **`FaceForge-0.26.0-STANDALONE.exe`**.
+2. Double-click **`FaceForge-0.27.0-STANDALONE.exe`**.
 3. **Do not** drop the EXE into `Skyrim Special Edition\Data`.
 4. **Do not** add this zip as a Vortex or MO2 mod for Skyrim.
 
@@ -53,7 +53,7 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 ## How to use it
 
 1. Run the EXE. Let it find Skyrim and index your setup (read-only).
-2. Add a clear front photo (or multi-view / slow turn video).
+2. Add a clear front photo. Optional: Guided multi-view takes left and right photos turned 25-45°, or a slow turn video.
 3. Analyze → pick race/sex → pick installed head parts (hair, eyes, and so on).
 4. Export a **RaceMenu preset pack**.
 5. In Skyrim: open RaceMenu → load the preset → sculpt if you want → use **Export Head** (not “slider-only / no sculpt”) if you will build a follower next.
@@ -88,25 +88,25 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 
 **Beta.** Everything below was produced out of game. No FaceForge preset has been loaded in RaceMenu
 and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified —
-so 0.26.0 is labelled that way here rather than on the release.
+so 0.27.0 is labelled that way here rather than on the release.
 
 Verified in this tree:
 
-- `FaceForge 0.26.0/` is the ship snapshot (`CURRENT.txt`)
-- 148 frontend tests and 139 native assertions (the native count is tallied at run time)
+- `FaceForge 0.27.0/` is the ship snapshot (`CURRENT.txt`)
+- 162 frontend tests and 147 native assertions (the native count is tallied at run time)
 - TypeScript clean, .NET Release clean, 0 warnings
 - `qa/browser-qa.mjs` green on one photo analysed three ways (straight, tilted 16°, face at a third of the frame),
-  with no outbound request and a window that does not scroll
+  with no outbound request and a window that does not scroll, plus Guided multi-view
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
   a CI job, not a manual step
-- Packaged `FaceForge-0.26.0-STANDALONE.exe` (FileVersion 0.26.0.0)
+- Packaged `FaceForge-0.27.0-STANDALONE.exe` (FileVersion 0.27.0.0)
 - The download ZIP was extracted and its EXE driven: a photo analyses, the interface cannot open a
   network connection (page policy plus a host filter, probed against the landmark library's logging
   endpoint), and the window refuses to navigate elsewhere. `qa/packaged-app-check.mjs` repeats it
 - The packaged EXE was driven end to end over the WebView2 debugging port: photo, analysis, installed
   hair/eyes/brows/face picked from the real catalogue, then a preset pack whose four head parts carry
   unique HDPT types and whose reshaped export carries 1,793 sculpt deltas. Recipe in
-  `FaceForge 0.26.0/qa/PACKAGED-APP-EXPORT.md`
+  `FaceForge 0.27.0/qa/PACKAGED-APP-EXPORT.md`
 
 Not claimed:
 
@@ -117,27 +117,37 @@ Not claimed:
 - A live vision request. The provider CLI launch path is tested with real processes, but no photo was
   sent to a model for this build
 
-0.24.3 stays downloadable. 0.25.0 and later change how a face is measured - the defaults are different, so a 0.26.0 preset is not the same as a 0.24.3 preset for the same photo.
+0.24.3 stays downloadable. 0.25.0 and later change how a face is measured - the defaults are different, so a 0.27.0 preset is not the same as a 0.24.3 preset for the same photo.
 
 ## Build from source
 
-Ship tree: `FaceForge 0.26.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
+Ship tree: `FaceForge 0.27.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) and the .NET 8 SDK.
 
 ```powershell
-cd "FaceForge 0.26.0"
+cd "FaceForge 0.27.0"
 .\build.ps1
 .\package.ps1
 ```
 
 ## Credits
 
-Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.26.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.26.0/THIRD_PARTY_NOTICES.md).
+Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.27.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.27.0/THIRD_PARTY_NOTICES.md).
 
 Skyrim, RaceMenu, and related names belong to their owners. This project is unofficial.
 
 ## License
 
 [MIT](LICENSE)
+
+## Notes in 0.27.0
+
+- **Left/right angle photos work.** They are judged by the head's measured turn (25-45° ideal) and
+  the side is read correctly; the slot says why a photo was not used.
+- **The quality score reflects the photo**: read from the face at the detector's scale, it now tells a
+  sharp photo from a blurred or tiny one.
+- **Angles render at the photo's own turn** in the Match pane and for vision refinement.
+- **Old unpacked copies are cleaned up** on start (about 50 MB per earlier build).
+- The automatic nose-depth pass from angle photos was removed: it could not recover a known nose.
 
 ## Notes in 0.26.0
 
@@ -165,5 +175,5 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
-0.26.0 EXE: 125,436,817 bytes. SHA-256: `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC`.
-0.26.0 Zip: 118,563,185 bytes. SHA-256: `1F4A420CA030ED2E73E9EF2AC5EDAB433260D6D5AB495B2FFD3E414F14A50D62`.
+0.27.0 EXE: 125,445,990 bytes. SHA-256: `38967EDE43524C88683F70C8559A92AFDB8F049680B59C3A0F2FC495514E51C1`.
+0.27.0 Zip: 118,566,624 bytes. SHA-256: `8172DC6000F2A3556011AC3F8854A0D191C5B6CA7A4A220A2DD3D9870F35DDA3`.

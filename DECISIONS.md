@@ -1,5 +1,23 @@
 # Decisions
 
+## 0.27.0 - measure the quantity the limit is written in (2026-11-14)
+
+- **Limits must be in the unit they describe.** The side-view limits were written as if in degrees
+  against a nose-offset fraction that grows about three times faster; the result rejected every real
+  angle. Pose limits are now in degrees from the depth-based estimate, checked against renders of the
+  head at known turns.
+- **Judge a photo where the model looks.** Quality is read from the face crop at the detector's
+  working scale. Whole-frame statistics measured the background and the downscale, not the face.
+- **A blur measure that compares the image with itself** (re-blurring) is independent of exposure and
+  content; edge counts are not. Thresholds are calibrated on real portraits, not on a synthetic
+  pattern (a periodic fixture made the measure non-monotonic and was replaced).
+- **Remove a feature that a round trip proves cannot work.** The profile nose pass could not recover
+  a known nose with the yaw exact and identical renders; tuning a weight on top of noise is not a fix.
+- **Never claim an action the code does not take** ("relabeled automatically"). Either do it or do not
+  say it; here the photo is now used as the side it shows.
+- **Clean up what you create.** An app that unpacks itself per build owns the cleanup; pruning is best
+  effort, never forces a folder in use, and leaves names it does not recognise.
+
 ## 0.26.0 - a style factor states a direction; follow the rule already written down (2026-11-13)
 
 - **One convention for baseline factors.** A factor below 1 lowers the reference, so the same face reads

@@ -3,9 +3,9 @@
 | | |
 |--|--|
 | **Repo** | https://github.com/SenjuWoo/FaceForge |
-| **Current ship tree** | `FaceForge 0.26.0/` (see `CURRENT.txt`) |
-| **Latest release** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0 |
-| **Previous full release** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3 |
+| **Current ship tree** | `FaceForge 0.27.0/` (see `CURRENT.txt`) |
+| **Latest release** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.27.0 |
+| **Previous release** | https://github.com/SenjuWoo/FaceForge/releases/tag/v0.26.0 |
 
 Binaries on GitHub Releases only.
 

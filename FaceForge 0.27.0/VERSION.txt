@@ -1,0 +1,16 @@
+FaceForge 0.27.0
+
+Parent: FaceForge 0.26.0 (GitHub v0.26.0)
+Status: GitHub release v0.27.0 (full release). No preset from it has been loaded in RaceMenu yet.
+- Guided multi-view works: angle photos are judged by the head's measured turn in degrees (25-45° is
+  ideal, 12-60° accepted). Before, only 2-15° passed, so every real three-quarter photo was ignored,
+  and the side labels were inverted.
+- Image quality is read from the face at the landmark model's own scale (resolution, blur by
+  re-blurring, exposure, contrast). Before, a sharp photo, a blurred one and an upscaled thumbnail all
+  scored 0.64-0.65 and good photos were called blurred.
+- Match pane and vision refinement render each angle at the photo's measured turn and side.
+- The automatic profile nose pass was removed: a round trip on the real head could not recover a known
+  nose. Angled photos still give vertical proportions to the ratio fit and the analysis.
+- Old unpacked interface copies (about 50 MB per build) are removed on start; a clear message when
+  WebView2 is missing.
+Verified: see VALIDATION.md (0.27.0 entry).

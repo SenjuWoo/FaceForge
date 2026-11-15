@@ -1,16 +1,17 @@
-# FaceForge - Nexus media plan (0.26.0)
+# FaceForge - Nexus media plan (0.27.0)
 
-All images are screenshots of the released 0.26.0 EXE (SHA-256 `55EE7F6EA8CB2735098AB2875000BAD934016D5B353E03FAB84B24CA2A7E83FC`), extracted from the upload ZIP and
-driven over the WebView2 debugging port on 2026-11-13, at the app's own window size (1534x958 CSS px).
+All images are screenshots of the released 0.27.0 EXE (SHA-256 `38967EDE43524C88683F70C8559A92AFDB8F049680B59C3A0F2FC495514E51C1`), extracted from the upload ZIP and
+driven over the WebView2 debugging port on 2026-11-14, at the app's own window size (1534x958 CSS px).
 No version or date is drawn on the hero, so it survives later releases.
 
 | # | File | Caption (paste) | Alt text | Purpose |
 |--|--|--|--|--|
-| 0 | `media-0.26.0/00-hero.png` (1920x1080) | FaceForge: a photo in, an editable RaceMenu preset out. | FaceForge window with a portrait, its landmark mesh, and a render of the fitted Skyrim head. | Hero / thumbnail |
-| 1 | `media-0.26.0/01-analysis.png` | After analysis: the photo's landmarks, what was corrected (tilt, turn, nod) and the race and sex the preset targets. | Source panel with landmark overlay and pose-correction readout. | Core feature |
-| 2 | `media-0.26.0/02-fit.png` | After "Analyze & improve": sliders fitted from 468 landmarks against the installed head, shown front and in profile. | Match panel with the photo beside a front and profile render of the fitted head. | Proof the fit runs on the real head |
-| 3 | `media-0.26.0/03-sliders.png` | Every generated slider stays editable before export. | Output panel listing face and jaw sliders with values. | Detail |
-| 4 | `media-0.26.0/04-race-style.png` | Race suggestions rank shape only, and say when races measure the same. Optional style nudges are labelled as such. | Race foundation and geometry style cards. | Configuration |
+| 0 | `media-0.27.0/00-hero.png` (1920x1080) | FaceForge: a photo in, an editable RaceMenu preset out. | FaceForge window with a portrait, its landmark mesh, and a render of the fitted Skyrim head. | Hero / thumbnail |
+| 1 | `media-0.27.0/01-analysis.png` | After analysis: the photo's landmarks, what was corrected (tilt, turn, nod) and the race and sex the preset targets. | Source panel with landmark overlay and pose-correction readout. | Core feature |
+| 2 | `media-0.27.0/02-fit.png` | After "Analyze & improve": sliders fitted from 468 landmarks against the installed head, shown front and in profile. | Match panel with the photo beside a front and profile render of the fitted head. | Proof the fit runs on the real head |
+| 3 | `media-0.27.0/03-sliders.png` | Every generated slider stays editable before export. | Output panel listing face and jaw sliders with values. | Detail |
+| 5 | `media-0.27.0/05-guided-multiview.png` | Guided multi-view: each angle photo shows its measured turn and is used on the side it shows. | Source panel with front, left and right slots marked "Used" with their turn and quality. | Multi-view feature |
+| 4 | `media-0.27.0/04-race-style.png` | Race suggestions rank shape only, and say when races measure the same. Optional style nudges are labelled as such. | Race foundation and geometry style cards. | Configuration |
 
 Provenance and rights:
 - Author: the FaceForge project; captured from the final build. The hero adds a title band and scales
@@ -21,6 +22,8 @@ Provenance and rights:
   Poly Head, an installed skin texture). They appear as the tool's output, as in any RaceMenu screenshot;
   credit High Poly Head if the page lists visible mods.
 - No ENB, ReShade or post-processing: these are application screenshots, not game screenshots.
+- Image 5 uses renders of the installed head at -35° and +40° as the left and right "photos" (no
+  real angle photos were available); say so in its caption if the page shows it.
 
 Not captured (needs the game; add when you have them):
 - An in-game RaceMenu screenshot of a 0.26.0 preset loaded at its target race and sex, ideally beside the

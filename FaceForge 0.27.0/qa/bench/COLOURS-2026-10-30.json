@@ -1,0 +1,40 @@
+{
+ "date": "2026-10-30",
+ "what": "Colour layer: skin-tone tint + hair colour written to the preset; iris colour word feeds eye-part ranking by name",
+ "photos": {
+  "p1": "skin(237,169,139) hair(83,65,51) iris(87,55,43) lips(229,107,99)",
+  "p2": "skin(200,152,132) hair(45,32,23) iris(63,53,38) lips(165,98,90)",
+  "p3": "skin(250,186,152) hair(62,46,39) iris(103,73,56) lips(194,113,102)",
+  "p4": "skin(221,180,160) hair(187,165,139) iris(100,67,31) lips(194,132,125)",
+  "p5": "skin(224,172,139) hair(156,110,78) iris(150,125,118, conf 0.43 - not used) lips(163,90,79)"
+ },
+ "tint_written_rgb": {
+  "p1": [
+   171,
+   158,
+   150
+  ],
+  "p2": [
+   153,
+   134,
+   127
+  ],
+  "p3": [
+   184,
+   178,
+   169
+  ],
+  "p4": [
+   176,
+   166,
+   157
+  ],
+  "p5": [
+   171,
+   158,
+   150
+  ]
+ },
+ "finding": "installed female head skin albedo averages (128,110,102): photo/albedo > 1 on every channel, so a multiply-by-ratio tint always clamped to white. Replaced by a lookup on Skyrim's own skin-tone preset gradient (HumanFemaleSkinWhite01-10, HumanSkinDarkSkin05-10).",
+ "caveats": "Estimates from one photo each (lighting, white balance, makeup). Photo-lightness to preset mapping is a calibration choice [U]. Multiply semantics inferred from preset values, not confirmed in game. Eye colour for light eyes in small photos is unreliable (p5 blue eyes read grey-brown). Eye parts are ranked by NAME only (about 21% of 1866 installed eye parts carry brown/blue/green in their EditorID)."
+}

@@ -1,5 +1,24 @@
 # FaceForge state
 
+## 2026-11-14 (multi-view and quality, 0.27.0)
+
+Goal: make Guided multi-view and the quality score work (user report), audit and upgrade, release.
+Done; GitHub `v0.27.0` (Latest). Snapshot `FaceForge 0.27.0/`; `FaceForge 0.26.0/` restored to its
+released state (the work was started there and moved).
+
+Root causes (VALIDATION 0.27.0 has the numbers): side views judged by a nose-offset fraction whose
+window was ~2-15 degrees; side sign inverted against the renderer; quality from a 128 px thumbnail of
+the whole frame; front pose from the same noisy offset; quality pixels and landmarks from different
+frames; fixed 30-degree angle renders. New: `scoreFaceQuality`/`blurEffect`, degree-based
+`assessView`, `renderYawFor`, `VERTICAL_MEASUREMENTS`, `WebBundleCache.PruneStale`.
+Removed: the automatic profile nose pass (round trip could not recover a known nose).
+
+Artifacts: EXE 125,445,990 bytes `38967EDE43524C88683F70C8559A92AFDB8F049680B59C3A0F2FC495514E51C1`; ZIP 118,566,624 bytes `8172DC6000F2A3556011AC3F8854A0D191C5B6CA7A4A220A2DD3D9870F35DDA3`.
+Nexus kit: NEXUS-RELEASE.md; media in NEXUS-UPLOAD/media-0.27.0/ (local only).
+
+Open: RaceMenu load of a 0.27.0 preset; real-person angle photos for a final acceptance check of the
+turn limits; Vortex/direct plugins.txt filtering (unchanged).
+
 ## 2026-11-13 (after the 0.26.0 release)
 
 Dependabot PR 25 (vitest 5.0.5 -> 5.1.0, dev dependency) merged as `e459022` after CI passed on its

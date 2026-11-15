@@ -1,9 +1,45 @@
 # FaceForge validation
 
-Active release: **0.26.0** - built, packaged and published as the GitHub Latest release. Every
+Active release: **0.27.0** - built, packaged and published as the GitHub Latest release. Every
 gate below is out of game; the one still missing is a RaceMenu load.
 
 Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+
+## 2026-11-14 - 0.27.0
+
+PASS, with the limits listed at the end.
+
+Reproduction first (0.26.0 code, scratch harness running the app's own detector, analysis, quality
+and view assessment in a browser): textured renders of the installed High Poly Head at known turns
+from the real HeadRenderer, plus five real photos and degraded copies of the synthetic portrait.
+
+| Evidence | 0.26.0 | 0.27.0 |
+|---|---|---|
+| Side view at 15 / 25 / 35 / 45 deg (renders) | all "too close to a full profile", not used | all used, correct side; read as 15.9 / 25.3 / 32.8 / 39.1 deg |
+| Correctly placed left photo | "reads as the opposite side" | no warning, "Used · left 34°" |
+| Quality: sharp synth / 4 px blur / 4x upscale | 0.65 ("may be blurred") / 0.64 / 0.64 | 1.00 / 0.35 (blur named) / 0.86 |
+| Quality: five real photos | 0.62-0.80, four "may be blurred" | 0.91-1.00, no warnings |
+| Front pose score, photo 1.3 deg off axis | 0.11 | 1.0 |
+| Guided UI: synth front + left/right renders at -35/+40 deg | both ignored | "Used · left 34° · 89%", "Used · right 37° · 100%", combined 96% |
+| Nose round trip (known nose reshape, render at true turn) | -- | not recoverable (+0.8 -> 1.0, -1.0 -> +0.47, 0 -> -1.23): pass removed |
+
+| Gate | Result |
+|---|---|
+| `package.ps1` | exit 0, 0 warnings, 0 errors; version gate passed |
+| Frontend tests | 162 passed, 13 files (+14: quality x4, angled views x5, render yaw x3, fit targets, slot status) |
+| Native validation | PASS, 147 assertions (+8: web cache pruning) |
+| Browser QA | green, with the new Guided multi-view stage (front 100% quality; reused portrait "Ignored · only 1° turned") |
+| Layout QA | 4 of 4 sizes |
+| Install test | ZIP extracted to an empty folder; EXE hash equals the built one |
+| Packaged EXE | `qa/packaged-app-check.mjs` passed; Guided multi-view with -35/+40 deg renders used on the correct sides; Match pane renders each angle at its measured turn; dense fit completed |
+| Update cleanup | first launch removed 12 stale interface copies: 510 MB to 35 MB |
+
+Failing first: the 9 new multi-view tests failed on the 0.26.0 code; the fit-target test failed against
+the committed `fit.ts`; the pruning assertions failed to compile before `WebBundleCache` existed.
+
+Not covered: nothing was loaded in Skyrim; no live vision request; no real-person angle photos were
+available, so angle acceptance was measured on renders of the installed head (and the real photos
+for quality and front pose).
 
 ## 2026-11-13 - 0.26.0
 
