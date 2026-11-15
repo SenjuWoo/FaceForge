@@ -1,5 +1,15 @@
 # FaceForge state
 
+## 2026-11-14 (after the 0.27.0 release)
+
+Dependabot PRs 27 (`@mediapipe/tasks-vision` 1.2.2 -> 1.2.3) and 26 (`vite` 8.3.7 -> 8.3.8, dev)
+merged as `585e9f3` and `49e3986` after CI passed on each. MediaPipe 1.2.3 ships a different WASM
+runtime (about 62 KB larger), so it was compared with 1.2.2 through the app's own path on 12 images
+(five real photos, synthetic portrait and four degraded copies, two angled head renders): landmarks,
+generated sliders, quality score and measured turn all identical (0.0 difference). CI and CodeQL
+green on `49e3986`, 0 open alerts, 0 open PRs; local `build.ps1` passed (162 tests, 147 assertions,
+0 warnings). Main is ahead of the v0.27.0 assets by these two updates only; results are identical.
+
 ## 2026-11-14 (multi-view and quality, 0.27.0)
 
 Goal: make Guided multi-view and the quality score work (user report), audit and upgrade, release.
