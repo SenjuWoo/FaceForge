@@ -3,7 +3,7 @@
 Active release: **0.27.0** - built, packaged and published as the GitHub Latest release. Every
 gate below is out of game; the one still missing is a RaceMenu load.
 
-Latest public release: **0.24.3**. Its validation section is kept for reference after the 0.25.0 ones.
+0.24.3 is the last release on the pre-0.25 measuring method. Its validation section is kept for reference after the 0.25.0 ones.
 
 ## 2026-11-14 - 0.27.0
 

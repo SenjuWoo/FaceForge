@@ -2,6 +2,21 @@
 # One living file.
 
 ================================================================================
+## [Unreleased] - 2026-11-26 - README presentation and public proof (no code change)
+Docs and QA only; the shipped EXE and ZIP are unchanged, so there is no new tag.
+
+- README rebuilt around real proof: a cover image, a screenshot of the released 0.27.0 EXE fitting a
+  generated face against an installed Nord head, and terminal shots of the test suites and a preset
+  export. The old README hero used `qa/synthetic-neutral-portrait.png`, whose provenance is not
+  recorded, so it is no longer shown publicly (`docs/images/app-hero.png` left the repository and is now
+  gitignored; the local file is kept).
+- Fixed: the README said "the last full release is v0.24.3". v0.26.0 and v0.27.0 are full releases and
+  v0.27.0 is Latest. VALIDATION.md had the same stale line.
+- New `qa/synthetic-face-proof.mjs`: serves the built interface, analyses `qa/synthetic-face-seed4243.png`
+  (a generated face; provenance in `qa/SYNTHETIC-FACE.md`), exports the preset and fails on any outbound
+  request. Not a CI job; it backs the README terminal shot.
+
+================================================================================
 ## [0.27.0] - 2026-11-14 - multi-view and image quality that work
 Parent: 0.26.0. Snapshot: `FaceForge 0.27.0/`. Full GitHub release; no preset from it has been checked
 in RaceMenu yet.

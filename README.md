@@ -1,43 +1,43 @@
-<p align="center">
-  <img src="docs/images/logo.svg" width="72" height="72" alt="FaceForge mark">
-</p>
+<div align="center">
 
-<h1 align="center">FaceForge</h1>
+![FaceForge: the amber hexagon face mark on a dark slate background, with the tagline 'Photo to an editable Skyrim RaceMenu preset, measured against the head you have installed' and the chips 468 landmarks, dense slider fit, High Poly Head, SE / AE](docs/presentation/hero.png)
 
-<p align="center"><strong>Photograph to an editable RaceMenu starting preset.</strong></p>
+[![CI](https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml/badge.svg)](https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/SenjuWoo/FaceForge?label=release&color=efa93d&labelColor=11151a)](https://github.com/SenjuWoo/FaceForge/releases/latest)
+[![Windows 10/11](https://img.shields.io/badge/Windows%2010%2F11-WebView2-66b6c9?labelColor=11151a)](#install)
+[![Skyrim SE/AE](https://img.shields.io/badge/Skyrim-SE%20%2F%20AE%20%2B%20RaceMenu-d39a4a?labelColor=11151a)](#requirements)
+[![License: MIT](https://img.shields.io/badge/license-MIT-66b6c9?labelColor=11151a)](LICENSE)
 
-<p align="center">
-  Windows tool that measures a face locally and writes a RaceMenu pack you finish in-game.<br>
-  It is <strong>not</strong> a Skyrim plugin, not an SKSE DLL, and <strong>must not</strong> be installed into Skyrim <code>Data</code>, Vortex, or Mod Organizer 2.
-</p>
+**[Install](#install)** · **[How to use it](#how-to-use-it)** · **[Features](#features)** · **[How it works](#how-it-works)** · **[Honest status](#honest-status)** · **[Changelog](CHANGELOG.txt)**
 
-<p align="center">
-  <a href="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml"><img src="https://github.com/SenjuWoo/FaceForge/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-66b6c9?labelColor=11151a" alt="MIT License"></a>
-  <a href="https://github.com/SenjuWoo/FaceForge/releases/latest"><img src="https://img.shields.io/github/v/release/SenjuWoo/FaceForge?label=release&color=efa93d" alt="latest release"></a>
-</p>
+</div>
 
-<p align="center">
-  <a href="https://github.com/SenjuWoo/FaceForge/releases/latest">Download</a>
-  ·
-  <a href="#quick-start">Quick start</a>
-  ·
-  <a href="#honest-status">Honest status</a>
-  ·
-  <a href="CHANGELOG.txt">Changelog</a>
-</p>
+FaceForge turns a photograph into an **editable RaceMenu starting preset** for Skyrim Special or
+Anniversary Edition. It finds 468 landmarks on the face with a local MediaPipe model, corrects tilt,
+turn and nod, then fits the RaceMenu sliders against the head meshes **you have installed**, so the
+numbers describe your head, not a generic one. You load the preset in RaceMenu and finish the face
+in game. It is a Windows utility that runs **outside** the game: not a plugin, not an SKSE DLL, and it
+**must not** be installed into Skyrim `Data`, Vortex or Mod Organizer 2.
 
-<p align="center">
-  <img src="docs/images/app-hero.png" alt="FaceForge after analyzing a synthetic front portrait: source face, measured proportions, and RaceMenu output panel" width="100%">
-</p>
+## What you get
 
-<p align="center"><sub>The packaged app after a dense fit on the synthetic test portrait, with the installed head rendered beside it. Not a claim about every photograph.</sub></p>
+- **A preset, not a guess.** Analysis writes every Expressive Facegen Morphs slider the catalogue declares (64 `EFM_` sliders) and holds a slider at neutral when the photo cannot measure it, instead of inventing a value.
+- **Measured against your install.** The Windows app indexes your game and mod folders read-only, renders your actual chargen head from its `.tri` meshes, and fits the photo's landmarks to how that head responds to each slider.
+- **Photos stay on the PC.** The interface cannot open a network connection: a page policy plus a host filter refuse every outside request, including the landmark library's own usage logger. The only network path is optional vision refinement, and it runs only after you tick the consent box.
+- **Real head parts.** Hair, eyes, brows and the rest are picked from the records your load order actually provides, with child parts kept off adult characters and High Poly Head parts kept on the list.
+- **Pose and photo checks.** Tilt, turn and nod are measured and corrected; the quality score reads the face itself, so a sharp photo is told apart from a blurred or tiny one. Guided multi-view adds left and right photos turned 25-45°.
+- **One portable EXE.** No .NET install, no load-order changes. Old unpacked copies are cleaned up on start.
 
-## Quick start
+![The packaged FaceForge 0.27.0 EXE after analysing a generated face: the source photo with its landmark mesh and tilt -1.3°, turn 1.3°, nod 4.6°; the dense fit reports a remaining landmark error of 1.5% of eye distance; the installed male Nord head is rendered from the front and in profile with the fitted sliders; the output panel shows Nord · NordRace, male, and the Export Preset Pack button](docs/presentation/app-packaged-fit.png)
 
-Download **[v0.27.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.27.0)**. No generated preset has been loaded
-in Skyrim yet, so treat the in-game look as unproven. The last full release is
-**[v0.24.3](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.24.3)**.
+<sub>The released 0.27.0 EXE (SHA-256 matches the download), driven over the WebView2 debugging port against a real install, on a generated face (no real person; provenance in <code>FaceForge 0.27.0/qa/SYNTHETIC-FACE.md</code>).</sub>
+
+![Terminal: node qa/synthetic-face-proof.mjs analyses synthetic-face-seed4243.png in the built interface: Analysis complete, pose -1.2° / 1.3° / 4.7°, a FaceForge_Preset.jslot with sections actor, faceTextures, headParts, modNames, mods, morphs, tintInfo and version, 64 EFM sliders written and 60 moved, 7 held at neutral, the largest moves on the lower eye shape and eyelid, 0 outbound requests and 0 page errors](docs/presentation/screenshot-proof.png)
+
+## Install
+
+Download the latest release from **[Releases](https://github.com/SenjuWoo/FaceForge/releases/latest)**
+(currently [v0.27.0](https://github.com/SenjuWoo/FaceForge/releases/tag/v0.27.0)).
 
 1. Unzip **anywhere on the PC** (Desktop, Documents, a tools folder).
 2. Double-click **`FaceForge-0.27.0-STANDALONE.exe`**.
@@ -50,18 +50,7 @@ FaceForge only **reads** your game / Vortex / CharGen folders. It does not chang
 
 Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge detects that injection and explains it instead of a bare WebView2 failure. Run it directly; it still reads the same mods.
 
-## How to use it
-
-1. Run the EXE. Let it find Skyrim and index your setup (read-only).
-2. Add a clear front photo. Optional: Guided multi-view takes left and right photos turned 25-45°, or a slow turn video.
-3. Analyze → pick race/sex → pick installed head parts (hair, eyes, and so on).
-4. Export a **RaceMenu preset pack**.
-5. In Skyrim: open RaceMenu → load the preset → sculpt if you want → use **Export Head** (not “slider-only / no sculpt”) if you will build a follower next.
-6. Optional: open **[FollowerForge](https://github.com/SenjuWoo/FollowerForge)** and build the NPC plugin from that baked head.
-
-**Pair:** FaceForge (face preset) → RaceMenu bake → FollowerForge (NPC plugin).
-
-## Requirements
+### Requirements
 
 **Hard**
 
@@ -76,7 +65,32 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 - OpenRouter, or a provider CLI, only if you press vision refine (photos stay local unless you do)
 - [FollowerForge](https://github.com/SenjuWoo/FollowerForge) after Export Head
 
-## What this is / is not
+## How to use it
+
+1. Run the EXE. Let it find Skyrim and index your setup (read-only).
+2. Add a clear front photo. Optional: Guided multi-view takes left and right photos turned 25-45°, or a slow turn video.
+3. Analyze → pick race/sex → pick installed head parts (hair, eyes, and so on).
+4. Export a **RaceMenu preset pack**.
+5. In Skyrim: open RaceMenu → load the preset → sculpt if you want → use **Export Head** (not “slider-only / no sculpt”) if you will build a follower next.
+6. Optional: open **[FollowerForge](https://github.com/SenjuWoo/FollowerForge)** and build the NPC plugin from that baked head.
+
+**Pair:** FaceForge (face preset) → RaceMenu bake → FollowerForge (NPC plugin).
+
+## Features
+
+| Need | Where |
+|---|---|
+| Analyse one front photo | Source face → Quick Photo → **Analyze face** |
+| Add left/right angles or a turn video | Source face → **Guided Multi-View** |
+| Photo or anime/art source | Source face → Auto / Photo / Anime-Art |
+| Fit sliders to your installed head | Match & improve → **Analyze & improve** (Dense landmarks, or Legacy ratios for the 0.24.3 method) |
+| Check nose and chin depth | Match & improve → profile render; manual reshape is baked into the export as sculpt |
+| Target race and sex | RaceMenu output → installed RACE records |
+| Start from an existing preset | RaceMenu output → **Inherit optional base** (hair, eyes, brows, sculpt) |
+| Optional AI vision pass | Settings → vision refinement (OpenRouter, or an installed Codex / Claude Code / Gemini CLI), after consent |
+| Export | **Export Preset Pack**: a ZIP holding `SKSE/Plugins/CharGen/Presets/<name>.jslot`, a README with the RaceMenu steps, and the inherited base's sculpt `.nif`/`.dds` when you keep one |
+
+### What this is / is not
 
 | It is | It is not |
 | --- | --- |
@@ -84,11 +98,33 @@ Running the EXE **under Mod Organizer 2 / USVFS is not supported**. FaceForge de
 | A photo → RaceMenu preset helper | Something you enable in your load order |
 | Safe to keep outside the game folder | A replacement for RaceMenu or Creation Kit |
 
+## How it works
+
+```mermaid
+flowchart TD
+  PHOTO["Front photo (+ optional angles)"] --> LM["MediaPipe Face Landmarker, local WASM: 468 landmarks"]
+  LM --> POSE["pose correction: tilt, turn, nod, left/right mirror"]
+  GAME["Your Skyrim install and mods (read-only)"] --> IDX[("index: races, head parts, BSA + loose morphs")]
+  IDX --> HEAD["HeadRenderer: your chargen head from its .tri meshes"]
+  POSE --> FIT["dense fit: landmarks vs. measured slider response"]
+  HEAD --> FIT
+  FIT --> OUT["EFM sliders + head parts + skin and hair colour"]
+  OUT --> ZIP["preset pack: .jslot + README"]
+  ZIP --> RM["RaceMenu: load, sculpt, Export Head"]
+  RM --> FF["FollowerForge (optional)"]
+  OUT -. "only after consent" .-> VIS["vision refinement: OpenRouter or provider CLI"]
+```
+
+- **WPF host + WebView2 interface.** The React/TypeScript interface is embedded in the EXE and served from a virtual host; the window refuses to navigate anywhere else, and the host answers every request that is not for the interface with a 403.
+- **Two layers against the network.** The page's Content Security Policy limits connections to itself, and the host filter blocks anything that slips past it. `qa/packaged-app-check.mjs` probes both against the released EXE.
+- **The game is evidence, never a target.** Game files, Vortex staging and CharGen presets are read; nothing is written there. Exports go where you save them.
+- **Version single-sourced.** `VERSION.txt` drives the assemblies, the web bundle and the EXE FileVersion, and the build fails on drift.
+
 ## Honest status
 
 **Beta.** Everything below was produced out of game. No FaceForge preset has been loaded in RaceMenu
-and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified —
-so 0.27.0 is labelled that way here rather than on the release.
+and looked at by a person, so the in-game appearance, colours, head parts and sculpt are unverified.
+v0.27.0 is the Latest full release on GitHub; this page carries that caveat.
 
 Verified in this tree:
 
@@ -99,6 +135,8 @@ Verified in this tree:
   with no outbound request and a window that does not scroll, plus Guided multi-view
 - `qa/layout-qa.mjs` green at 1366x768 (100% and 125% scaling), 1280x720 and 1536x960; both QA scripts are
   a CI job, not a manual step
+- `qa/synthetic-face-proof.mjs` analyses a generated face in the built interface and exports a preset with
+  no outbound request (the terminal shot above)
 - Packaged `FaceForge-0.27.0-STANDALONE.exe` (FileVersion 0.27.0.0)
 - The download ZIP was extracted and its EXE driven: a photo analyses, the interface cannot open a
   network connection (page policy plus a host filter, probed against the landmark library's logging
@@ -107,6 +145,8 @@ Verified in this tree:
   hair/eyes/brows/face picked from the real catalogue, then a preset pack whose four head parts carry
   unique HDPT types and whose reshaped export carries 1,793 sculpt deltas. Recipe in
   `FaceForge 0.27.0/qa/PACKAGED-APP-EXPORT.md`
+
+![Terminal: pnpm test reports 13 test files and 162 tests passed; the native core test project reports 147 assertions, 1 preset and 4 plugins](docs/presentation/screenshot-tests.png)
 
 Not claimed:
 
@@ -125,21 +165,20 @@ Ship tree: `FaceForge 0.27.0\`. Needs Node.js 20+ (pnpm via Corepack is fine) an
 
 ```powershell
 cd "FaceForge 0.27.0"
-.\build.ps1
-.\package.ps1
+.\build.ps1      # frontend tests, web bundle, native core tests, desktop build
+.\package.ps1    # single-file EXE + release ZIP
 ```
 
-## Credits
+The README proof run, after `pnpm install`, `pnpm build` and `pnpm exec playwright install chromium` in
+`src\FaceForge.Web`:
 
-Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.27.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.27.0/THIRD_PARTY_NOTICES.md).
+```powershell
+node qa\synthetic-face-proof.mjs
+```
 
-Skyrim, RaceMenu, and related names belong to their owners. This project is unofficial.
+## Recent changes
 
-## License
-
-[MIT](LICENSE)
-
-## Notes in 0.27.0
+### 0.27.0
 
 - **Left/right angle photos work.** They are judged by the head's measured turn (25-45° ideal) and
   the side is read correctly; the slot says why a photo was not used.
@@ -149,7 +188,7 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - **Old unpacked copies are cleaned up** on start (about 50 MB per earlier build).
 - The automatic nose-depth pass from angle photos was removed: it could not recover a known nose.
 
-## Notes in 0.26.0
+### 0.26.0
 
 - **"Compact soft midface" now narrows the midface** as described; before, it widened it.
 - **Child head parts are not offered** for an adult character, and High Poly Head parts stay on the list.
@@ -157,7 +196,7 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - **Loose morph files override archived ones**, as in the game.
 - **The window no longer slides up** when you scroll past the end of a panel.
 
-## Notes in 0.25.0
+### 0.25.0
 
 - **The default fit changed.** "Dense landmarks" measures how the installed head actually responds to
   each slider and fits the photo's 468 landmarks to it. "Legacy ratios" keeps the 0.24.3 method.
@@ -175,5 +214,17 @@ Skyrim, RaceMenu, and related names belong to their owners. This project is unof
 - Run it directly, not through Mod Organizer 2 / USVFS: FaceForge detects that injection and explains
   it instead of failing with a WebView2 error.
 
+Full history: [CHANGELOG.txt](CHANGELOG.txt).
+
 0.27.0 EXE: 125,445,990 bytes. SHA-256: `38967EDE43524C88683F70C8559A92AFDB8F049680B59C3A0F2FC495514E51C1`.
 0.27.0 Zip: 118,566,624 bytes. SHA-256: `8172DC6000F2A3556011AC3F8854A0D191C5B6CA7A4A220A2DD3D9870F35DDA3`.
+
+## Credits
+
+Local face landmarks use MediaPipe Tasks Vision (Apache 2.0). WebView2, React, Vite, and TypeScript are third-party; see [`FaceForge 0.27.0/THIRD_PARTY_NOTICES.md`](FaceForge%200.27.0/THIRD_PARTY_NOTICES.md).
+
+Skyrim, RaceMenu, and related names belong to their owners. This project is unofficial.
+
+## License
+
+[MIT](LICENSE)

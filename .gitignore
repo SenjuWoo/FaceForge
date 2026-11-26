@@ -94,3 +94,6 @@ docs/superpowers/
 
 # Release screenshots are uploaded to Nexus, not kept in git (docs/images has the README copy)
 NEXUS-UPLOAD/media-*/
+
+# Old README hero: shows qa/synthetic-neutral-portrait.png, whose provenance is not recorded. Kept local only.
+docs/images/app-hero.png

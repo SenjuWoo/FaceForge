@@ -1,5 +1,18 @@
 # FaceForge state
 
+## 2026-11-26 (README presentation pass, no code change)
+
+README rebuilt to the fleet presentation layout with proof from real runs: `docs/presentation/`
+hero + social preview (kit cover), `app-packaged-fit.png` (released 0.27.0 EXE, hash checked, driven over
+the WebView2 debugging port: generated face, male Nord, dense fit 1.5% of eye distance, network probes
+refused), `screenshot-proof.png` (`qa/synthetic-face-proof.mjs`: 64 EFM sliders written, 60 moved, 0
+outbound requests) and `screenshot-tests.png` (162 tests, 147 assertions). The public images use the
+generated `qa/synthetic-face-seed4243.png` (provenance `qa/SYNTHETIC-FACE.md`), not the unrecorded
+portrait; `docs/images/app-hero.png` removed from the index and gitignored (local file kept).
+Corrected "last full release is v0.24.3" in README and VALIDATION. Baseline before the pass: `build.ps1`
+green (162 tests, 147 assertions, 0 warnings); 0 open alerts, 0 open PRs.
+Social preview: upload `docs/presentation/social-preview.png` by hand (Settings > General).
+
 ## 2026-11-14 (after the 0.27.0 release)
 
 Dependabot PRs 27 (`@mediapipe/tasks-vision` 1.2.2 -> 1.2.3) and 26 (`vite` 8.3.7 -> 8.3.8, dev)
